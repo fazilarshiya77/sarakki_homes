@@ -1,0 +1,236 @@
+@import "tailwindcss";
+
+:root {
+  /* Color tokens — DESIGN_SYSTEM.md §2 */
+  --background: #f6f3ee;
+  --foreground: #1c1c1c;
+  --accent-gold: #c4a66b;
+  --accent-gold-dark: #332c26;
+  --accent-emerald: #0e4f46;
+  --surface: #efe9e0;
+  --card: #fcfbf9;
+  --border: #ddd4c6;
+  --success: #5c7a5e;
+  --muted-foreground: #67615b;
+  --footer: #241e19;
+  --glass-tint: rgba(255, 255, 255, 0.08);
+
+  /* Radius tokens — DESIGN_SYSTEM.md §5 */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* Shadow tokens — DESIGN_SYSTEM.md §5. Extremely soft, never black,
+     never harsh — architectural elevation, not neumorphic inset. */
+  --shadow-soft: 0 20px 60px rgba(0, 0, 0, 0.08);
+  --shadow-soft-lg: 0 30px 80px rgba(0, 0, 0, 0.12);
+
+  /* Motion easing — DESIGN_SYSTEM.md §6 */
+  --ease-reveal: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-symmetric: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent-gold: var(--accent-gold);
+  --color-accent-gold-dark: var(--accent-gold-dark);
+  --color-accent-emerald: var(--accent-emerald);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-success: var(--success);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-footer: var(--footer);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-soft: var(--shadow-soft);
+  --shadow-soft-lg: var(--shadow-soft-lg);
+
+  --font-display: var(--font-display), serif;
+  --font-accent: var(--font-accent), serif;
+  --font-body: var(--font-body), sans-serif;
+}
+
+/* Smooth scrolling site-wide; disabled below for reduced-motion users. */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Ambient color field — a whisper of gold top-right and emerald bottom-left
+   so frosted-glass surfaces have something to refract on light sections.
+   Extremely subtle per DESIGN_SYSTEM.md §2 (no decorative gradients). */
+body {
+  background:
+    radial-gradient(1100px 750px at 88% -12%, rgba(196, 166, 107, 0.09), transparent 62%),
+    radial-gradient(950px 680px at -8% 112%, rgba(14, 79, 70, 0.08), transparent 62%),
+    var(--background);
+  background-attachment: fixed;
+  color: var(--foreground);
+}
+
+/* Glassmorphism — DESIGN_SYSTEM.md §5 glass surfaces */
+.glass {
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.78) 0%,
+    rgba(255, 255, 255, 0.52) 46%,
+    rgba(252, 251, 249, 0.42) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px) saturate(1.25);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  box-shadow:
+    0 8px 30px rgba(28, 28, 28, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.glass-dark {
+  background: var(--glass-tint);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Gold focus ring — DESIGN_SYSTEM.md §5, never the harsh blue default */
+:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+
+/* Premium button micro-interaction — DESIGN_SYSTEM.md §5 buttons.
+   A soft glossy shine sweeps across on hover, and 3 small gold sparkles
+   fire once and fade at the corners. Transform/opacity only (GPU-composited,
+   no layout cost) so this stays at 60fps. `.btn-fx` is the shared marker
+   class every button/anchor gets; `.btn-shine-wrap` clips the sweep to the
+   button's own rounded shape while `.btn-sparkle` sits outside that clip so
+   sparkles can peek past the edge. */
+.btn-fx {
+  position: relative;
+  isolation: isolate;
+}
+
+.btn-shine-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.btn-shine {
+  position: absolute;
+  top: -50%;
+  bottom: -50%;
+  left: -25%;
+  width: 30%;
+  background: linear-gradient(
+    115deg,
+    transparent,
+    rgba(255, 255, 255, 0.7),
+    transparent
+  );
+  transform: translateX(-260%) skewX(-16deg);
+  opacity: 0;
+}
+
+.btn-fx:hover .btn-shine {
+  animation: btn-shine-sweep 0.7s var(--ease-reveal) both;
+}
+
+@keyframes btn-shine-sweep {
+  0% {
+    transform: translateX(-260%) skewX(-16deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateX(460%) skewX(-16deg);
+    opacity: 0;
+  }
+}
+
+.btn-sparkle {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: radial-gradient(circle, #fff 0%, var(--accent-gold) 65%, transparent 100%);
+  box-shadow: 0 0 6px 1px rgba(196, 166, 107, 0.75);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.btn-fx:hover .btn-sparkle {
+  animation: btn-sparkle 0.6s ease-out both;
+}
+
+.btn-sparkle-1 {
+  top: -5px;
+  left: 14%;
+}
+
+.btn-sparkle-2 {
+  top: -3px;
+  right: 16%;
+}
+
+.btn-sparkle-3 {
+  bottom: -5px;
+  right: 6%;
+}
+
+/* Staggered per-sparkle delay — must match the :hover rule's specificity
+   (class + pseudo-class + class) and come after it in source order, or the
+   shorthand `animation` above silently resets delay back to 0 on all three. */
+.btn-fx:hover .btn-sparkle-1 {
+  animation-delay: 0.03s;
+}
+
+.btn-fx:hover .btn-sparkle-2 {
+  animation-delay: 0.12s;
+}
+
+.btn-fx:hover .btn-sparkle-3 {
+  animation-delay: 0.21s;
+}
+
+@keyframes btn-sparkle {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(2px);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1) translateY(-2px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.55) translateY(-9px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
