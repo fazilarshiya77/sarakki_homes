@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bodoni_Moda, Cormorant_Garamond, Manrope } from "next/font/google";
 import { FloatingSocialDock } from "@/components/ui/FloatingSocialDock";
+import { AuthProvider } from "@/components/admin/AuthProvider";
 import "./globals.css";
 
 const bodoniModa = Bodoni_Moda({
@@ -70,8 +71,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className="min-h-full flex flex-col bg-background text-foreground font-body"
         suppressHydrationWarning
       >
-        {children}
-        <FloatingSocialDock />
+        <AuthProvider>
+          {children}
+          <FloatingSocialDock />
+        </AuthProvider>
       </body>
     </html>
   );

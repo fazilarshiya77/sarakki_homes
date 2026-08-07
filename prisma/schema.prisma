@@ -1,0 +1,215 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User roles: ADMIN, MANAGER, SALES_EXECUTIVE, CONTENT_MANAGER
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String
+  passwordHash String
+  role         String        @default("SALES_EXECUTIVE")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  activities   ActivityLog[]
+  enquiries    Enquiry[]     @relation("AssignedStaff")
+}
+
+model Category {
+  id              String     @id @default(uuid())
+  slug            String     @unique
+  title           String
+  description     String
+  heroTagline     String
+  longDescription String
+  highlights      String     @default("[]") // JSON stringified array
+  idealFor        String     @default("[]") // JSON stringified array
+  tone            String     @default("warm")
+  properties      Property[]
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model Builder {
+  id         String     @id @default(uuid())
+  name       String     @unique
+  properties Property[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+// Property statuses: PUBLISHED, UNPUBLISHED, ARCHIVED, SOLD, UNDER_PROCESS, AUCTION_CLOSED
+model Property {
+  id             String   @id @default(uuid())
+  propertyId     String   @unique // Auto-generated short ID (e.g. SH-1001)
+  slug           String   @unique
+  title          String
+  location       String
+  price          String
+  priceValueLakh Float
+  type           String
+  status         String   @default("UNPUBLISHED")
+  featured       String   @default("false") // "true" or "false"
+  beds           Int
+  baths          Int
+  area           String
+  areaSqft       Int
+  description    String
+  address        String
+  mapQuery       String
+  views          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  builderId String
+  builder   Builder @relation(fields: [builderId], references: [id])
+
+  // Auction details (optional)
+  auctionInfo AuctionInfo?
+
+  // Loan eligibility details
+  loanEligibility LoanEligibility?
+
+  // Relations
+  images    PropertyImage[]
+  videos    PropertyVideo[]
+  documents Document[]
+  enquiries Enquiry[]
+}
+
+model AuctionInfo {
+  id                 String   @id @default(uuid())
+  propertyId         String   @unique
+  property           Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  bankName           String
+  auctionDate        DateTime
+  emd                String
+  reservePrice       String
+  physicalPossession Boolean  @default(false)
+  legalStatus        String
+}
+
+model LoanEligibility {
+  id            String   @id @default(uuid())
+  propertyId    String   @unique
+  property      Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  maxLoanAmount String
+  indicativeEmi String
+  partnerBanks  String   @default("[]") // JSON stringified array
+}
+
+model PropertyImage {
+  id         String   @id @default(uuid())
+  url        String
+  publicId   String // Cloudinary reference
+  order      Int      @default(0)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model PropertyVideo {
+  id         String   @id @default(uuid())
+  url        String
+  publicId   String?
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model Document {
+  id         String   @id @default(uuid())
+  name       String
+  url        String
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model Enquiry {
+  id         String   @id @default(uuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+  message    String
+  status     String   @default("NEW") // NEW, CONTACTED, CONVERTED, CLOSED
+  notes      String?
+  staffId    String?
+  assignedTo User?    @relation("AssignedStaff", fields: [staffId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Customer {
+  id        String    @id @default(uuid())
+  name      String
+  phone     String
+  email     String    @unique
+  enquiries Enquiry[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Testimonial {
+  id          String   @id @default(uuid())
+  name        String
+  role        String
+  quote       String
+  rating      Int      @default(5)
+  imagePublic String?
+  createdAt   DateTime @default(now())
+}
+
+model Blog {
+  id             String   @id @default(uuid())
+  title          String
+  slug           String   @unique
+  content        String
+  featuredImage  String
+  seoTitle       String?
+  seoDescription String?
+  seoKeywords    String   @default("[]") // JSON stringified array
+  published      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Setting {
+  id           String @id @default(uuid())
+  companyName  String @default("Sarakki Homes")
+  companyLogo  String @default("/logo.png")
+  favicon      String @default("/favicon.ico")
+  smtpHost     String @default("")
+  smtpPort     Int    @default(587)
+  smtpUser     String @default("")
+  smtpPassword String @default("")
+  whatsappNo   String @default("+91 98450 00000")
+  instagramUrl String @default("#")
+  linkedinUrl  String @default("#")
+  metaTitle    String @default("Sarakki Homes")
+  metaDesc     String @default("")
+  
+  // CMS Fields
+  heroTitle       String @default("Trust before property.")
+  heroDescription String @default("From bank auctions to ready-to-move homes, we guide every step — legal verification, financing, registration, khata transfer — so your investment is never a leap of faith.")
+  aboutHeadline   String @default("BENGALURU'S TRUSTED PROPERTY CONSULTANCY")
+  aboutDescription String @default("We guide clients through selection, verification, bidding, and registration. Experience a seamless and secure transaction experience.")
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  details   String
+  createdAt DateTime @default(now())
+}
