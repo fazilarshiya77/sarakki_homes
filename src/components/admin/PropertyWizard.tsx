@@ -17,6 +17,7 @@ import {
   Image as ImageIcon,
   Search,
   CheckCircle2,
+  Check,
 } from "lucide-react";
 
 // Form validation schema with Zod
@@ -26,12 +27,12 @@ const propertySchema = z.object({
   builderId: z.string().min(1, "Please select a builder"),
   type: z.string().min(1, "Please select a type (e.g. Bank Auction, Resale)"),
   price: z.string().min(1, "Price description is required (e.g. ₹ 2.4 Cr)"),
-  priceValueLakh: z.string().transform((val) => parseFloat(val) || 0),
+  priceValueLakh: z.string().min(1, "Price value in lakhs is required"),
   location: z.string().min(1, "Location is required (e.g. Whitefield, Bengaluru)"),
   address: z.string().min(1, "Address is required"),
   mapQuery: z.string().min(1, "Google Maps query is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  
+
   // Auction Info (optional)
   auctionInfo: z.object({
     bankName: z.string().optional(),
@@ -43,10 +44,10 @@ const propertySchema = z.object({
   }).optional(),
 
   // Details
-  beds: z.string().transform((val) => parseInt(val) || 0),
-  baths: z.string().transform((val) => parseInt(val) || 0),
+  beds: z.string(),
+  baths: z.string(),
   area: z.string().min(1, "Area display value is required (e.g. 3,200 sq.ft)"),
-  areaSqft: z.string().transform((val) => parseInt(val) || 0),
+  areaSqft: z.string(),
 
   // Media
   imageUrl: z.string().url("Must be a valid image URL").or(z.string().length(0)),
@@ -86,7 +87,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
     watch,
     setValue,
     formState: { errors },
-  } = useForm<PropertyFormData>({
+  } = useForm<any>({
     resolver: zodResolver(propertySchema),
     defaultValues: initialData || {
       title: "",
@@ -174,49 +175,67 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-      {/* Wizard Step Navigation (Left Panel) */}
-      <div className="lg:col-span-1 space-y-3">
-        {STEPS.map((step, idx) => {
-          const Icon = step.icon;
-          const isCompleted = idx < currentStep;
-          const isActive = idx === currentStep;
+      {/* Wizard Step Navigation (Left Panel) — premium vertical stepper.
+          Upcoming steps stay clearly readable (never near-invisible) per
+          the redesign brief; only the connecting rail + circle fill
+          communicate progress. */}
+      <div className="lg:col-span-1">
+        <div className="relative pl-1">
+          <div className="absolute left-[15px] top-2 bottom-2 w-px bg-crm-border" />
+          <div className="flex flex-col gap-1">
+            {STEPS.map((step, idx) => {
+              const isCompleted = idx < currentStep;
+              const isActive = idx === currentStep;
 
-          return (
-            <div
-              key={step.label}
-              className={cn(
-                "flex items-center gap-3.5 rounded-sm p-3.5 border transition-all duration-300",
-                isActive
-                  ? "border-accent-gold/40 bg-accent-gold/[0.02] text-foreground font-semibold"
-                  : isCompleted
-                  ? "border-border/20 bg-background text-muted-foreground"
-                  : "border-border/10 bg-background/40 text-muted-foreground/50"
-              )}
-            >
-              <div
-                className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-full border text-[10px] font-bold shrink-0",
-                  isActive
-                    ? "border-accent-gold text-accent-gold-dark"
-                    : isCompleted
-                    ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                    : "border-border/40 text-muted-foreground/40"
-                )}
-              >
-                {isCompleted ? "✓" : idx + 1}
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[11px] uppercase tracking-wider">{step.label}</span>
-              </div>
-            </div>
-          );
-        })}
+              return (
+                <button
+                  key={step.label}
+                  type="button"
+                  onClick={() => idx <= currentStep && setCurrentStep(idx)}
+                  disabled={idx > currentStep}
+                  className={cn(
+                    "group relative flex items-center gap-3.5 rounded-sm px-3 py-3 text-left transition-all duration-200",
+                    isActive ? "bg-crm-espresso/[0.04]" : "hover:bg-crm-espresso/[0.02]",
+                    idx > currentStep && "cursor-default"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-bold transition-all duration-300",
+                      isActive
+                        ? "border-crm-gold bg-crm-gold text-crm-espresso shadow-[0_0_0_4px_rgba(196,166,107,0.16)]"
+                        : isCompleted
+                        ? "border-crm-gold bg-crm-card text-crm-gold"
+                        : "border-crm-border bg-crm-card text-crm-text-muted"
+                    )}
+                  >
+                    {isCompleted ? <Check size={13} strokeWidth={3} /> : String(idx + 1).padStart(2, "0")}
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span
+                      className={cn(
+                        "text-[11px] font-bold uppercase tracking-[0.08em] transition-colors duration-200",
+                        isActive
+                          ? "text-crm-text"
+                          : isCompleted
+                          ? "text-crm-text-secondary"
+                          : "text-crm-text-muted"
+                      )}
+                    >
+                      {step.label}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Form Steps Panel (Right Panel) */}
-      <div className="lg:col-span-3 rounded-sm border border-border/20 bg-card/25 p-8 backdrop-blur-md">
+      <div className="lg:col-span-3 crm-card p-8">
         {errorMessage && (
-          <div className="mb-6 rounded-sm border border-red-500/10 bg-red-500/5 px-4 py-3 text-xs text-red-400">
+          <div className="mb-6 rounded-sm border border-red-300 bg-red-50 px-4 py-3 text-xs text-red-700">
             {errorMessage}
           </div>
         )}
@@ -226,211 +245,184 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
             {/* Step 1: Basic Information */}
             {currentStep === 0 && (
               <motion.div
+                key="step-0"
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                className="space-y-6"
+                className="space-y-8"
               >
-                <div>
-                  <h3 className="text-sm font-semibold tracking-wide text-foreground">Basic Information</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Core listing parameters for buyers.</p>
-                </div>
+                <StepHeading title="Basic Information" description="Core listing parameters for buyers." />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Property Name</label>
+                <FieldGroup title="Property Basics">
+                  <Field label="Property Name" error={errors.title}>
                     <input
                       type="text"
                       {...register("title")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                      className="crm-input"
                       placeholder="e.g. Prestige Lavender Residences"
                     />
-                    {errors.title && <span className="text-[10px] text-red-400">{errors.title.message}</span>}
-                  </div>
+                  </Field>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Property Type</label>
-                    <select
-                      {...register("type")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-muted-foreground outline-none focus:border-accent-gold/40"
-                    >
+                  <Field label="Property Type">
+                    <select {...register("type")} className="crm-select">
                       <option value="Bank Auction">Bank Auction</option>
                       <option value="Resale">Resale</option>
                       <option value="Ready To Move">Ready To Move</option>
                       <option value="Rental Income">Rental Income</option>
                       <option value="Upcoming Project">Upcoming Project</option>
                     </select>
-                  </div>
+                  </Field>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Category</label>
-                    <select
-                      {...register("categoryId")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-muted-foreground outline-none focus:border-accent-gold/40"
-                    >
+                  <Field label="Category">
+                    <select {...register("categoryId")} className="crm-select">
                       <option value="">Select Category</option>
                       {categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>{cat.title}</option>
                       ))}
                     </select>
-                  </div>
+                  </Field>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Builder</label>
-                    <select
-                      {...register("builderId")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-muted-foreground outline-none focus:border-accent-gold/40"
-                    >
+                  <Field label="Builder">
+                    <select {...register("builderId")} className="crm-select">
                       <option value="">Select Builder</option>
                       {builders.map((b) => (
                         <option key={b.id} value={b.id}>{b.name}</option>
                       ))}
                     </select>
-                  </div>
+                  </Field>
+                </FieldGroup>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Price (Display Text)</label>
+                <FieldGroup title="Pricing">
+                  <Field label="Price (Display Text)">
                     <input
                       type="text"
                       {...register("price")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                      className="crm-input"
                       placeholder="e.g. ₹ 2.4 Cr or ₹ 85 Lakh"
                     />
-                  </div>
+                  </Field>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Price Value in Lakhs</label>
+                  <Field label="Price Value in Lakhs">
                     <input
                       type="number"
                       {...register("priceValueLakh")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                      className="crm-input"
                       placeholder="e.g. 240 or 85"
                     />
-                  </div>
+                  </Field>
+                </FieldGroup>
 
-                  <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Location (Short Address)</label>
+                <FieldGroup title="Location">
+                  <Field label="Location (Short Address)" span2>
                     <input
                       type="text"
                       {...register("location")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                      className="crm-input"
                       placeholder="e.g. Whitefield, Bengaluru"
                     />
-                  </div>
+                  </Field>
 
-                  <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Address (Full Details)</label>
+                  <Field label="Address (Full Details)" span2>
                     <input
                       type="text"
                       {...register("address")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                      className="crm-input"
                       placeholder="e.g. Plot 15, Garden Layout, Phase 3, Whitefield, Bengaluru"
                     />
-                  </div>
+                  </Field>
 
-                  <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Google Maps Location Query</label>
+                  <Field label="Google Maps Location Query" span2>
                     <input
                       type="text"
                       {...register("mapQuery")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                      className="crm-input"
                       placeholder="e.g. Prestige Shantiniketan, Whitefield, Bengaluru"
                     />
-                  </div>
+                  </Field>
+                </FieldGroup>
 
-                  <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Description</label>
+                <FieldGroup title="Description">
+                  <Field label="Overview" span2>
                     <textarea
                       rows={5}
                       {...register("description")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40 resize-none"
+                      className="crm-textarea resize-none"
                       placeholder="Enter a descriptive overview of the property..."
                     />
-                  </div>
-                </div>
+                  </Field>
+                </FieldGroup>
               </motion.div>
             )}
 
             {/* Step 2: Auction Information */}
             {currentStep === 1 && (
               <motion.div
+                key="step-1"
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                className="space-y-6"
+                className="space-y-8"
               >
-                <div>
-                  <h3 className="text-sm font-semibold tracking-wide text-foreground">Auction Information</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Required fields only if the type is "Bank Auction".</p>
-                </div>
+                <StepHeading title="Auction Information" description='Required fields only if the type is "Bank Auction".' />
 
                 {propertyType !== "Bank Auction" ? (
-                  <div className="py-8 text-center text-xs text-muted-foreground border border-dashed border-border/20 rounded-sm">
+                  <div className="py-10 text-center text-xs text-crm-text-muted border border-dashed border-crm-border rounded-sm bg-crm-bg/60">
                     This property is not categorized as a Bank Auction. You can skip this step.
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Bank Name / Notice Info</label>
+                  <FieldGroup title="Auction Details">
+                    <Field label="Bank Name / Notice Info">
                       <input
                         type="text"
                         {...register("auctionInfo.bankName")}
-                        className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                        className="crm-input"
                         placeholder="e.g. State Bank of India, SARFAESI Auction"
                       />
-                    </div>
+                    </Field>
 
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Auction Date</label>
-                      <input
-                        type="date"
-                        {...register("auctionInfo.auctionDate")}
-                        className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-muted-foreground outline-none focus:border-accent-gold/40"
-                      />
-                    </div>
+                    <Field label="Auction Date">
+                      <input type="date" {...register("auctionInfo.auctionDate")} className="crm-input" />
+                    </Field>
 
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">EMD Amount</label>
+                    <Field label="EMD Amount">
                       <input
                         type="text"
                         {...register("auctionInfo.emd")}
-                        className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                        className="crm-input"
                         placeholder="e.g. ₹ 21.5 Lakh"
                       />
-                    </div>
+                    </Field>
 
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Reserve Price</label>
+                    <Field label="Reserve Price">
                       <input
                         type="text"
                         {...register("auctionInfo.reservePrice")}
-                        className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                        className="crm-input"
                         placeholder="e.g. ₹ 2.15 Cr"
                       />
-                    </div>
+                    </Field>
 
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Legal Status</label>
+                    <Field label="Legal Status">
                       <input
                         type="text"
                         {...register("auctionInfo.legalStatus")}
-                        className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                        className="crm-input"
                         placeholder="e.g. Title Verified, Clear Deed"
                       />
-                    </div>
+                    </Field>
 
-                    <div className="space-y-1.5 flex items-center justify-between border border-border/20 bg-background/40 rounded-sm p-4 mt-6 md:col-span-2">
+                    <div className="md:col-span-2 flex items-center justify-between rounded-sm border border-crm-border bg-crm-bg/60 p-4">
                       <div className="flex flex-col">
-                        <span className="text-xs font-semibold text-foreground">Physical Possession</span>
-                        <span className="text-[10px] text-muted-foreground mt-0.5">Has the bank taken active physical possession?</span>
+                        <span className="text-xs font-semibold text-crm-text">Physical Possession</span>
+                        <span className="text-[10px] text-crm-text-muted mt-0.5">Has the bank taken active physical possession?</span>
                       </div>
                       <input
                         type="checkbox"
                         {...register("auctionInfo.physicalPossession")}
-                        className="h-4 w-4 rounded border border-border/40 accent-accent-gold"
+                        className="h-4 w-4 rounded border border-crm-border accent-crm-gold"
                       />
                     </div>
-                  </div>
+                  </FieldGroup>
                 )}
               </motion.div>
             )}
@@ -438,168 +430,143 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
             {/* Step 3: Property Details */}
             {currentStep === 2 && (
               <motion.div
+                key="step-2"
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                className="space-y-6"
+                className="space-y-8"
               >
-                <div>
-                  <h3 className="text-sm font-semibold tracking-wide text-foreground">Property Details</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Specific metrics and structural definitions.</p>
-                </div>
+                <StepHeading title="Property Details" description="Specific metrics and structural definitions." />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Bedrooms</label>
-                    <input
-                      type="number"
-                      {...register("beds")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
-                    />
-                  </div>
+                <FieldGroup title="Measurements">
+                  <Field label="Bedrooms">
+                    <input type="number" {...register("beds")} className="crm-input" />
+                  </Field>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Bathrooms</label>
-                    <input
-                      type="number"
-                      {...register("baths")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
-                    />
-                  </div>
+                  <Field label="Bathrooms">
+                    <input type="number" {...register("baths")} className="crm-input" />
+                  </Field>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Area Display Text</label>
+                  <Field label="Area Display Text">
                     <input
                       type="text"
                       {...register("area")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                      className="crm-input"
                       placeholder="e.g. 3,200 sq.ft"
                     />
-                  </div>
+                  </Field>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Area in Sqft (Value)</label>
+                  <Field label="Area in Sqft (Value)">
                     <input
                       type="number"
                       {...register("areaSqft")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                      className="crm-input"
                       placeholder="e.g. 3200"
                     />
-                  </div>
-                </div>
+                  </Field>
+                </FieldGroup>
               </motion.div>
             )}
 
             {/* Step 4: Media & Images */}
             {currentStep === 3 && (
               <motion.div
+                key="step-3"
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                className="space-y-6"
+                className="space-y-8"
               >
-                <div>
-                  <h3 className="text-sm font-semibold tracking-wide text-foreground">Media & Attachments</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Attach the primary header image URL.</p>
-                </div>
+                <StepHeading title="Media & Attachments" description="Attach the primary header image URL." />
 
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Primary Image URL</label>
+                <FieldGroup title="Primary Image">
+                  <Field label="Primary Image URL" span2 error={errors.imageUrl}>
                     <input
                       type="text"
                       {...register("imageUrl")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                      className="crm-input"
                       placeholder="e.g. /media/re.jpg or an external link"
                     />
-                    {errors.imageUrl && <span className="text-[10px] text-red-400">{errors.imageUrl.message}</span>}
-                  </div>
+                  </Field>
 
-                  <div className="p-12 text-center text-xs text-muted-foreground border border-dashed border-border/20 bg-background/40 rounded-sm">
+                  <div className="md:col-span-2 p-12 text-center text-xs text-crm-text-muted border border-dashed border-crm-border bg-crm-bg/60 rounded-sm">
                     Drag and Drop uploads will route through Cloudinary API key settings once keys are supplied in settings panel.
                   </div>
-                </div>
+                </FieldGroup>
               </motion.div>
             )}
 
             {/* Step 5: SEO Configuration */}
             {currentStep === 4 && (
               <motion.div
+                key="step-4"
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                className="space-y-6"
+                className="space-y-8"
               >
-                <div>
-                  <h3 className="text-sm font-semibold tracking-wide text-foreground">SEO Config</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Define metadata parameters for search indexing.</p>
-                </div>
+                <StepHeading title="SEO Config" description="Define metadata parameters for search indexing." />
 
-                <div className="grid grid-cols-1 gap-6">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">SEO Title Override</label>
+                <FieldGroup title="Search Metadata">
+                  <Field label="SEO Title Override" span2>
                     <input
                       type="text"
                       {...register("seoTitle")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                      className="crm-input"
                       placeholder="Keep empty to use Property Name"
                     />
-                  </div>
+                  </Field>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">SEO Meta Description</label>
+                  <Field label="SEO Meta Description" span2>
                     <textarea
                       rows={3}
                       {...register("seoDescription")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40 resize-none"
+                      className="crm-textarea resize-none"
                       placeholder="Summarize listing in 150-160 characters..."
                     />
-                  </div>
+                  </Field>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Slug (URL endpoint)</label>
+                  <Field label="Slug (URL endpoint)" span2>
                     <input
                       type="text"
                       {...register("slug")}
-                      className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                      className="crm-input"
                       placeholder="e.g. sarjapur-emerald-villa"
                     />
-                  </div>
-                </div>
+                  </Field>
+                </FieldGroup>
               </motion.div>
             )}
 
             {/* Step 6: Review & Submit */}
             {currentStep === 5 && (
               <motion.div
+                key="step-5"
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                className="space-y-6"
+                className="space-y-8"
               >
-                <div>
-                  <h3 className="text-sm font-semibold tracking-wide text-foreground">Review & Publish</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Please review listing details before saving to local database.</p>
-                </div>
+                <StepHeading title="Review & Publish" description="Please review listing details before saving to local database." />
 
-                <div className="border border-border/20 bg-background/30 rounded-sm p-6 space-y-4 text-xs">
-                  <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-sm border border-crm-border bg-crm-bg/60 p-7">
+                  <div className="flex flex-wrap items-start justify-between gap-6">
                     <div>
-                      <span className="text-muted-foreground font-medium block">Name</span>
-                      <strong className="text-foreground text-sm font-semibold">{formValues.title || "N/A"}</strong>
+                      <span className="crm-label">Property Name</span>
+                      <p className="mt-1.5 font-display text-xl text-crm-text">{formValues.title || "N/A"}</p>
+                      <p className="mt-1 text-xs text-crm-text-secondary">{formValues.location || "N/A"}</p>
                     </div>
-                    <div>
-                      <span className="text-muted-foreground font-medium block">Type</span>
-                      <strong className="text-foreground">{formValues.type}</strong>
+                    <div className="text-right">
+                      <span className="crm-label">Price</span>
+                      <p className="mt-1.5 font-display text-2xl font-semibold text-crm-gold">{formValues.price || "N/A"}</p>
                     </div>
-                    <div>
-                      <span className="text-muted-foreground font-medium block">Price</span>
-                      <strong className="text-foreground font-semibold">{formValues.price || "N/A"}</strong>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground block">Location</span>
-                      <strong className="text-foreground">{formValues.location || "N/A"}</strong>
-                    </div>
+                  </div>
+
+                  <div className="mt-6 grid grid-cols-2 gap-5 border-t border-crm-border pt-5 sm:grid-cols-4">
+                    <ReviewStat label="Type" value={formValues.type} />
+                    <ReviewStat label="Bedrooms" value={formValues.beds || "0"} />
+                    <ReviewStat label="Bathrooms" value={formValues.baths || "0"} />
+                    <ReviewStat label="Area" value={formValues.area || "N/A"} />
                   </div>
                 </div>
               </motion.div>
@@ -607,32 +574,24 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
           </AnimatePresence>
 
           {/* Form Actions Buttons */}
-          <div className="flex items-center justify-between border-t border-border/20 pt-6 mt-8">
+          <div className="flex items-center justify-between border-t border-crm-border pt-6 mt-8">
             <button
               type="button"
               onClick={handleBack}
               disabled={currentStep === 0 || loading}
-              className="inline-flex items-center gap-1.5 rounded-sm border border-border/40 hover:bg-surface px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-all duration-200 disabled:opacity-30"
+              className="crm-btn-secondary"
             >
               <ChevronLeft size={14} />
               <span>Back</span>
             </button>
 
             {currentStep < STEPS.length - 1 ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                className="inline-flex items-center gap-1.5 rounded-sm bg-foreground/5 hover:bg-foreground/10 px-5 py-2 text-xs font-semibold uppercase tracking-wider text-foreground transition-all duration-200"
-              >
+              <button type="button" onClick={handleNext} className="crm-btn-primary">
                 <span>Continue</span>
                 <ChevronRight size={14} />
               </button>
             ) : (
-              <button
-                type="submit"
-                disabled={loading}
-                className="inline-flex items-center gap-2 rounded-sm bg-gradient-to-r from-accent-gold-dark to-accent-gold px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-black transition-all duration-300 hover:brightness-110 disabled:opacity-50"
-              >
+              <button type="submit" disabled={loading} className="crm-btn-gold">
                 {loading ? (
                   <Loader2 size={14} className="animate-spin" />
                 ) : (
@@ -643,6 +602,55 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+function StepHeading({ title, description }: { title: string; description: string }) {
+  return (
+    <div>
+      <h3 className="font-display text-xl font-semibold text-crm-text">{title}</h3>
+      <p className="text-xs text-crm-text-secondary mt-1">{description}</p>
+    </div>
+  );
+}
+
+function FieldGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-4">
+      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-crm-gold border-b border-crm-border pb-2.5">
+        {title}
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">{children}</div>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  children,
+  span2,
+  error,
+}: {
+  label: string;
+  children: React.ReactNode;
+  span2?: boolean;
+  error?: any;
+}) {
+  return (
+    <div className={cn("space-y-1.5", span2 && "md:col-span-2")}>
+      <label className="crm-label">{label}</label>
+      {children}
+      {error && <span className="block text-[10px] text-red-600">{String(error.message)}</span>}
+    </div>
+  );
+}
+
+function ReviewStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <span className="crm-label">{label}</span>
+      <p className="mt-1 text-sm font-semibold text-crm-text">{value}</p>
     </div>
   );
 }

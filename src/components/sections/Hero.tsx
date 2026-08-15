@@ -7,7 +7,8 @@ import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Counter } from "@/components/ui/Counter";
 import { ButtonFX } from "@/components/ui/ButtonFX";
-import { CONTACT, STATS } from "@/lib/data";
+import { STATS } from "@/lib/data";
+import { useSiteSettings } from "@/components/providers/SettingsProvider";
 import { heroDelayMs } from "@/lib/heroTiming";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -16,6 +17,8 @@ const EASE = [0.22, 1, 0.36, 1] as const;
  *  and stats are all in place immediately. No scroll-linked expansion or
  *  crossfade; the only motion is a one-time staggered fade-in on load. */
 export function Hero() {
+  const { contact: CONTACT, heroTitle, heroDescription } = useSiteSettings();
+
   return (
     <section
       id="hero"
@@ -32,9 +35,9 @@ export function Hero() {
         />
       </div>
 
-      {/* Cinematic wash for text contrast. */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-foreground via-foreground/30 to-foreground/55" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-foreground/60 via-transparent to-transparent" />
+      {/* Cinematic wash for text contrast. Keeps the center of the image bright and clear. */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent" />
       {/* Film grain — 2% opacity. */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.02] mix-blend-overlay"
@@ -63,14 +66,12 @@ export function Hero() {
           <Eyebrow light>Bengaluru&rsquo;s Trusted Property Consultancy</Eyebrow>
           <h1
             className="mt-6 font-display text-6xl leading-[1.05] tracking-[-0.02em] text-background md:text-[5.5rem]"
-            style={{ textShadow: "0 4px 28px rgba(0,0,0,0.4)" }}
+            style={{ textShadow: "0 2px 10px rgba(0,0,0,0.25)" }}
           >
-            Trust before property.
+            {heroTitle}
           </h1>
           <p className="mt-7 max-w-xl text-lg leading-relaxed text-background/85 md:text-xl">
-            From bank auctions to ready-to-move homes, we guide every step —
-            legal verification, financing, registration, khata transfer —
-            so your investment is never a leap of faith.
+            {heroDescription}
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
             <a
@@ -96,43 +97,43 @@ export function Hero() {
             </a>
           </div>
         </motion.div>
-
+ 
         <div className="flex flex-col gap-8">
           <motion.div
-            className="glass-dark w-full max-w-4xl rounded-pill p-2.5 md:p-3"
+            className="glass-dark w-full max-w-4xl rounded-xl p-4 border border-white/10"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: heroDelayMs(150), ease: EASE }}
           >
-            <form className="flex flex-col gap-3 md:flex-row md:items-center">
-              <div className="flex flex-1 items-center gap-3 rounded-pill bg-background/95 px-5 py-3.5 transition-shadow duration-300 focus-within:shadow-[0_0_0_2px_var(--accent-gold)]">
-                <MapPin size={17} className="shrink-0 text-accent-gold-dark" />
+            <form className="flex flex-col gap-3.5 md:flex-row md:items-center">
+              <div className="flex flex-1 items-center gap-3 rounded-md border border-white/10 bg-background/5 px-4.5 py-3 transition-all duration-300 focus-within:border-accent-gold focus-within:bg-background/10">
+                <MapPin size={17} className="shrink-0 text-accent-gold" />
                 <input
                   type="text"
                   placeholder="Location — e.g. Whitefield, Sarjapur Road"
-                  className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+                  className="w-full bg-transparent text-sm text-background placeholder:text-background/40 focus:outline-none"
                 />
               </div>
               <select
-                className="rounded-pill bg-background/95 px-5 py-3.5 text-sm text-foreground transition-shadow duration-300 focus:outline-none focus-visible:shadow-[0_0_0_2px_var(--accent-gold)] md:w-56"
+                className="rounded-md border border-white/10 bg-background/5 px-4.5 py-3 text-sm text-background/90 transition-all duration-300 focus:outline-none focus:border-accent-gold focus:bg-background/10 md:w-56 cursor-pointer"
                 defaultValue=""
               >
-                <option value="" disabled>
+                <option value="" disabled className="bg-foreground text-background">
                   Property Type
                 </option>
-                <option>Bank Auction</option>
-                <option>Rental Income</option>
-                <option>Chance Deal</option>
-                <option>Resale</option>
-                <option>Upcoming Project</option>
-                <option>Ready To Move</option>
+                <option className="bg-foreground text-background">Bank Auction</option>
+                <option className="bg-foreground text-background">Rental Income</option>
+                <option className="bg-foreground text-background">Chance Deal</option>
+                <option className="bg-foreground text-background">Resale</option>
+                <option className="bg-foreground text-background">Upcoming Project</option>
+                <option className="bg-foreground text-background">Ready To Move</option>
               </select>
               <button
                 type="submit"
-                className="btn-fx inline-flex items-center justify-center gap-2 rounded-pill bg-background/95 px-6 py-3.5 text-sm font-semibold text-foreground transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:scale-[1.02] hover:shadow-soft-lg active:translate-y-0 active:scale-[0.98] active:duration-150"
+                className="btn-fx inline-flex items-center justify-center gap-2 rounded-md bg-accent-gold px-6 py-3 text-sm font-semibold text-foreground transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:scale-[1.02] hover:bg-accent-gold-dark hover:shadow-soft-lg active:translate-y-0 active:scale-[0.98] active:duration-150"
               >
                 <ButtonFX />
-                <Search size={16} className="text-accent-gold-dark" />
+                <Search size={16} className="text-foreground" />
                 Search
               </button>
             </form>

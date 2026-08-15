@@ -43,8 +43,8 @@ export default function LoginPage() {
     <div className="relative flex min-h-screen items-center justify-center bg-[#0d0d0d] px-6 py-12">
       {/* Dynamic Background Gradients */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-[30%] -left-[20%] h-[80%] w-[60%] rounded-full bg-accent-gold/5 blur-[120px]" />
-        <div className="absolute -bottom-[30%] -right-[20%] h-[80%] w-[60%] rounded-full bg-accent-gold/5 blur-[120px]" />
+        <div className="absolute -top-[30%] -left-[20%] h-[80%] w-[60%] rounded-full bg-crm-gold-bright/5 blur-[120px]" />
+        <div className="absolute -bottom-[30%] -right-[20%] h-[80%] w-[60%] rounded-full bg-crm-gold-bright/5 blur-[120px]" />
       </div>
 
       <motion.div
@@ -55,13 +55,13 @@ export default function LoginPage() {
       >
         {/* Header/Logo */}
         <div className="flex flex-col items-center text-center">
-          <span className="font-display text-2xl tracking-[0.2em] uppercase text-accent-gold-dark font-medium">
+          <span className="font-display text-2xl tracking-[0.2em] uppercase text-crm-gold font-medium">
             Sarakki Homes
           </span>
-          <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mt-2">
+          <span className="text-[10px] uppercase tracking-[0.3em] text-white/50 mt-2">
             Enterprise CRM Login
           </span>
-          <p className="mt-4 text-xs text-muted-foreground/80 leading-relaxed max-w-[280px]">
+          <p className="mt-4 text-xs text-white/60 leading-relaxed max-w-[280px]">
             Please sign in using your staff credentials to access the console.
           </p>
         </div>
@@ -82,11 +82,11 @@ export default function LoginPage() {
           <div className="space-y-4">
             {/* Email Field */}
             <div className="space-y-1">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-white/50">
                 Email Address
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-foreground/50">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-white/40">
                   <Mail size={14} />
                 </div>
                 <input
@@ -94,7 +94,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-sm border border-white/10 bg-white/[0.02] py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/35 outline-none transition-all duration-300 focus:border-accent-gold/40 focus:bg-white/[0.04]"
+                  className="w-full rounded-sm border border-white/10 bg-white/[0.02] py-3 pl-10 pr-4 text-sm text-crm-gold-bright placeholder:text-white/25 outline-none transition-all duration-300 focus:border-crm-gold-bright/40 focus:bg-white/[0.04]"
                   placeholder="name@sarakkihomes.com"
                 />
               </div>
@@ -102,11 +102,11 @@ export default function LoginPage() {
 
             {/* Password Field */}
             <div className="space-y-1">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-white/50">
                 Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-foreground/50">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-white/40">
                   <Lock size={14} />
                 </div>
                 <input
@@ -114,7 +114,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-sm border border-white/10 bg-white/[0.02] py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/35 outline-none transition-all duration-300 focus:border-accent-gold/40 focus:bg-white/[0.04]"
+                  className="w-full rounded-sm border border-white/10 bg-white/[0.02] py-3 pl-10 pr-4 text-sm text-crm-gold-bright placeholder:text-white/25 outline-none transition-all duration-300 focus:border-crm-gold-bright/40 focus:bg-white/[0.04]"
                   placeholder="••••••••"
                 />
               </div>
@@ -123,19 +123,19 @@ export default function LoginPage() {
 
           {/* Action Row */}
           <div className="flex items-center justify-between text-xs">
-            <label className="flex items-center gap-2 cursor-pointer text-muted-foreground hover:text-foreground transition-colors select-none">
+            <label className="flex items-center gap-2 cursor-pointer text-white/50 hover:text-white transition-colors select-none">
               <input
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-3.5 w-3.5 rounded-sm border border-white/20 bg-transparent text-accent-gold focus:ring-0 outline-none accent-accent-gold"
+                className="h-3.5 w-3.5 rounded-sm border border-white/20 bg-transparent text-crm-gold-bright focus:ring-0 outline-none accent-crm-gold-bright"
               />
               <span>Remember Me</span>
             </label>
             <button
               type="button"
               onClick={() => alert("Please contact your IT administrator to reset your password.")}
-              className="text-accent-gold-dark hover:text-accent-gold transition-colors font-medium"
+              className="text-crm-gold hover:text-crm-gold-bright transition-colors font-medium"
             >
               Forgot Password?
             </button>
@@ -145,7 +145,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="group flex w-full items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-accent-gold-dark to-accent-gold/90 hover:from-accent-gold hover:to-accent-gold-dark py-3.5 text-xs font-semibold uppercase tracking-wider text-black transition-all duration-300 disabled:opacity-50"
+            className="group flex w-full items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-crm-gold to-crm-gold-bright/90 hover:from-crm-gold-bright hover:to-crm-gold py-3.5 text-xs font-semibold uppercase tracking-wider text-crm-espresso transition-all duration-300 disabled:opacity-50"
           >
             {loading ? (
               <Loader2 size={14} className="animate-spin" />

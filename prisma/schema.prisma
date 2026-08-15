@@ -21,6 +21,7 @@ model User {
   updatedAt    DateTime      @updatedAt
   activities   ActivityLog[]
   enquiries    Enquiry[]     @relation("AssignedStaff")
+  leads        Lead[]        @relation("AssignedAgent")
 }
 
 model Category {
@@ -163,6 +164,7 @@ model Testimonial {
   id          String   @id @default(uuid())
   name        String
   role        String
+  location    String?
   quote       String
   rating      Int      @default(5)
   imagePublic String?
@@ -212,4 +214,86 @@ model ActivityLog {
   action    String
   details   String
   createdAt DateTime @default(now())
+}
+
+// ============================================================
+// CRM — core lead-management module, modeled loosely on the
+// client-supplied reference CRM (RAYYAN01/realestatecrm) but kept on
+// this project's existing Prisma + SQLite + NextAuth stack rather than
+// migrating to Supabase. Phase 1 scope: leads, pipeline stage, tasks,
+// notes, and an activity timeline. Deliberately separate from the
+// pre-existing Enquiry/Customer models — those stay as the public
+// website's contact-form pipeline; Lead is the CRM's own richer record,
+// added by staff (walk-ins, calls, referrals) as well as manually
+// promoted from an Enquiry.
+// ============================================================
+
+// Pipeline stages: NEW, CONTACTED, QUALIFIED, SITE_VISIT, NEGOTIATION, WON, LOST
+model Lead {
+  id            String    @id @default(uuid())
+  name          String
+  phone         String
+  email         String?
+  location      String?
+  budgetMinLakh Float?
+  budgetMaxLakh Float?
+  propertyType  String?
+  purpose       String    @default("Buy") // Buy, Rent, Invest
+  source        String    @default("Website")
+  bedrooms      Int?
+  bathrooms     Int?
+  areaRequired  String?
+  possession    String? // Ready to Move, Under Construction, Any
+  priority      String    @default("MEDIUM") // LOW, MEDIUM, HIGH
+  stage         String    @default("NEW")
+  favorite      Boolean   @default(false)
+  wonDetails    String?
+  lostReason    String?
+  lastContact   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  agentId String?
+  agent   User?   @relation("AssignedAgent", fields: [agentId], references: [id])
+
+  tasks    LeadTask[]
+  notes    LeadNote[]
+  timeline LeadTimelineEntry[]
+}
+
+// Status: PENDING, IN_PROGRESS, DONE
+model LeadTask {
+  id          String    @id @default(uuid())
+  leadId      String?
+  lead        Lead?     @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  title       String
+  description String?
+  assignedTo  String?
+  priority    String    @default("MEDIUM")
+  status      String    @default("PENDING")
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model LeadNote {
+  id        String   @id @default(uuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  author    String
+  content   String
+  pinned    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// Type: CREATED, STAGE_CHANGE, NOTE, TASK, CALL, MEETING
+model LeadTimelineEntry {
+  id          String   @id @default(uuid())
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type        String
+  title       String
+  description String?
+  author      String?
+  createdAt   DateTime @default(now())
 }

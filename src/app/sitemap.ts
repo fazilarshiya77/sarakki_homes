@@ -1,11 +1,12 @@
 import type { MetadataRoute } from "next";
-import { CATEGORIES, PROPERTIES } from "@/lib/data";
+import { CATEGORIES } from "@/lib/data";
+import { getAllPublishedSlugs } from "@/lib/properties";
 
 // TODO: replace with the real production domain once the site is hosted —
 // set NEXT_PUBLIC_SITE_URL in the deployment environment.
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sarakkihomes.com";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: BASE_URL, changeFrequency: "weekly", priority: 1 },
     { url: `${BASE_URL}/properties`, changeFrequency: "daily", priority: 0.9 },
@@ -15,8 +16,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/terms`, changeFrequency: "yearly", priority: 0.2 },
   ];
 
-  const propertyRoutes: MetadataRoute.Sitemap = PROPERTIES.map((property) => ({
-    url: `${BASE_URL}/properties/${property.slug}`,
+  const slugs = await getAllPublishedSlugs();
+  const propertyRoutes: MetadataRoute.Sitemap = slugs.map((slug) => ({
+    url: `${BASE_URL}/properties/${slug}`,
     changeFrequency: "weekly",
     priority: 0.7,
   }));

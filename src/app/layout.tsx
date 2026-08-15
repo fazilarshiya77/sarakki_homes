@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Bodoni_Moda, Cormorant_Garamond, Manrope } from "next/font/google";
 import { FloatingSocialDock } from "@/components/ui/FloatingSocialDock";
+import { BuilderMarquee } from "@/components/ui/BuilderMarquee";
 import { AuthProvider } from "@/components/admin/AuthProvider";
+import { SettingsProvider } from "@/components/providers/SettingsProvider";
+import { getSiteSettings } from "@/lib/settings";
 import "./globals.css";
 
 const bodoniModa = Bodoni_Moda({
@@ -25,45 +28,52 @@ const manrope = Manrope({
 // TODO: replace with the real production domain once the site is hosted —
 // set NEXT_PUBLIC_SITE_URL in the deployment environment.
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sarakkihomes.com";
-const TITLE = "Sarakki Homes | Premium Real Estate Consultancy, Bengaluru";
-const DESCRIPTION =
-  "Sarakki Homes guides you through the complete property journey — selection, legal verification, bank auction process, loan arrangement, registration, and khata transfer. Trust before property.";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(BASE_URL),
-  title: TITLE,
-  description: DESCRIPTION,
-  keywords: [
-    "Sarakki Homes",
-    "Bengaluru real estate",
-    "bank auction properties Bengaluru",
-    "property consultancy Bengaluru",
-    "khata transfer",
-    "ready to move properties Bengaluru",
-  ],
-  openGraph: {
-    title: TITLE,
-    description: DESCRIPTION,
-    url: BASE_URL,
-    siteName: "Sarakki Homes",
-    locale: "en_IN",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: TITLE,
-    description: DESCRIPTION,
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+// Title/description are pulled from the admin-managed Setting row (Website
+// CMS → SEO fields) so editing them there actually changes what search
+// engines and social previews show — not just hardcoded copy.
+export async function generateMetadata(): Promise<Metadata> {
+  const { metaTitle, metaDesc } = await getSiteSettings();
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return {
+    metadataBase: new URL(BASE_URL),
+    title: metaTitle,
+    description: metaDesc,
+    keywords: [
+      "Sarakki Homes",
+      "Bengaluru real estate",
+      "bank auction properties Bengaluru",
+      "property consultancy Bengaluru",
+      "khata transfer",
+      "ready to move properties Bengaluru",
+    ],
+    openGraph: {
+      title: metaTitle,
+      description: metaDesc,
+      url: BASE_URL,
+      siteName: "Sarakki Homes",
+      locale: "en_IN",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: metaTitle,
+      description: metaDesc,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const settings = await getSiteSettings();
+
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${bodoniModa.variable} ${cormorantGaramond.variable} ${manrope.variable} h-full antialiased`}
       suppressHydrationWarning
     >
@@ -72,8 +82,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         suppressHydrationWarning
       >
         <AuthProvider>
-          {children}
-          <FloatingSocialDock />
+          <SettingsProvider settings={settings}>
+            {children}
+            <BuilderMarquee />
+            <FloatingSocialDock />
+          </SettingsProvider>
         </AuthProvider>
       </body>
     </html>

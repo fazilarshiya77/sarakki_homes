@@ -5,10 +5,10 @@ import { buttonClasses } from "@/components/ui/Button";
 import { ButtonFX } from "@/components/ui/ButtonFX";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { PropertyCard } from "@/components/property/PropertyCard";
-import { PROPERTIES } from "@/lib/data";
+import { getFeaturedProperties } from "@/lib/properties";
 
-export function FeaturedProperties() {
-  const featured = PROPERTIES.filter((p) => p.featured).slice(0, 6);
+export async function FeaturedProperties() {
+  const featured = await getFeaturedProperties(6);
 
   return (
     <Section id="properties" className="bg-surface">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   PropertyFilters,
   DEFAULT_FILTERS,
@@ -10,7 +11,15 @@ import { PropertyGrid } from "@/components/property/PropertyGrid";
 import { BUDGET_RANGES, type Property } from "@/lib/data";
 
 export function PropertyExplorer({ properties }: { properties: Property[] }) {
-  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  // Pre-fill the category filter from ?category=<slug> so the header's
+  // Properties dropdown lands on an already-filtered grid, not just the
+  // generic listing page. An unrecognized slug just yields an empty grid —
+  // PropertyGrid's EmptyState already handles that.
+  const searchParams = useSearchParams();
+  const [filters, setFilters] = useState<FilterState>({
+    ...DEFAULT_FILTERS,
+    category: searchParams.get("category") ?? "",
+  });
 
   const filtered = useMemo(() => {
     const budget = BUDGET_RANGES[filters.budgetIndex];
@@ -30,12 +39,18 @@ export function PropertyExplorer({ properties }: { properties: Property[] }) {
     return result;
   }, [properties, filters]);
 
+  const locations = useMemo(
+    () => Array.from(new Set(properties.map((p) => p.location.split(",")[0]))).sort(),
+    [properties]
+  );
+
   return (
     <div className="flex flex-col gap-10">
       <PropertyFilters
         filters={filters}
         onChange={setFilters}
         resultCount={filtered.length}
+        locations={locations}
       />
       <PropertyGrid properties={filtered} onReset={() => setFilters(DEFAULT_FILTERS)} />
     </div>

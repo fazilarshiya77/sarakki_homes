@@ -2,9 +2,11 @@ import { Landmark } from "lucide-react";
 import { buttonClasses } from "@/components/ui/Button";
 import { ButtonFX } from "@/components/ui/ButtonFX";
 import type { LoanEligibility } from "@/lib/data";
-import { CONTACT } from "@/lib/data";
+import { getSiteSettings } from "@/lib/settings";
 
-export function LoanEligibilityCard({ loan }: { loan: LoanEligibility }) {
+export async function LoanEligibilityCard({ loan }: { loan: LoanEligibility }) {
+  const { contact } = await getSiteSettings();
+
   return (
     <div className="rounded-md border border-border bg-surface p-8">
       <h2 className="flex items-center gap-2.5 font-display text-2xl">
@@ -42,7 +44,7 @@ export function LoanEligibilityCard({ loan }: { loan: LoanEligibility }) {
       </div>
 
       <a
-        href={CONTACT.whatsappHref}
+        href={contact.whatsappHref}
         target="_blank"
         rel="noopener noreferrer"
         className={buttonClasses("primary", "mt-7 w-fit")}

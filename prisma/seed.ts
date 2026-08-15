@@ -189,139 +189,52 @@ async function main() {
   }
   console.log("✅ Seeded categories.");
 
-  // 5. Seed Properties
-  const propertiesData = [
+  // Testimonials — the public homepage's book-flip section reads these
+  // live from the database (src/lib/testimonials.ts), not from hardcoded
+  // copy, so admin-added reviews actually appear on the site.
+  const testimonials = [
     {
-      propertyId: "SH-1001",
-      slug: "whitefield-garden-residence",
-      title: "Whitefield Garden Residence",
+      name: "Ramesh Iyer",
+      role: "Purchased Bank Auction Property",
       location: "Whitefield, Bengaluru",
-      price: "₹ 2.4 Cr",
-      priceValueLakh: 240,
-      type: "Bank Auction",
-      categorySlug: "bank-auctions",
-      builderName: "Shriram Properties",
-      beds: 4,
-      baths: 4,
-      area: "3,200 sq.ft",
-      areaSqft: 3200,
-      featured: "true",
-      status: "PUBLISHED",
-      description: "A spacious four-bedroom residence in Whitefield's established garden layout, brought to market through a bank auction with clean, fully verified title.",
-      image: "/img1.jpg",
-      gallery: JSON.stringify(["warm", "charcoal", "gold", "warm"]),
-      amenities: JSON.stringify(["24x7 Security", "Covered Parking", "Power Backup", "Landscaped Garden"]),
-      address: "Garden Layout, Whitefield, Bengaluru",
-      mapQuery: "Whitefield, Bengaluru, Karnataka",
-      auctionInfo: {
-        bankName: "State Bank of India, SARFAESI Auction",
-        auctionDate: new Date("2026-09-22"),
-        reservePrice: "₹ 2.15 Cr",
-        emd: "₹ 21.5 Lakh",
-        physicalPossession: true,
-        legalStatus: "Title Verified",
-      },
-      loanEligibility: {
-        maxLoanAmount: "Up to ₹ 1.9 Cr (80% of valuation)",
-        indicativeEmi: "≈ ₹ 1.48 Lakh / month at 8.7% for 20 years",
-        partnerBanks: JSON.stringify(["HDFC Bank", "SBI", "ICICI Bank"]),
-      },
+      quote:
+        "Sarakki Homes walked us through a bank auction we'd never have attempted alone. Every document was verified before we bid — no surprises after.",
+      rating: 5,
     },
     {
-      propertyId: "SH-1002",
-      slug: "sarjapur-emerald-villa",
-      title: "Sarjapur Emerald Villa",
-      location: "Sarjapur Road, Bengaluru",
-      price: "₹ 3.1 Cr",
-      priceValueLakh: 310,
-      type: "Ready To Move",
-      categorySlug: "ready-to-move",
-      builderName: "Prestige Group",
-      beds: 5,
-      baths: 5,
-      area: "4,000 sq.ft",
-      areaSqft: 4000,
-      featured: "true",
-      status: "PUBLISHED",
-      description: "A move-in ready villa in a gated community off Sarjapur Road, with occupancy certificate in hand and no waiting on construction timelines.",
-      image: "/img2.jpg",
-      gallery: JSON.stringify(["emerald", "warm", "charcoal", "gold"]),
-      amenities: JSON.stringify(["Gated Community", "Clubhouse & Gym", "Children's Play Area", "CCTV Surveillance"]),
-      address: "Prestige Layout, Sarjapur Road, Bengaluru",
-      mapQuery: "Sarjapur Road, Bengaluru, Karnataka",
-      loanEligibility: {
-        maxLoanAmount: "Up to ₹ 2.48 Cr (80% of valuation)",
-        indicativeEmi: "≈ ₹ 1.93 Lakh / month at 8.7% for 20 years",
-        partnerBanks: JSON.stringify(["HDFC Bank", "SBI", "ICICI Bank"]),
-      },
+      name: "Divya & Arjun Rao",
+      role: "Luxury Villa Buyers",
+      location: "Sarjapur, Bengaluru",
+      quote:
+        "What stood out was how little they pushed. It felt like counsel, not sales. We understood every rupee, every clause, and felt in completely safe hands.",
+      rating: 5,
+    },
+    {
+      name: "Kavitha Menon",
+      role: "Rental Income Investors",
+      location: "Koramangala, Bengaluru",
+      quote:
+        "Their rental yield analysis was more rigorous than what our bank gave us. Three properties later, they are still the only firm we call first.",
+      rating: 5,
+    },
+    {
+      name: "Rajesh Khanna",
+      role: "Ready To Move Property Buyer",
+      location: "Attibele, Bengaluru",
+      quote:
+        "The transition from our old home was seamless. Sarakki Homes took care of all the khata registration transfer details quickly and transparently.",
+      rating: 5,
     },
   ];
 
-  for (const prop of propertiesData) {
-    const existing = await prisma.property.findUnique({
-      where: { slug: prop.slug },
-    });
-
-    if (!existing) {
-      const catId = seededCategories[prop.categorySlug];
-      const builderId = seededBuilders[prop.builderName] || seededBuilders["Prestige Group"];
-
-      const created = await prisma.property.create({
-        data: {
-          propertyId: prop.propertyId,
-          slug: prop.slug,
-          title: prop.title,
-          location: prop.location,
-          price: prop.price,
-          priceValueLakh: prop.priceValueLakh,
-          type: prop.type,
-          status: prop.status,
-          featured: prop.featured,
-          beds: prop.beds,
-          baths: prop.baths,
-          area: prop.area,
-          areaSqft: prop.areaSqft,
-          description: prop.description,
-          address: prop.address,
-          mapQuery: prop.mapQuery,
-          categoryId: catId,
-          builderId: builderId,
-        },
-      });
-
-      // Seed images
-      await prisma.propertyImage.create({
-        data: {
-          url: prop.image,
-          publicId: `default_${prop.slug}`,
-          order: 0,
-          propertyId: created.id,
-        },
-      });
-
-      // Seed AuctionInfo if applicable
-      if (prop.auctionInfo) {
-        await prisma.auctionInfo.create({
-          data: {
-            ...prop.auctionInfo,
-            propertyId: created.id,
-          },
-        });
-      }
-
-      // Seed LoanEligibility
-      if (prop.loanEligibility) {
-        await prisma.loanEligibility.create({
-          data: {
-            ...prop.loanEligibility,
-            propertyId: created.id,
-          },
-        });
-      }
+  const testimonialCount = await prisma.testimonial.count();
+  if (testimonialCount === 0) {
+    for (const t of testimonials) {
+      await prisma.testimonial.create({ data: t });
     }
+    console.log("✅ Seeded testimonials.");
   }
 
-  console.log("✅ Seeded properties.");
   console.log("🌱 Database seeding complete!");
 }
 

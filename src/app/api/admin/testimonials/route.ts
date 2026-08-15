@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -16,7 +17,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session || !session.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
     const body = await req.json();
@@ -28,6 +29,7 @@ export async function POST(req: Request) {
       data: {
         name: body.name,
         role: body.role || "Homebuyer",
+        location: body.location || null,
         quote: body.quote,
         rating: parseInt(body.rating || "5"),
         imagePublic: body.imagePublic || null,
@@ -36,11 +38,16 @@ export async function POST(req: Request) {
 
     await prisma.activityLog.create({
       data: {
-        userId: session.user.id,
+        userId: (session.user as any).id,
         action: "CREATE_TESTIMONIAL",
         details: `Created testimonial by ${body.name}`,
       },
     });
+
+    // The homepage's testimonials book reads these live — bust its cache
+    // so a newly added review appears immediately, not after 60s.
+    revalidatePath("/");
+    revalidatePath("/process");
 
     return NextResponse.json({ testimonial });
   } catch (error: any) {

@@ -7,6 +7,7 @@ metadata:
   version: "0.1.0"
 ---
 
+
 # Prisma MongoDB Upgrade Path
 
 MongoDB projects are the one Prisma cohort with no road into Prisma 7: **v6 is the terminal

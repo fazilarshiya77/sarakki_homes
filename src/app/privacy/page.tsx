@@ -4,7 +4,7 @@ import { Footer } from "@/components/sections/Footer";
 import { Container, Section } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
-import { CONTACT } from "@/lib/data";
+import { getSiteSettings } from "@/lib/settings";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Sarakki Homes",
@@ -39,7 +39,9 @@ const SECTIONS = [
   },
 ];
 
-export default function PrivacyPolicyPage() {
+export default async function PrivacyPolicyPage() {
+  const { contact: CONTACT } = await getSiteSettings();
+
   return (
     <>
       <Header solid />

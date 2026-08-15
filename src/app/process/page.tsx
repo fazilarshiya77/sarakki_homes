@@ -7,6 +7,7 @@ import { Container, Section } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { ProcessTimeline } from "@/components/process/ProcessTimeline";
+import { getHomepageTestimonials } from "@/lib/testimonials";
 
 export const metadata: Metadata = {
   title: "Our Process | Sarakki Homes",
@@ -14,7 +15,11 @@ export const metadata: Metadata = {
     "From property selection to khata transfer — the complete Sarakki Homes buying journey, step by step.",
 };
 
-export default function ProcessPage() {
+export const revalidate = 60;
+
+export default async function ProcessPage() {
+  const testimonials = await getHomepageTestimonials();
+
   return (
     <>
       <Header solid />
@@ -41,7 +46,7 @@ export default function ProcessPage() {
           </Container>
         </Section>
 
-        <Testimonials />
+        <Testimonials testimonials={testimonials} />
         <FinalCTA />
       </main>
       <Footer />

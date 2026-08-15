@@ -8,7 +8,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
-  if (!session) {
+  if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -29,7 +29,7 @@ export async function PUT(
     // Log activity
     await prisma.activityLog.create({
       data: {
-        userId: session.user.id,
+        userId: (session.user as any).id,
         action: "UPDATE_ENQUIRY",
         details: `Updated enquiry status to ${body.status} for enquiry ID: ${id}`,
       },

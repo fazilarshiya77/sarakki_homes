@@ -14,10 +14,17 @@ import { LoanEligibilityCard } from "@/components/property/LoanEligibilityCard";
 import { PropertyDocuments } from "@/components/property/PropertyDocuments";
 import { EnquiryPanel } from "@/components/property/EnquiryPanel";
 import { RelatedProperties } from "@/components/property/RelatedProperties";
-import { PROPERTIES, getPropertyBySlug, getRelatedProperties } from "@/lib/data";
+import { getAllPublishedSlugs, getPropertyBySlug, getRelatedProperties } from "@/lib/properties";
 
-export function generateStaticParams() {
-  return PROPERTIES.map((p) => ({ slug: p.slug }));
+// Pre-render every published property at build time, but don't 404 a slug
+// added after the build — render it on demand instead (`dynamicParams`,
+// default true, kept explicit since that's the behavior this depends on).
+export const dynamicParams = true;
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const slugs = await getAllPublishedSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -26,11 +33,11 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const property = getPropertyBySlug(slug);
-  if (!property) return {};
+  const result = await getPropertyBySlug(slug);
+  if (!result) return {};
   return {
-    title: `${property.title} | Sarakki Homes`,
-    description: property.description,
+    title: `${result.property.title} | Sarakki Homes`,
+    description: result.property.description,
   };
 }
 
@@ -40,10 +47,11 @@ export default async function PropertyDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const property = getPropertyBySlug(slug);
-  if (!property) notFound();
+  const result = await getPropertyBySlug(slug);
+  if (!result) notFound();
+  const { property, galleryImages } = result;
 
-  const related = getRelatedProperties(property);
+  const related = await getRelatedProperties(property);
 
   return (
     <>
@@ -51,7 +59,11 @@ export default async function PropertyDetailPage({
       <main className="flex flex-1 flex-col pt-24">
         <Section className="!pb-0 !pt-8 md:!pt-10">
           <Container>
-            <PropertyGallery images={property.gallery} title={property.title} />
+            <PropertyGallery
+              images={galleryImages}
+              fallbackTone={property.gallery[0]}
+              title={property.title}
+            />
           </Container>
         </Section>
 

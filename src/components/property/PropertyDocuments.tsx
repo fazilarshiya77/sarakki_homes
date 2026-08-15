@@ -1,6 +1,8 @@
 import { FileCheck2, ShieldCheck } from "lucide-react";
 
 export function PropertyDocuments({ documents }: { documents: string[] }) {
+  if (documents.length === 0) return null;
+
   return (
     <div>
       <h2 className="flex items-center gap-2.5 font-display text-2xl">

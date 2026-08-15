@@ -13,7 +13,7 @@ export function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <Section id="faq" className="bg-surface">
+    <Section id="faq" className="bg-surface !pt-12 md:!pt-16">
       <Container className="max-w-4xl">
         <RevealOnScroll className="text-center">
           <Eyebrow className="justify-center">Frequently Asked</Eyebrow>

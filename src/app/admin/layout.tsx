@@ -3,6 +3,33 @@
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/admin/Sidebar";
 
+// A light-touch header title lookup — keyed by path prefix, longest match
+// wins. Purely cosmetic (the header breadcrumb), doesn't touch any page's
+// own content/logic.
+const PAGE_TITLES: { prefix: string; title: string }[] = [
+  { prefix: "/admin/dashboard", title: "Overview" },
+  { prefix: "/admin/leads", title: "Leads" },
+  { prefix: "/admin/tasks", title: "Tasks" },
+  { prefix: "/admin/properties/create", title: "Create Listing" },
+  { prefix: "/admin/properties", title: "Properties" },
+  { prefix: "/admin/categories", title: "Categories" },
+  { prefix: "/admin/builders", title: "Builders" },
+  { prefix: "/admin/enquiries", title: "Enquiries" },
+  { prefix: "/admin/customers", title: "Customers" },
+  { prefix: "/admin/cms", title: "Website CMS" },
+  { prefix: "/admin/blog", title: "Blog" },
+  { prefix: "/admin/testimonials", title: "Testimonials" },
+  { prefix: "/admin/users", title: "Users" },
+  { prefix: "/admin/settings", title: "Settings" },
+];
+
+function pageTitleFor(pathname: string): string {
+  const match = PAGE_TITLES.filter((p) => pathname.startsWith(p.prefix)).sort(
+    (a, b) => b.prefix.length - a.prefix.length
+  )[0];
+  return match?.title ?? "Console";
+}
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
@@ -11,24 +38,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground font-body">
+    <div className="flex h-screen w-screen overflow-hidden bg-crm-bg text-crm-text font-body">
       {/* Collapsible Sidebar */}
       <Sidebar />
 
       {/* Main Panel */}
-      <div className="flex flex-1 flex-col overflow-hidden bg-background">
+      <div className="flex flex-1 flex-col overflow-hidden bg-crm-bg">
         {/* Top Header Bar */}
-        <header className="flex h-16 items-center justify-between border-b border-border/20 px-8 bg-card/25 backdrop-blur-md">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground tracking-wide font-medium">CRM</span>
-            <span className="text-xs text-muted-foreground/40">/</span>
-            <span className="text-xs font-semibold text-accent-gold-dark uppercase tracking-wider">Console</span>
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-crm-border px-8 bg-crm-card">
+          <div className="flex items-center gap-2.5">
+            <span className="text-[11px] text-crm-text-muted tracking-[0.1em] uppercase font-medium">
+              CRM
+            </span>
+            <span className="text-[11px] text-crm-text-muted/50">/</span>
+            <span className="text-[13px] font-semibold text-crm-text tracking-wide">
+              {pageTitleFor(pathname)}
+            </span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">
-              Live Database Mode
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            </span>
+            <span className="text-[10px] text-crm-text-muted uppercase tracking-[0.12em] font-semibold">
+              Live Database
             </span>
           </div>
         </header>

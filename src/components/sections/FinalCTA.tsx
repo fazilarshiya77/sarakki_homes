@@ -5,9 +5,11 @@ import { Container, Section } from "@/components/ui/Container";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { ButtonFX } from "@/components/ui/ButtonFX";
-import { CONTACT } from "@/lib/data";
+import { useSiteSettings } from "@/components/providers/SettingsProvider";
 
 export function FinalCTA() {
+  const { contact: CONTACT } = useSiteSettings();
+
   return (
     <Section className="relative overflow-hidden bg-foreground text-background">
       <MediaPlaceholder tone="charcoal" className="absolute inset-0" grain />

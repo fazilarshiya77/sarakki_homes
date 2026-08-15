@@ -77,8 +77,8 @@ export default function CmsPage() {
 
   if (loading) {
     return (
-      <div className="py-24 flex flex-col items-center justify-center gap-3 text-muted-foreground text-xs font-semibold">
-        <Loader2 size={24} className="animate-spin text-accent-gold" />
+      <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary text-xs font-semibold">
+        <Loader2 size={24} className="animate-spin text-crm-gold-bright" />
         <span>Loading CMS content...</span>
       </div>
     );
@@ -89,10 +89,10 @@ export default function CmsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-wide text-foreground">
+          <h1 className="font-display text-2xl font-semibold tracking-wide text-crm-text">
             Website CMS Editor
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-xs text-crm-text-secondary mt-0.5">
             Modify text blocks, headlines, and call-to-actions without touching code.
           </p>
         </div>
@@ -108,59 +108,59 @@ export default function CmsPage() {
         {/* Core Sections */}
         <div className="lg:col-span-2 space-y-6">
           {/* Hero Section */}
-          <div className="rounded-sm border border-border/20 bg-card/25 p-6 backdrop-blur-md space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-accent-gold-dark flex items-center gap-2">
+          <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-6 backdrop-blur-md space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-crm-gold flex items-center gap-2">
               <Layout size={14} />
               Hero Section Content
             </h3>
 
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Hero Headline</label>
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">Hero Headline</label>
                 <input
                   type="text"
                   value={heroTitle}
                   onChange={(e) => setHeroTitle(e.target.value)}
-                  className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Hero Description Subtext</label>
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">Hero Description Subtext</label>
                 <textarea
                   rows={4}
                   value={heroDescription}
                   onChange={(e) => setHeroDescription(e.target.value)}
-                  className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40 resize-none"
+                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40 resize-none"
                 />
               </div>
             </div>
           </div>
 
           {/* About Section */}
-          <div className="rounded-sm border border-border/20 bg-card/25 p-6 backdrop-blur-md space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-accent-gold-dark flex items-center gap-2">
+          <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-6 backdrop-blur-md space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-crm-gold flex items-center gap-2">
               About Section Content
             </h3>
 
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">About Headline</label>
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">About Headline</label>
                 <input
                   type="text"
                   value={aboutHeadline}
                   onChange={(e) => setAboutHeadline(e.target.value)}
-                  className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">About Description Paragraph</label>
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">About Description Paragraph</label>
                 <textarea
                   rows={4}
                   value={aboutDescription}
                   onChange={(e) => setAboutDescription(e.target.value)}
-                  className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40 resize-none"
+                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40 resize-none"
                 />
               </div>
             </div>
@@ -169,40 +169,40 @@ export default function CmsPage() {
 
         {/* Channels & Submit */}
         <div className="space-y-6">
-          <div className="rounded-sm border border-border/20 bg-card/25 p-6 backdrop-blur-md space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-accent-gold-dark flex items-center gap-2">
+          <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-6 backdrop-blur-md space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-crm-gold flex items-center gap-2">
               <Globe size={14} />
               Communication Channels
             </h3>
 
             <div className="space-y-4 text-xs">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">WhatsApp Number</label>
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">WhatsApp Number</label>
                 <input
                   type="text"
                   value={whatsappNo}
                   onChange={(e) => setWhatsappNo(e.target.value)}
-                  className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Instagram URL</label>
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">Instagram URL</label>
                 <input
                   type="text"
                   value={instagramUrl}
                   onChange={(e) => setInstagramUrl(e.target.value)}
-                  className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">LinkedIn URL</label>
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">LinkedIn URL</label>
                 <input
                   type="text"
                   value={linkedinUrl}
-                  onChange={(e) => setLinkedInUrl(e.target.value)}
-                  className="w-full rounded-sm border border-border/40 bg-background/40 py-2.5 px-3.5 text-xs text-foreground outline-none focus:border-accent-gold/40"
+                  onChange={(e) => setLinkedinUrl(e.target.value)}
+                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
                 />
               </div>
             </div>
@@ -211,7 +211,7 @@ export default function CmsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-accent-gold-dark to-accent-gold py-3 text-xs font-semibold uppercase tracking-wider text-black transition-all duration-300 hover:brightness-110 disabled:opacity-50"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-crm-gold to-crm-gold-bright py-3 text-xs font-semibold uppercase tracking-wider text-black transition-all duration-300 hover:brightness-110 disabled:opacity-50"
           >
             {saving ? (
               <Loader2 size={14} className="animate-spin" />

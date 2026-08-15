@@ -18,10 +18,10 @@ export default async function CreatePropertyPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-wide text-foreground">
+        <h1 className="font-display text-2xl font-semibold tracking-wide text-crm-text">
           Create Listing
         </h1>
-        <p className="text-xs text-muted-foreground mt-0.5">
+        <p className="text-xs text-crm-text-secondary mt-0.5">
           Follow the steps below to populate a new luxury property listing in database.
         </p>
       </div>

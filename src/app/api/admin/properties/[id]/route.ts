@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -41,7 +42,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
-  if (!session) {
+  if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -148,11 +149,18 @@ export async function PUT(
     // Log activity
     await prisma.activityLog.create({
       data: {
-        userId: session.user.id,
+        userId: (session.user as any).id,
         action: "UPDATE_PROPERTY",
         details: `Updated property ${property.title} (${property.propertyId})`,
       },
     });
+
+    revalidatePath("/");
+    revalidatePath("/properties");
+    revalidatePath("/properties/bank-auctions");
+    revalidatePath(`/properties/${existing.slug}`);
+    if (property.slug !== existing.slug) revalidatePath(`/properties/${property.slug}`);
+    revalidatePath(`/properties/bank-auctions/${property.propertyId}`);
 
     return NextResponse.json({ property });
   } catch (error: any) {
@@ -165,7 +173,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
-  if (!session) {
+  if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -188,11 +196,16 @@ export async function DELETE(
     // Log activity
     await prisma.activityLog.create({
       data: {
-        userId: session.user.id,
+        userId: (session.user as any).id,
         action: "DELETE_PROPERTY",
         details: `Deleted property ${existing.title} (${existing.propertyId})`,
       },
     });
+
+    revalidatePath("/");
+    revalidatePath("/properties");
+    revalidatePath("/properties/bank-auctions");
+    revalidatePath(`/properties/${existing.slug}`);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

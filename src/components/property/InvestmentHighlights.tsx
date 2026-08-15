@@ -1,6 +1,8 @@
 import { TrendingUp } from "lucide-react";
 
 export function InvestmentHighlights({ highlights }: { highlights: string[] }) {
+  if (highlights.length === 0) return null;
+
   return (
     <div>
       <h2 className="font-display text-2xl">Investment Highlights</h2>

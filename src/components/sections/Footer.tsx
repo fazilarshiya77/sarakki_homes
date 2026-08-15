@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Mail, MapPin, PhoneCall } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { InstagramIcon } from "@/components/ui/SocialIcons";
-import { CATEGORIES, CONTACT } from "@/lib/data";
+import { CATEGORIES } from "@/lib/data";
+import { getSiteSettings } from "@/lib/settings";
 
 const COMPANY_LINKS = [
   { label: "Properties", href: "/properties" },
@@ -11,9 +12,11 @@ const COMPANY_LINKS = [
   { label: "FAQ", href: "/#faq" },
 ];
 
-export function Footer() {
+export async function Footer() {
+  const { contact: CONTACT } = await getSiteSettings();
+
   return (
-    <footer className="bg-footer text-background">
+    <footer id="site-footer" className="bg-footer text-background">
       <Container className="py-20">
         <div className="grid grid-cols-1 gap-14 md:grid-cols-4">
           <div className="md:col-span-2">

@@ -5,13 +5,21 @@ import { FeaturedCategories } from "@/components/sections/FeaturedCategories";
 import { FeaturedProperties } from "@/components/sections/FeaturedProperties";
 import { WhySarakkiHomes } from "@/components/sections/WhySarakkiHomes";
 import { AuctionJourney } from "@/components/sections/AuctionJourney";
-import { TopBuilders } from "@/components/sections/TopBuilders";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { FAQ } from "@/components/sections/FAQ";
+import { CommissionStructure } from "@/components/sections/CommissionStructure";
 import { FinalCTA } from "@/components/sections/FinalCTA";
 import { Footer } from "@/components/sections/Footer";
+import { getHomepageTestimonials } from "@/lib/testimonials";
 
-export default function Home() {
+// FeaturedProperties and Testimonials both pull live, admin-managed
+// content — re-fetch at most once a minute rather than only baking them
+// in at build time.
+export const revalidate = 60;
+
+export default async function Home() {
+  const testimonials = await getHomepageTestimonials();
+
   return (
     <AppShell>
       <Header />
@@ -21,9 +29,9 @@ export default function Home() {
         <WhySarakkiHomes />
         <AuctionJourney />
         <FeaturedCategories />
-        <TopBuilders />
         <FAQ />
-        <Testimonials />
+        <Testimonials testimonials={testimonials} />
+        <CommissionStructure />
         <FinalCTA />
       </main>
       <Footer />

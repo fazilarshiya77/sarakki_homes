@@ -44,8 +44,7 @@ export const CATEGORIES = [
   {
     title: "Bank Auction Properties",
     slug: "bank-auctions",
-    description:
-      "Verified auction listings with complete legal due-diligence, guided bidding.",
+    description: "Properties offered through bank auctions.",
     heroTagline: "Below-market entry, without the risk.",
     longDescription:
       "Bank auctions offer some of the sharpest pricing in Bengaluru's property market — but only if you know how to navigate SARFAESI notices, reserve prices, and title history. We shortlist auction properties, run independent legal verification before you ever bid, and guide you through the bidding process itself.",
@@ -62,8 +61,7 @@ export const CATEGORIES = [
   {
     title: "Rental Income Properties",
     slug: "rental-income",
-    description:
-      "Assets selected for stable yield, in Bengaluru's strongest micro-markets.",
+    description: "Properties with existing rental income and investment potential.",
     heroTagline: "Built for yield, not just appreciation.",
     longDescription:
       "Not every property makes a good rental asset. We evaluate tenant demand, vacancy patterns, and yield history across Bengaluru's tech corridors before recommending anything — so the number on the brochure matches what actually lands in your account.",
@@ -81,7 +79,7 @@ export const CATEGORIES = [
     title: "Chance Properties",
     slug: "chance-deals",
     description:
-      "Rare, time-sensitive opportunities sourced before they reach the open market.",
+      "Clear-title properties available below typical market pricing due to seller circumstances.",
     heroTagline: "Opportunities that never reach a listing site.",
     longDescription:
       "Some of the best deals never get publicly listed — motivated sellers, estate settlements, relocation sales. Our network surfaces these before they reach brokers or portals, and we move fast on your behalf when the window is short.",
@@ -98,8 +96,7 @@ export const CATEGORIES = [
   {
     title: "Resale Properties",
     slug: "resale",
-    description:
-      "Pre-owned homes, title-checked and khata-verified before you ever view them.",
+    description: "Clear-title properties available for resale.",
     heroTagline: "Established homes, clean paperwork.",
     longDescription:
       "Resale is where most title disputes originate — unclear succession, missing khata records, unpaid dues. Every resale property we present has been through our documentation review first, so what you see is what you can actually buy.",
@@ -114,10 +111,9 @@ export const CATEGORIES = [
     tone: "warm" as MediaTone,
   },
   {
-    title: "Upcoming Builder Projects",
+    title: "Upcoming Projects",
     slug: "upcoming-projects",
-    description:
-      "Early access to RERA-approved developments from builders we've vetted.",
+    description: "New projects from reputed builders.",
     heroTagline: "Early access, vetted builders only.",
     longDescription:
       "We don't work with every builder in Bengaluru — only those with a track record of on-time delivery and clean RERA compliance. Early-access pricing on these projects is typically 15-20% below expected possession-time value.",
@@ -132,9 +128,9 @@ export const CATEGORIES = [
     tone: "emerald" as MediaTone,
   },
   {
-    title: "Ready To Move Properties",
+    title: "Ready-to-Move Properties",
     slug: "ready-to-move",
-    description: "Move-in ready homes with occupancy certificates in hand.",
+    description: "Homes that are ready for immediate possession.",
     heroTagline: "No waiting, no possession risk.",
     longDescription:
       "For buyers who can't or don't want to wait on a construction timeline, we present only properties with occupancy certificates already issued — the paperwork that actually lets you move in and get utilities connected.",
@@ -158,6 +154,70 @@ export type PropertyCategorySlug =
   | "upcoming-projects"
   | "ready-to-move";
 
+// Commission Structure — client-provided business terms, verbatim. Do not
+// round, reword, or add fees/conditions not present in the brief. `category`
+// / `categorySuffix` only split the client's exact wording across two lines
+// for the card layout; no wording is altered. `figure` is the number/claim
+// itself ("2%", "No Brokerage") and must stay the most prominent element
+// wherever this is rendered. `note` carries the one approved cashback line
+// for Upcoming Projects — do not paraphrase it.
+export interface CommissionEntry {
+  slug: PropertyCategorySlug;
+  category: string;
+  categorySuffix: string;
+  figure: string;
+  basis: string;
+  note?: string;
+  featured?: boolean;
+}
+
+export const COMMISSION_STRUCTURE: CommissionEntry[] = [
+  {
+    slug: "bank-auctions",
+    category: "Bank Auction",
+    categorySuffix: "Properties",
+    figure: "2%",
+    basis: "of Final Bidding Value",
+  },
+  {
+    slug: "rental-income",
+    category: "Rental Income",
+    categorySuffix: "Properties",
+    figure: "1%",
+    basis: "of Sale Price",
+  },
+  {
+    slug: "chance-deals",
+    category: "Chance",
+    categorySuffix: "Properties",
+    figure: "2%",
+    basis: "of Sale Price",
+  },
+  {
+    slug: "resale",
+    category: "Resale",
+    categorySuffix: "Properties",
+    figure: "1%",
+    basis: "of Sale Price",
+  },
+  {
+    slug: "ready-to-move",
+    category: "Ready To Move In",
+    categorySuffix: "(RTMI) Properties",
+    figure: "1%",
+    basis: "of Sale Price",
+  },
+  {
+    slug: "upcoming-projects",
+    category: "Upcoming Projects",
+    categorySuffix: "of Top Builders",
+    figure: "No Brokerage",
+    basis: "",
+    note: "1% Cash Back after payment of 20%.",
+    featured: true,
+  },
+];
+
 export interface AuctionInfo {
   bankName: string;
   auctionDate: string;
@@ -169,6 +229,12 @@ export interface LoanEligibility {
   maxLoanAmount: string;
   indicativeEmi: string;
   partnerBanks: string[];
+}
+
+export interface SubFlat {
+  beds: number;
+  area: string;
+  price: string;
 }
 
 export interface Property {
@@ -196,6 +262,19 @@ export interface Property {
   loanEligibility: LoanEligibility;
   documents: string[];
   mapQuery: string;
+
+  // Project specification fields (DS-Max style)
+  bedsRange?: string;
+  areaRange?: string;
+  priceRange?: string;
+  subFlats?: SubFlat[];
+  landmark?: string;
+  approval?: string;
+  landArea?: string;
+  floors?: string;
+  totalFlats?: number;
+  blocks?: number;
+  availability?: number;
 }
 
 const STANDARD_BANKS = ["HDFC Bank", "SBI", "ICICI Bank", "Axis Bank", "LIC Housing Finance"];
@@ -209,441 +288,12 @@ const STANDARD_DOCS = [
   "Approved Building Plan",
 ];
 
-export const PROPERTIES: Property[] = [
-  {
-    id: "p1",
-    slug: "whitefield-garden-residence",
-    title: "Whitefield Garden Residence",
-    location: "Whitefield, Bengaluru",
-    price: "₹ 2.4 Cr",
-    priceValueLakh: 240,
-    type: "Bank Auction",
-    categorySlug: "bank-auctions",
-    beds: 4,
-    baths: 4,
-    area: "3,200 sq.ft",
-    areaSqft: 3200,
-    featured: true,
-    description:
-      "A spacious four-bedroom residence in Whitefield's established garden layout, brought to market through a bank auction with clean, fully verified title.",
-    image: "/img1.jpg",
-    gallery: ["warm", "charcoal", "gold", "warm"],
-    amenities: [
-      "24x7 Security",
-      "Covered Parking",
-      "Power Backup",
-      "Landscaped Garden",
-      "Lift Access",
-      "Rainwater Harvesting",
-    ],
-    investmentHighlights: [
-      "Acquired 18-22% below comparable resale rates via the auction route",
-      "Whitefield micro-market has posted 12-15% YoY appreciation over 3 years",
-      "Walking distance to Whitefield Metro corridor (under construction)",
-    ],
-    auctionInfo: {
-      bankName: "State Bank of India, SARFAESI Auction",
-      auctionDate: "22 September 2026",
-      reservePrice: "₹ 2.15 Cr",
-      emd: "₹ 21.5 Lakh",
-    },
-    loanEligibility: {
-      maxLoanAmount: "Up to ₹ 1.9 Cr (80% of valuation)",
-      indicativeEmi: "≈ ₹ 1.48 Lakh / month at 8.7% for 20 years",
-      partnerBanks: STANDARD_BANKS,
-    },
-    documents: [...STANDARD_DOCS, "SARFAESI Auction Notice"],
-    mapQuery: "Whitefield, Bengaluru, Karnataka",
-  },
-  {
-    id: "p2",
-    slug: "sarjapur-emerald-villa",
-    title: "Sarjapur Emerald Villa",
-    location: "Sarjapur Road, Bengaluru",
-    price: "₹ 3.1 Cr",
-    priceValueLakh: 310,
-    type: "Ready To Move",
-    categorySlug: "ready-to-move",
-    beds: 5,
-    baths: 5,
-    area: "4,000 sq.ft",
-    areaSqft: 4000,
-    featured: true,
-    description:
-      "A move-in ready villa in a gated community off Sarjapur Road, with occupancy certificate in hand and no waiting on construction timelines.",
-    image: "/img2.jpg",
-    gallery: ["emerald", "warm", "charcoal", "gold"],
-    amenities: [
-      "Gated Community",
-      "Clubhouse & Gym",
-      "Children's Play Area",
-      "CCTV Surveillance",
-      "Covered Parking",
-      "Modular Kitchen",
-    ],
-    investmentHighlights: [
-      "Occupancy certificate already issued — zero possession risk",
-      "Sarjapur Road corridor benefits from proximity to major tech campuses",
-      "Gated villa community with established resale liquidity",
-    ],
-    loanEligibility: {
-      maxLoanAmount: "Up to ₹ 2.48 Cr (80% of valuation)",
-      indicativeEmi: "≈ ₹ 1.93 Lakh / month at 8.7% for 20 years",
-      partnerBanks: STANDARD_BANKS,
-    },
-    documents: [...STANDARD_DOCS, "Occupancy Certificate"],
-    mapQuery: "Sarjapur Road, Bengaluru, Karnataka",
-  },
-  {
-    id: "p3",
-    slug: "indiranagar-heritage-home",
-    title: "Indiranagar Heritage Home",
-    location: "Indiranagar, Bengaluru",
-    price: "₹ 5.8 Cr",
-    priceValueLakh: 580,
-    type: "Resale",
-    categorySlug: "resale",
-    beds: 4,
-    baths: 3,
-    area: "2,800 sq.ft",
-    areaSqft: 2800,
-    featured: true,
-    description:
-      "A character-filled independent home on a quiet Indiranagar street, title-checked and khata-verified, in one of Bengaluru's most established addresses.",
-    image: "/img3.jpeg",
-    gallery: ["gold", "warm", "charcoal", "emerald"],
-    amenities: [
-      "Covered Parking",
-      "Private Garden",
-      "Power Backup",
-      "Vaastu Compliant",
-      "24x7 Security",
-    ],
-    investmentHighlights: [
-      "Indiranagar remains one of Bengaluru's most land-constrained, high-demand addresses",
-      "Independent plot with redevelopment upside",
-      "Walking distance to Indiranagar Metro station",
-    ],
-    loanEligibility: {
-      maxLoanAmount: "Up to ₹ 4.64 Cr (80% of valuation)",
-      indicativeEmi: "≈ ₹ 3.61 Lakh / month at 8.7% for 20 years",
-      partnerBanks: STANDARD_BANKS,
-    },
-    documents: STANDARD_DOCS,
-    mapQuery: "Indiranagar, Bengaluru, Karnataka",
-  },
-  {
-    id: "p4",
-    slug: "hebbal-skyline-residences",
-    title: "Hebbal Skyline Residences",
-    location: "Hebbal, Bengaluru",
-    price: "₹ 1.9 Cr",
-    priceValueLakh: 190,
-    type: "Upcoming Project",
-    categorySlug: "upcoming-projects",
-    beds: 3,
-    baths: 3,
-    area: "1,950 sq.ft",
-    areaSqft: 1950,
-    featured: true,
-    description:
-      "Early-access units in a RERA-approved high-rise overlooking Hebbal Lake, from a builder we've vetted for on-time delivery.",
-    image: "/img4.avif",
-    gallery: ["charcoal", "gold", "warm", "emerald"],
-    amenities: [
-      "Clubhouse & Gym",
-      "Swimming Pool",
-      "Children's Play Area",
-      "Landscaped Garden",
-      "Covered Parking",
-      "Lift Access",
-    ],
-    investmentHighlights: [
-      "Pre-launch pricing, 15-20% below expected possession-time value",
-      "Direct lake and airport-road connectivity",
-      "Builder track record of on-time delivery across 3 prior projects",
-    ],
-    loanEligibility: {
-      maxLoanAmount: "Up to ₹ 1.52 Cr (80% of valuation)",
-      indicativeEmi: "≈ ₹ 1.18 Lakh / month at 8.7% for 20 years",
-      partnerBanks: STANDARD_BANKS,
-    },
-    documents: ["RERA Registration", "Approved Building Plan", "Builder-Buyer Agreement (Draft)"],
-    mapQuery: "Hebbal, Bengaluru, Karnataka",
-  },
-  {
-    id: "p5",
-    slug: "jp-nagar-courtyard-house",
-    title: "JP Nagar Courtyard House",
-    location: "JP Nagar, Bengaluru",
-    price: "₹ 2.9 Cr",
-    priceValueLakh: 290,
-    type: "Chance Deal",
-    categorySlug: "chance-deals",
-    beds: 4,
-    baths: 4,
-    area: "3,000 sq.ft",
-    areaSqft: 3000,
-    featured: true,
-    description:
-      "A time-sensitive off-market opportunity in JP Nagar's Phase 4, sourced directly before it reached broker listings.",
-    image: "/img5.jpg",
-    gallery: ["warm", "gold", "charcoal", "warm"],
-    amenities: [
-      "Private Courtyard",
-      "Covered Parking",
-      "24x7 Security",
-      "Power Backup",
-      "Vaastu Compliant",
-    ],
-    investmentHighlights: [
-      "Off-market sourcing — priced below current JP Nagar listing averages",
-      "Established social infrastructure and metro connectivity",
-      "Motivated seller — fast-track registration possible",
-    ],
-    loanEligibility: {
-      maxLoanAmount: "Up to ₹ 2.32 Cr (80% of valuation)",
-      indicativeEmi: "≈ ₹ 1.80 Lakh / month at 8.7% for 20 years",
-      partnerBanks: STANDARD_BANKS,
-    },
-    documents: STANDARD_DOCS,
-    mapQuery: "JP Nagar, Bengaluru, Karnataka",
-  },
-  {
-    id: "p6",
-    slug: "koramangala-rental-suites",
-    title: "Koramangala Rental Suites",
-    location: "Koramangala, Bengaluru",
-    price: "₹ 1.6 Cr",
-    priceValueLakh: 160,
-    type: "Rental Income",
-    categorySlug: "rental-income",
-    beds: 2,
-    baths: 2,
-    area: "1,400 sq.ft",
-    areaSqft: 1400,
-    featured: true,
-    description:
-      "A compact, high-yield unit in Koramangala selected specifically for rental income — strong tenant demand from the surrounding startup and tech corridor.",
-    image: "/img6.jpg",
-    gallery: ["emerald", "charcoal", "warm", "gold"],
-    amenities: [
-      "Gated Community",
-      "Covered Parking",
-      "24x7 Security",
-      "Lift Access",
-      "Modular Kitchen",
-    ],
-    investmentHighlights: [
-      "Average rental yield of 3.5-4%, above the city median",
-      "Consistently low vacancy — strong demand from Koramangala's tech workforce",
-      "Compact ticket size with high liquidity on resale",
-    ],
-    loanEligibility: {
-      maxLoanAmount: "Up to ₹ 1.28 Cr (80% of valuation)",
-      indicativeEmi: "≈ ₹ 0.99 Lakh / month at 8.7% for 20 years",
-      partnerBanks: STANDARD_BANKS,
-    },
-    documents: STANDARD_DOCS,
-    mapQuery: "Koramangala, Bengaluru, Karnataka",
-  },
-  {
-    id: "p7",
-    slug: "yelahanka-lakeview-bungalow",
-    title: "Yelahanka Lakeview Bungalow",
-    location: "Yelahanka, Bengaluru",
-    price: "₹ 2.1 Cr",
-    priceValueLakh: 210,
-    type: "Bank Auction",
-    categorySlug: "bank-auctions",
-    beds: 3,
-    baths: 3,
-    area: "2,400 sq.ft",
-    areaSqft: 2400,
-    featured: false,
-    description:
-      "A bank-auctioned bungalow overlooking Yelahanka Lake, with independent legal verification completed ahead of listing.",
-    image: "/img2.jpg",
-    gallery: ["warm", "emerald", "gold"],
-    amenities: ["24x7 Security", "Covered Parking", "Private Garden", "Power Backup"],
-    investmentHighlights: [
-      "Lakefront positioning, rare at this price point",
-      "Yelahanka's proximity to the airport corridor continues to drive demand",
-    ],
-    auctionInfo: {
-      bankName: "Canara Bank, SARFAESI Auction",
-      auctionDate: "5 October 2026",
-      reservePrice: "₹ 1.85 Cr",
-      emd: "₹ 18.5 Lakh",
-    },
-    loanEligibility: {
-      maxLoanAmount: "Up to ₹ 1.68 Cr (80% of valuation)",
-      indicativeEmi: "≈ ₹ 1.30 Lakh / month at 8.7% for 20 years",
-      partnerBanks: STANDARD_BANKS,
-    },
-    documents: [...STANDARD_DOCS, "SARFAESI Auction Notice"],
-    mapQuery: "Yelahanka, Bengaluru, Karnataka",
-  },
-  {
-    id: "p8",
-    slug: "electronic-city-tech-homes",
-    title: "Electronic City Tech Homes",
-    location: "Electronic City, Bengaluru",
-    price: "₹ 1.2 Cr",
-    priceValueLakh: 120,
-    type: "Rental Income",
-    categorySlug: "rental-income",
-    beds: 2,
-    baths: 2,
-    area: "1,150 sq.ft",
-    areaSqft: 1150,
-    featured: false,
-    description:
-      "A tightly-managed apartment community close to Electronic City's tech parks, chosen for consistent rental demand and low upkeep.",
-    image: "/img1.jpg",
-    gallery: ["charcoal", "warm", "emerald"],
-    amenities: ["Gated Community", "Clubhouse & Gym", "Covered Parking", "CCTV Surveillance"],
-    investmentHighlights: [
-      "Sub-₹1.5 Cr entry point with dependable tenant demand",
-      "Direct connectivity via NICE Road and Hosur Road",
-    ],
-    loanEligibility: {
-      maxLoanAmount: "Up to ₹ 96 Lakh (80% of valuation)",
-      indicativeEmi: "≈ ₹ 0.74 Lakh / month at 8.7% for 20 years",
-      partnerBanks: STANDARD_BANKS,
-    },
-    documents: STANDARD_DOCS,
-    mapQuery: "Electronic City, Bengaluru, Karnataka",
-  },
-  {
-    id: "p9",
-    slug: "hsr-layout-corner-plot-home",
-    title: "HSR Layout Corner Plot Home",
-    location: "HSR Layout, Bengaluru",
-    price: "₹ 4.2 Cr",
-    priceValueLakh: 420,
-    type: "Resale",
-    categorySlug: "resale",
-    beds: 4,
-    baths: 4,
-    area: "2,600 sq.ft",
-    areaSqft: 2600,
-    featured: false,
-    description:
-      "A corner-plot independent home in HSR Layout's Sector 2, khata-verified with clean, single-owner title history.",
-    image: "/img3.jpeg",
-    gallery: ["gold", "charcoal", "warm"],
-    amenities: ["Covered Parking", "Private Garden", "24x7 Security", "Vaastu Compliant"],
-    investmentHighlights: [
-      "Corner plot — rare configuration with redevelopment flexibility",
-      "HSR Layout continues to command premium resale demand",
-    ],
-    loanEligibility: {
-      maxLoanAmount: "Up to ₹ 3.36 Cr (80% of valuation)",
-      indicativeEmi: "≈ ₹ 2.61 Lakh / month at 8.7% for 20 years",
-      partnerBanks: STANDARD_BANKS,
-    },
-    documents: STANDARD_DOCS,
-    mapQuery: "HSR Layout, Bengaluru, Karnataka",
-  },
-  {
-    id: "p10",
-    slug: "devanahalli-aerocity-plots",
-    title: "Devanahalli Aerocity Residences",
-    location: "Devanahalli, Bengaluru",
-    price: "₹ 1.4 Cr",
-    priceValueLakh: 140,
-    type: "Upcoming Project",
-    categorySlug: "upcoming-projects",
-    beds: 3,
-    baths: 2,
-    area: "1,650 sq.ft",
-    areaSqft: 1650,
-    featured: false,
-    description:
-      "Pre-launch inventory near the Devanahalli Aerocity corridor, from a RERA-registered developer with early-bird pricing.",
-    image: "/img5.jpg",
-    gallery: ["emerald", "gold", "warm"],
-    amenities: ["Clubhouse & Gym", "Landscaped Garden", "Covered Parking", "Lift Access"],
-    investmentHighlights: [
-      "Positioned along Bengaluru's fastest-growing north corridor",
-      "Early-bird pricing ahead of Aerocity infrastructure completion",
-    ],
-    loanEligibility: {
-      maxLoanAmount: "Up to ₹ 1.12 Cr (80% of valuation)",
-      indicativeEmi: "≈ ₹ 0.87 Lakh / month at 8.7% for 20 years",
-      partnerBanks: STANDARD_BANKS,
-    },
-    documents: ["RERA Registration", "Approved Building Plan", "Builder-Buyer Agreement (Draft)"],
-    mapQuery: "Devanahalli, Bengaluru, Karnataka",
-  },
-  {
-    id: "p11",
-    slug: "malleshwaram-classic-bungalow",
-    title: "Malleshwaram Classic Bungalow",
-    location: "Malleshwaram, Bengaluru",
-    price: "₹ 6.5 Cr",
-    priceValueLakh: 650,
-    type: "Chance Deal",
-    categorySlug: "chance-deals",
-    beds: 5,
-    baths: 4,
-    area: "3,600 sq.ft",
-    areaSqft: 3600,
-    featured: false,
-    description:
-      "A rare full-plot bungalow in Malleshwaram's heritage core, sourced off-market ahead of any public listing.",
-    image: "/img4.avif",
-    gallery: ["warm", "gold", "emerald"],
-    amenities: ["Private Garden", "Covered Parking", "24x7 Security", "Power Backup"],
-    investmentHighlights: [
-      "Full-plot heritage-zone property — increasingly rare inventory",
-      "Off-market pricing below comparable Malleshwaram listings",
-    ],
-    loanEligibility: {
-      maxLoanAmount: "Up to ₹ 5.2 Cr (80% of valuation)",
-      indicativeEmi: "≈ ₹ 4.04 Lakh / month at 8.7% for 20 years",
-      partnerBanks: STANDARD_BANKS,
-    },
-    documents: STANDARD_DOCS,
-    mapQuery: "Malleshwaram, Bengaluru, Karnataka",
-  },
-  {
-    id: "p12",
-    slug: "bannerghatta-road-move-in-ready",
-    title: "Bannerghatta Road Move-In Ready Home",
-    location: "Bannerghatta Road, Bengaluru",
-    price: "₹ 1.75 Cr",
-    priceValueLakh: 175,
-    type: "Ready To Move",
-    categorySlug: "ready-to-move",
-    beds: 3,
-    baths: 2,
-    area: "1,700 sq.ft",
-    areaSqft: 1700,
-    featured: false,
-    description:
-      "A ready-to-move apartment near Bannerghatta Road's biotech corridor, occupancy certificate in hand.",
-    image: "/img6.jpg",
-    gallery: ["charcoal", "emerald", "gold"],
-    amenities: ["Gated Community", "Clubhouse & Gym", "Covered Parking", "CCTV Surveillance"],
-    investmentHighlights: [
-      "Occupancy certificate already issued — move in within weeks",
-      "Close to Bannerghatta Road's biotech and healthcare hub",
-    ],
-    loanEligibility: {
-      maxLoanAmount: "Up to ₹ 1.4 Cr (80% of valuation)",
-      indicativeEmi: "≈ ₹ 1.09 Lakh / month at 8.7% for 20 years",
-      partnerBanks: STANDARD_BANKS,
-    },
-    documents: [...STANDARD_DOCS, "Occupancy Certificate"],
-    mapQuery: "Bannerghatta Road, Bengaluru, Karnataka",
-  },
-];
-
-export const LOCATIONS = Array.from(
-  new Set(PROPERTIES.map((p) => p.location.split(",")[0]))
-).sort();
+// Real property listings are admin-managed (see /admin/properties) and
+// live in the database — src/lib/properties.ts fetches them via Prisma.
+// This array only ever held the Phase 3 static demo data and is kept as
+// an empty typed export so anything still importing `Property`/`PROPERTIES`
+// as a type-only reference doesn't break; don't add listings here.
+export const PROPERTIES: Property[] = [];
 
 export const BUDGET_RANGES = [
   { label: "Any Budget", min: 0, max: Infinity },
@@ -652,19 +302,6 @@ export const BUDGET_RANGES = [
   { label: "₹3 Cr – ₹5 Cr", min: 300, max: 500 },
   { label: "Above ₹5 Cr", min: 500, max: Infinity },
 ];
-
-export function getPropertyBySlug(slug: string) {
-  return PROPERTIES.find((p) => p.slug === slug);
-}
-
-export function getRelatedProperties(property: Property, count = 3) {
-  return PROPERTIES.filter(
-    (p) =>
-      p.id !== property.id &&
-      (p.categorySlug === property.categorySlug ||
-        p.location === property.location)
-  ).slice(0, count);
-}
 
 export const PILLARS = [
   {
@@ -785,15 +422,51 @@ export const PROCESS_STEPS = [
   },
 ];
 
-export const BUILDERS = [
-  "Prestige Group",
-  "Sobha Limited",
-  "Brigade Group",
+// The client's full partner-builder roster, verbatim — used by the sticky
+// BuilderMarquee ticker (src/components/ui/BuilderMarquee.tsx), the only
+// builder-roster surface on the site now that the in-page TopBuilders
+// section has been removed. Do not merge, add to, or trim this list.
+export const PARTNER_BUILDERS = [
+  "Prestige",
+  "Sobha",
+  "Brigade",
+  "Godrej",
   "Puravankara",
-  "Godrej Properties",
-  "Embassy Group",
-  "Shriram Properties",
+  "Vaishnavi",
+  "Mahaveer",
+  "Adarsh",
+  "Shriram",
+  "DS Max",
+  "Concorde",
+  "Sowparnika",
+  "Total Environment",
+  "L & T Realty",
+  "Embassy",
+  "Assetz",
+  "Mantri",
+  "Casagrand",
   "Salarpuria Sattva",
+  "Aratt",
+  "Axis Concept",
+  "Mahindra",
+  "Legacy",
+  "Sumadhura",
+  "Elegant",
+  "Radiant",
+  "Gopalan",
+  "Century",
+  "Tata Housing",
+  "Kolte Patil",
+  "RMZ",
+  "DNR",
+  "Nambiar",
+  "Chaitanya",
+  "Confident",
+  "Prabhavathi",
+  "Renaissance",
+  "Bren",
+  "Kristal",
+  "DSR",
 ];
 
 export const TESTIMONIALS = [

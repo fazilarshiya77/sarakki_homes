@@ -7,7 +7,7 @@ export function RevealOnScroll({
   children,
   className,
   delay = 0,
-  y = 20,
+  y = 12,
 }: {
   children: React.ReactNode;
   className?: string;
@@ -17,10 +17,10 @@ export function RevealOnScroll({
   return (
     <motion.div
       className={cn(className)}
-      initial={{ opacity: 0, y, filter: "blur(4px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }}
+      initial={{ opacity: 0, y }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.05 }}
+      transition={{ duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>
@@ -30,7 +30,7 @@ export function RevealOnScroll({
 export function RevealGroup({
   children,
   className,
-  stagger = 0.08,
+  stagger = 0.06,
 }: {
   children: React.ReactNode;
   className?: string;
@@ -41,7 +41,7 @@ export function RevealGroup({
       className={cn(className)}
       initial="hidden"
       whileInView="show"
-      viewport={{ once: true, amount: 0.15 }}
+      viewport={{ once: true, amount: 0.05 }}
       variants={{
         hidden: {},
         show: { transition: { staggerChildren: stagger } },
@@ -53,11 +53,10 @@ export function RevealGroup({
 }
 
 export const revealItemVariants = {
-  hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
+  hidden: { opacity: 0, y: 12 },
   show: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const },
   },
 };

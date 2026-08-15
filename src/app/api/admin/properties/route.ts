@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -12,6 +13,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") || "";
   const status = searchParams.get("status") || "";
+  const category = searchParams.get("category") || "";
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "10");
   const skip = (page - 1) * limit;
@@ -28,6 +30,9 @@ export async function GET(req: Request) {
     if (status) {
       where.status = status;
     }
+    if (category) {
+      where.category = { slug: category };
+    }
 
     const [properties, total] = await prisma.$transaction([
       prisma.property.findMany({
@@ -39,7 +44,7 @@ export async function GET(req: Request) {
         },
         skip,
         take: limit,
-        orderBy: { createdAt: "desc" },
+        orderBy: [{ category: { slug: "asc" } }, { createdAt: "desc" }],
       }),
       prisma.property.count({ where }),
     ]);
@@ -52,7 +57,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session) {
+  if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -142,11 +147,18 @@ export async function POST(req: Request) {
     // Log activity
     await prisma.activityLog.create({
       data: {
-        userId: session.user.id,
+        userId: (session.user as any).id,
         action: "CREATE_PROPERTY",
         details: `Created property ${property.title} (${property.propertyId})`,
       },
     });
+
+    // Public listings/detail pages are ISR-cached (revalidate = 60) —
+    // bust that so a newly published property shows up immediately.
+    revalidatePath("/");
+    revalidatePath("/properties");
+    revalidatePath("/properties/bank-auctions");
+    revalidatePath(`/properties/${property.slug}`);
 
     return NextResponse.json({ property });
   } catch (error: any) {

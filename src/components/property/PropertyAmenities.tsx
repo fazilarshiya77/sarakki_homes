@@ -1,6 +1,8 @@
 import { Check } from "lucide-react";
 
 export function PropertyAmenities({ amenities }: { amenities: string[] }) {
+  if (amenities.length === 0) return null;
+
   return (
     <div>
       <h2 className="font-display text-2xl">Amenities</h2>

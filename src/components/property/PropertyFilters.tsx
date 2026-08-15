@@ -1,8 +1,12 @@
 "use client";
 
 import { SlidersHorizontal, X } from "lucide-react";
-import { CATEGORIES, LOCATIONS, BUDGET_RANGES } from "@/lib/data";
+import { CATEGORIES, BUDGET_RANGES } from "@/lib/data";
 import { cn } from "@/lib/utils";
+
+// Bank Auction Properties live exclusively at /properties/bank-auctions —
+// never mixed into this general listing/filter set.
+const FILTERABLE_CATEGORIES = CATEGORIES.filter((c) => c.slug !== "bank-auctions");
 
 export type SortOption = "relevant" | "price-asc" | "price-desc";
 
@@ -24,10 +28,14 @@ export function PropertyFilters({
   filters,
   onChange,
   resultCount,
+  locations,
 }: {
   filters: FilterState;
   onChange: (filters: FilterState) => void;
   resultCount: number;
+  /** Derived from the live property set — see PropertyExplorer — rather
+   *  than a fixed list, so it never offers a location with zero results. */
+  locations: string[];
 }) {
   const hasActiveFilters =
     filters.location || filters.category || filters.budgetIndex !== 0;
@@ -36,7 +44,7 @@ export function PropertyFilters({
     "rounded-sm border border-border bg-background px-4 py-3 text-sm text-foreground focus:outline-none focus:border-accent-gold-dark md:w-auto w-full";
 
   return (
-    <div className="sticky top-[72px] z-30 -mx-6 border-b border-border bg-background/95 px-6 py-5 backdrop-blur-md md:mx-0 md:rounded-md md:border md:px-6 md:shadow-soft">
+    <div className="-mx-6 border-b border-border bg-background/95 px-6 py-5 backdrop-blur-md md:mx-0 md:rounded-md md:border md:px-6 md:shadow-soft">
       <div className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-center">
         <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <SlidersHorizontal size={16} className="text-accent-gold-dark" />
@@ -49,7 +57,7 @@ export function PropertyFilters({
           onChange={(e) => onChange({ ...filters, location: e.target.value })}
         >
           <option value="">All Locations</option>
-          {LOCATIONS.map((loc) => (
+          {locations.map((loc) => (
             <option key={loc} value={loc}>
               {loc}
             </option>
@@ -62,7 +70,7 @@ export function PropertyFilters({
           onChange={(e) => onChange({ ...filters, category: e.target.value })}
         >
           <option value="">All Property Types</option>
-          {CATEGORIES.map((cat) => (
+          {FILTERABLE_CATEGORIES.map((cat) => (
             <option key={cat.slug} value={cat.slug}>
               {cat.title}
             </option>

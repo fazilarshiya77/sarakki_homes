@@ -12,7 +12,13 @@ import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { buttonClasses } from "@/components/ui/Button";
 import { ButtonFX } from "@/components/ui/ButtonFX";
 import { PropertyCard } from "@/components/property/PropertyCard";
-import { CATEGORIES, CONTACT, PROPERTIES } from "@/lib/data";
+import { BankAuctionCard } from "@/components/property/BankAuctionCard";
+import { CATEGORIES } from "@/lib/data";
+import { getPropertiesByCategory } from "@/lib/properties";
+import { getBankAuctionProperties } from "@/lib/auctions";
+import { getSiteSettings } from "@/lib/settings";
+
+export const revalidate = 60;
 
 export function generateStaticParams() {
   return CATEGORIES.map((c) => ({ slug: c.slug }));
@@ -41,8 +47,15 @@ export default async function ServiceDetailPage({
   const category = CATEGORIES.find((c) => c.slug === slug);
   if (!category) notFound();
 
+  const { contact: CONTACT } = await getSiteSettings();
   const Icon = category.icon;
-  const matchingProperties = PROPERTIES.filter((p) => p.categorySlug === category.slug).slice(0, 6);
+  const isBankAuctions = category.slug === "bank-auctions";
+  // Bank auctions are a fully separate track (src/lib/auctions.ts, its own
+  // listing/detail routes) — never pulled through the generic property
+  // adapter, so this page fetches from the dedicated source instead.
+  const matchingProperties = isBankAuctions ? [] : await getPropertiesByCategory(category.slug, 6);
+  const matchingAuctions = isBankAuctions ? (await getBankAuctionProperties()).slice(0, 6) : [];
+  const viewAllHref = isBankAuctions ? "/properties/bank-auctions" : "/properties";
 
   return (
     <>
@@ -112,7 +125,7 @@ export default async function ServiceDetailPage({
           </Container>
         </Section>
 
-        {matchingProperties.length > 0 && (
+        {(matchingProperties.length > 0 || matchingAuctions.length > 0) && (
           <Section className="bg-surface">
             <Container>
               <div className="flex flex-wrap items-end justify-between gap-6">
@@ -122,16 +135,20 @@ export default async function ServiceDetailPage({
                     {category.title}
                   </h2>
                 </RevealOnScroll>
-                <Link href="/properties" className={buttonClasses("secondary")}>
+                <Link href={viewAllHref} className={buttonClasses("secondary")}>
                   <ButtonFX />
-                  View All Properties
+                  View All {isBankAuctions ? "Auction Properties" : "Properties"}
                 </Link>
               </div>
 
               <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {matchingProperties.map((property) => (
-                  <PropertyCard key={property.id} property={property} />
-                ))}
+                {isBankAuctions
+                  ? matchingAuctions.map((property) => (
+                      <BankAuctionCard key={property.id} property={property} />
+                    ))
+                  : matchingProperties.map((property) => (
+                      <PropertyCard key={property.id} property={property} />
+                    ))}
               </div>
             </Container>
           </Section>

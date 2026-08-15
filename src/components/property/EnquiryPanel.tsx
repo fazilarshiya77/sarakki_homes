@@ -4,14 +4,15 @@ import { useState } from "react";
 import { CalendarCheck, MessageCircle, PhoneCall } from "lucide-react";
 import { Button, buttonClasses } from "@/components/ui/Button";
 import { ButtonFX } from "@/components/ui/ButtonFX";
-import { CONTACT } from "@/lib/data";
+import { useSiteSettings } from "@/components/providers/SettingsProvider";
 
 export function EnquiryPanel({ propertyTitle }: { propertyTitle: string }) {
+  const { contact } = useSiteSettings();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
 
-  const scheduleVisitHref = `https://wa.me/919845000000?text=${encodeURIComponent(
+  const scheduleVisitHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURIComponent(
     `Hi Sarakki Homes, I'd like to schedule a visit for "${propertyTitle}".`
   )}`;
 
@@ -20,7 +21,7 @@ export function EnquiryPanel({ propertyTitle }: { propertyTitle: string }) {
     const text = `Hi Sarakki Homes, I'm enquiring about "${propertyTitle}".\nName: ${name || "-"}\nPhone: ${
       phone || "-"
     }\nMessage: ${message || "-"}`;
-    window.open(`https://wa.me/919845000000?text=${encodeURIComponent(text)}`, "_blank");
+    window.open(`https://wa.me/${contact.whatsappNumber}?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   return (
@@ -32,7 +33,7 @@ export function EnquiryPanel({ propertyTitle }: { propertyTitle: string }) {
 
       <div className="mt-6 flex flex-col gap-3">
         <a
-          href={CONTACT.whatsappHref}
+          href={contact.whatsappHref}
           target="_blank"
           rel="noopener noreferrer"
           className={buttonClasses("primary", "w-full")}
@@ -41,10 +42,10 @@ export function EnquiryPanel({ propertyTitle }: { propertyTitle: string }) {
           <MessageCircle size={16} />
           WhatsApp Us
         </a>
-        <a href={CONTACT.phoneHref} className={buttonClasses("secondary", "w-full")}>
+        <a href={contact.phoneHref} className={buttonClasses("secondary", "w-full")}>
           <ButtonFX />
           <PhoneCall size={16} />
-          {CONTACT.phoneDisplay}
+          {contact.phoneDisplay}
         </a>
         <a
           href={scheduleVisitHref}

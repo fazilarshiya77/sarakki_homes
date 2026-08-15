@@ -41,3 +41,10 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# Raw client-supplied source material (WhatsApp flyers, spreadsheets) used
+# only to extract property data/photos during development — not code, and
+# not meant for a public repo. The actual processed photos the site uses
+# live in /public/media/properties and ARE committed.
+/public/requirements/
+/public/requirements.zip

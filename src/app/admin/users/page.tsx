@@ -58,26 +58,26 @@ export default function UsersPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-wide text-foreground">
+        <h1 className="font-display text-2xl font-semibold tracking-wide text-crm-text">
           Staff & Permissions
         </h1>
-        <p className="text-xs text-muted-foreground mt-0.5">
+        <p className="text-xs text-crm-text-secondary mt-0.5">
           Review executive roster, admin configurations, and role scopes.
         </p>
       </div>
 
       {/* Main List */}
-      <div className="border border-border/20 bg-card/10 rounded-sm overflow-hidden backdrop-blur-sm">
+      <div className="border border-crm-border/20 bg-crm-card/10 rounded-sm overflow-hidden backdrop-blur-sm">
         {loading ? (
-          <div className="py-24 flex flex-col items-center justify-center gap-3 text-muted-foreground text-xs font-semibold">
-            <Loader2 size={24} className="animate-spin text-accent-gold" />
+          <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary text-xs font-semibold">
+            <Loader2 size={24} className="animate-spin text-crm-gold-bright" />
             <span>Loading staff roster...</span>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-border/20 bg-foreground/[0.02] text-muted-foreground font-semibold">
+                <tr className="border-b border-crm-border/20 bg-foreground/[0.02] text-crm-text-secondary font-semibold">
                   <th className="p-4 uppercase tracking-wider font-semibold">Staff Name</th>
                   <th className="p-4 uppercase tracking-wider font-semibold">Role Designation</th>
                   <th className="p-4 uppercase tracking-wider font-semibold">Email Address</th>
@@ -86,15 +86,15 @@ export default function UsersPage() {
               </thead>
               <tbody>
                 {users.map((u) => {
-                  let badge = "bg-muted text-muted-foreground border-muted-foreground/10";
-                  if (u.role === "ADMIN") badge = "bg-accent-gold/10 text-accent-gold-dark border-accent-gold/20";
+                  let badge = "bg-muted text-crm-text-secondary border-muted-foreground/10";
+                  if (u.role === "ADMIN") badge = "bg-crm-gold-bright/10 text-crm-gold border-crm-gold-bright/20";
                   if (u.role === "MANAGER") badge = "bg-blue-500/10 text-blue-400 border-blue-500/20";
                   if (u.role === "SALES_EXECUTIVE") badge = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
 
                   return (
-                    <tr key={u.id} className="border-b border-border/10 hover:bg-foreground/[0.01]">
-                      <td className="p-4 font-semibold text-foreground flex items-center gap-2">
-                        <UserCheck size={12} className="text-accent-gold-dark" />
+                    <tr key={u.id} className="border-b border-crm-border/10 hover:bg-foreground/[0.01]">
+                      <td className="p-4 font-semibold text-crm-text flex items-center gap-2">
+                        <UserCheck size={12} className="text-crm-gold" />
                         <span>{u.name}</span>
                       </td>
                       <td className="p-4">
@@ -102,10 +102,10 @@ export default function UsersPage() {
                           {u.role}
                         </span>
                       </td>
-                      <td className="p-4 text-muted-foreground font-mono">
+                      <td className="p-4 text-crm-text-secondary font-mono">
                         {u.email}
                       </td>
-                      <td className="p-4 text-muted-foreground">
+                      <td className="p-4 text-crm-text-secondary">
                         {u.role === "ADMIN" ? "Full Access Control" : "Read/Write Listings"}
                       </td>
                     </tr>
