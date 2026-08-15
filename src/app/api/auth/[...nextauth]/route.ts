@@ -91,8 +91,27 @@ export const authOptions: AuthOptions = {
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET || "sarakki-homes-crm-secret-key-1234",
+  // A hardcoded fallback secret used to live here. That's a real security
+  // hole in production: anyone who reads this public repo could forge a
+  // valid session JWT for any user (including admins) against a deployment
+  // that never got its own NEXTAUTH_SECRET configured. Instead:
+  //  - production (NODE_ENV=production) requires a real NEXTAUTH_SECRET and
+  //    fails loudly and immediately if it's missing, rather than silently
+  //    running with a secret anyone can read on GitHub.
+  //  - local dev keeps a clearly-labeled, obviously-insecure fallback so
+  //    `npm run dev` still works without extra setup.
+  secret: process.env.NEXTAUTH_SECRET ?? getDevOnlySecret(),
 };
+
+function getDevOnlySecret(): string {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "NEXTAUTH_SECRET is not set. Generate one (e.g. `openssl rand -base64 32`) " +
+        "and add it in Vercel → Project → Settings → Environment Variables."
+    );
+  }
+  return "dev-only-insecure-secret-do-not-use-in-production";
+}
 
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
