@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { safeDbCall } from "@/lib/db-safe";
 
 export interface SiteContact {
   phoneDisplay: string;
@@ -64,20 +65,26 @@ function contactFromPhone(raw: string): SiteContact {
 }
 
 export async function getSiteSettings(): Promise<SiteSettings> {
-  const row = await prisma.setting.findFirst();
-  if (!row) return FALLBACK;
+  return safeDbCall(
+    async () => {
+      const row = await prisma.setting.findFirst();
+      if (!row) return FALLBACK;
 
-  const contact = contactFromPhone(row.whatsappNo || FALLBACK.contact.phoneDisplay);
-  contact.instagramHref = row.instagramUrl || FALLBACK.contact.instagramHref;
+      const contact = contactFromPhone(row.whatsappNo || FALLBACK.contact.phoneDisplay);
+      contact.instagramHref = row.instagramUrl || FALLBACK.contact.instagramHref;
 
-  return {
-    companyName: row.companyName || FALLBACK.companyName,
-    contact,
-    metaTitle: row.metaTitle || FALLBACK.metaTitle,
-    metaDesc: row.metaDesc || FALLBACK.metaDesc,
-    heroTitle: row.heroTitle || FALLBACK.heroTitle,
-    heroDescription: row.heroDescription || FALLBACK.heroDescription,
-    aboutHeadline: row.aboutHeadline || FALLBACK.aboutHeadline,
-    aboutDescription: row.aboutDescription || FALLBACK.aboutDescription,
-  };
+      return {
+        companyName: row.companyName || FALLBACK.companyName,
+        contact,
+        metaTitle: row.metaTitle || FALLBACK.metaTitle,
+        metaDesc: row.metaDesc || FALLBACK.metaDesc,
+        heroTitle: row.heroTitle || FALLBACK.heroTitle,
+        heroDescription: row.heroDescription || FALLBACK.heroDescription,
+        aboutHeadline: row.aboutHeadline || FALLBACK.aboutHeadline,
+        aboutDescription: row.aboutDescription || FALLBACK.aboutDescription,
+      };
+    },
+    FALLBACK,
+    "getSiteSettings"
+  );
 }

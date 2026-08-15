@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import type { Property, MediaTone, PropertyCategorySlug } from "@/lib/data";
+import { safeDbCall } from "@/lib/db-safe";
 
 // The public site's `Property` shape (src/lib/data.ts) was designed around
 // a richer static dataset than what the admin CMS actually captures today
@@ -81,35 +82,53 @@ export function getGalleryImages(p: DbProperty): string[] {
 const EXCLUDE_BANK_AUCTIONS = { category: { slug: { not: "bank-auctions" } } };
 
 export async function getPublishedProperties(): Promise<Property[]> {
-  const rows = await prisma.property.findMany({
-    where: { status: "PUBLISHED", ...EXCLUDE_BANK_AUCTIONS },
-    include: PROPERTY_INCLUDE,
-    orderBy: { createdAt: "desc" },
-  });
-  return rows.map(toPublicProperty);
+  return safeDbCall(
+    async () => {
+      const rows = await prisma.property.findMany({
+        where: { status: "PUBLISHED", ...EXCLUDE_BANK_AUCTIONS },
+        include: PROPERTY_INCLUDE,
+        orderBy: { createdAt: "desc" },
+      });
+      return rows.map(toPublicProperty);
+    },
+    [],
+    "getPublishedProperties"
+  );
 }
 
 export async function getFeaturedProperties(limit = 6): Promise<Property[]> {
-  const rows = await prisma.property.findMany({
-    where: { status: "PUBLISHED", featured: "true", ...EXCLUDE_BANK_AUCTIONS },
-    include: PROPERTY_INCLUDE,
-    orderBy: { createdAt: "desc" },
-    take: limit,
-  });
-  return rows.map(toPublicProperty);
+  return safeDbCall(
+    async () => {
+      const rows = await prisma.property.findMany({
+        where: { status: "PUBLISHED", featured: "true", ...EXCLUDE_BANK_AUCTIONS },
+        include: PROPERTY_INCLUDE,
+        orderBy: { createdAt: "desc" },
+        take: limit,
+      });
+      return rows.map(toPublicProperty);
+    },
+    [],
+    "getFeaturedProperties"
+  );
 }
 
 export async function getPropertiesByCategory(categorySlug: string, limit = 6): Promise<Property[]> {
   // Bank auctions are served exclusively via src/lib/auctions.ts — never
   // surfaced through this generic adapter, even when explicitly requested.
   if (categorySlug === "bank-auctions") return [];
-  const rows = await prisma.property.findMany({
-    where: { status: "PUBLISHED", category: { slug: categorySlug } },
-    include: PROPERTY_INCLUDE,
-    orderBy: { createdAt: "desc" },
-    take: limit,
-  });
-  return rows.map(toPublicProperty);
+  return safeDbCall(
+    async () => {
+      const rows = await prisma.property.findMany({
+        where: { status: "PUBLISHED", category: { slug: categorySlug } },
+        include: PROPERTY_INCLUDE,
+        orderBy: { createdAt: "desc" },
+        take: limit,
+      });
+      return rows.map(toPublicProperty);
+    },
+    [],
+    "getPropertiesByCategory"
+  );
 }
 
 /** Returns both the mapped `Property` and its raw gallery image URLs, since
@@ -118,32 +137,50 @@ export async function getPropertiesByCategory(categorySlug: string, limit = 6): 
 export async function getPropertyBySlug(
   slug: string
 ): Promise<{ property: Property; galleryImages: string[] } | null> {
-  const row = await prisma.property.findUnique({
-    where: { slug, status: "PUBLISHED" },
-    include: PROPERTY_INCLUDE,
-  });
-  if (!row || row.category.slug === "bank-auctions") return null;
-  return { property: toPublicProperty(row), galleryImages: getGalleryImages(row) };
+  return safeDbCall(
+    async () => {
+      const row = await prisma.property.findUnique({
+        where: { slug, status: "PUBLISHED" },
+        include: PROPERTY_INCLUDE,
+      });
+      if (!row || row.category.slug === "bank-auctions") return null;
+      return { property: toPublicProperty(row), galleryImages: getGalleryImages(row) };
+    },
+    null,
+    "getPropertyBySlug"
+  );
 }
 
 export async function getRelatedProperties(property: Property, limit = 3): Promise<Property[]> {
-  const rows = await prisma.property.findMany({
-    where: {
-      status: "PUBLISHED",
-      id: { not: property.id },
-      category: { slug: property.categorySlug },
+  return safeDbCall(
+    async () => {
+      const rows = await prisma.property.findMany({
+        where: {
+          status: "PUBLISHED",
+          id: { not: property.id },
+          category: { slug: property.categorySlug },
+        },
+        include: PROPERTY_INCLUDE,
+        orderBy: { createdAt: "desc" },
+        take: limit,
+      });
+      return rows.map(toPublicProperty);
     },
-    include: PROPERTY_INCLUDE,
-    orderBy: { createdAt: "desc" },
-    take: limit,
-  });
-  return rows.map(toPublicProperty);
+    [],
+    "getRelatedProperties"
+  );
 }
 
 export async function getAllPublishedSlugs(): Promise<string[]> {
-  const rows = await prisma.property.findMany({
-    where: { status: "PUBLISHED", ...EXCLUDE_BANK_AUCTIONS },
-    select: { slug: true },
-  });
-  return rows.map((r) => r.slug);
+  return safeDbCall(
+    async () => {
+      const rows = await prisma.property.findMany({
+        where: { status: "PUBLISHED", ...EXCLUDE_BANK_AUCTIONS },
+        select: { slug: true },
+      });
+      return rows.map((r) => r.slug);
+    },
+    [],
+    "getAllPublishedSlugs"
+  );
 }

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import { deriveAuctionStatus, type AuctionProperty } from "@/lib/auctionHelpers";
+import { safeDbCall } from "@/lib/db-safe";
 
 // Bank Auction Properties render through this dedicated adapter rather than
 // the generic `Property` shape in src/lib/properties.ts — the auction
@@ -55,26 +56,44 @@ function toAuctionProperty(p: DbAuctionProperty): AuctionProperty {
 }
 
 export async function getBankAuctionProperties(): Promise<AuctionProperty[]> {
-  const rows = await prisma.property.findMany({
-    where: { status: "PUBLISHED", category: { slug: "bank-auctions" } },
-    include: AUCTION_INCLUDE,
-    orderBy: { createdAt: "desc" },
-  });
-  return rows.map(toAuctionProperty);
+  return safeDbCall(
+    async () => {
+      const rows = await prisma.property.findMany({
+        where: { status: "PUBLISHED", category: { slug: "bank-auctions" } },
+        include: AUCTION_INCLUDE,
+        orderBy: { createdAt: "desc" },
+      });
+      return rows.map(toAuctionProperty);
+    },
+    [],
+    "getBankAuctionProperties"
+  );
 }
 
 export async function getBankAuctionByPropertyId(propertyId: string): Promise<AuctionProperty | null> {
-  const row = await prisma.property.findFirst({
-    where: { propertyId, status: "PUBLISHED", category: { slug: "bank-auctions" } },
-    include: AUCTION_INCLUDE,
-  });
-  return row ? toAuctionProperty(row) : null;
+  return safeDbCall(
+    async () => {
+      const row = await prisma.property.findFirst({
+        where: { propertyId, status: "PUBLISHED", category: { slug: "bank-auctions" } },
+        include: AUCTION_INCLUDE,
+      });
+      return row ? toAuctionProperty(row) : null;
+    },
+    null,
+    "getBankAuctionByPropertyId"
+  );
 }
 
 export async function getAllBankAuctionPropertyIds(): Promise<string[]> {
-  const rows = await prisma.property.findMany({
-    where: { status: "PUBLISHED", category: { slug: "bank-auctions" } },
-    select: { propertyId: true },
-  });
-  return rows.map((r) => r.propertyId);
+  return safeDbCall(
+    async () => {
+      const rows = await prisma.property.findMany({
+        where: { status: "PUBLISHED", category: { slug: "bank-auctions" } },
+        select: { propertyId: true },
+      });
+      return rows.map((r) => r.propertyId);
+    },
+    [],
+    "getAllBankAuctionPropertyIds"
+  );
 }

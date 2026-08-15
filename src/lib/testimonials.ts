@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { TestimonialData } from "@/components/sections/Testimonials";
+import { safeDbCall } from "@/lib/db-safe";
 
 function initialsFor(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -13,16 +14,22 @@ function initialsFor(name: string): string {
  *  right for a "client stories" feel, so oldest-first (chronological,
  *  matching how the original hardcoded copy read) via createdAt asc. */
 export async function getHomepageTestimonials(): Promise<TestimonialData[]> {
-  const rows = await prisma.testimonial.findMany({
-    orderBy: { createdAt: "asc" },
-    take: 4,
-  });
+  return safeDbCall(
+    async () => {
+      const rows = await prisma.testimonial.findMany({
+        orderBy: { createdAt: "asc" },
+        take: 4,
+      });
 
-  return rows.map((t) => ({
-    name: t.name,
-    initials: initialsFor(t.name),
-    location: t.location ?? "",
-    category: t.role,
-    quote: t.quote,
-  }));
+      return rows.map((t) => ({
+        name: t.name,
+        initials: initialsFor(t.name),
+        location: t.location ?? "",
+        category: t.role,
+        quote: t.quote,
+      }));
+    },
+    [],
+    "getHomepageTestimonials"
+  );
 }
