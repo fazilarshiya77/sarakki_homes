@@ -154,7 +154,7 @@ export default function EnquiriesPage() {
                         <span className="truncate">{enq.property.title}</span>
                       </div>
                       <p className="text-[10px] text-crm-text-secondary/75 line-clamp-1 italic mt-1.5">
-                        "{enq.message}"
+                        &ldquo;{enq.message}&rdquo;
                       </p>
                     </div>
 

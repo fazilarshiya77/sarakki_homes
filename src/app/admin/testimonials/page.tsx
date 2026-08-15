@@ -106,7 +106,7 @@ export default function TestimonialsPage() {
                       <Quote size={14} className="text-crm-text-secondary/30" />
                     </div>
                     <p className="text-xs text-crm-text-secondary italic leading-relaxed line-clamp-4">
-                      "{t.quote}"
+                      &ldquo;{t.quote}&rdquo;
                     </p>
                   </div>
 

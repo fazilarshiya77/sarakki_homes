@@ -263,7 +263,7 @@ export function DashboardClient({ stats, recentEnquiries }: DashboardClientProps
                       Interested in: <strong className="text-crm-text">{enq.property.title}</strong>
                     </p>
                     <p className="text-[11px] text-crm-text-muted italic mt-1 line-clamp-1">
-                      "{enq.message}"
+                      &ldquo;{enq.message}&rdquo;
                     </p>
                   </div>
                   <span className="text-[9px] uppercase tracking-wider font-semibold text-crm-text-muted shrink-0 pl-4">

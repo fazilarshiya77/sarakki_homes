@@ -8,6 +8,38 @@ import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import type { MediaTone } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
+// Extracted to module scope (not defined inside PropertyGallery) — a
+// component declared during render is a *new* component type on every
+// re-render, so React unmounts and remounts it instead of reconciling,
+// losing state and causing a visible flicker every time `active` changes.
+function Slide({
+  index,
+  images,
+  hasPhotos,
+  fallbackTone,
+  title,
+  className,
+}: {
+  index: number;
+  images: string[];
+  hasPhotos: boolean;
+  fallbackTone: MediaTone;
+  title: string;
+  className?: string;
+}) {
+  return hasPhotos ? (
+    <Image
+      src={images[index]}
+      alt={title}
+      fill
+      sizes="(min-width: 1024px) 60vw, 100vw"
+      className={cn("object-cover", className)}
+    />
+  ) : (
+    <MediaPlaceholder tone={fallbackTone} className={cn("h-full w-full", className)} />
+  );
+}
+
 // Real uploaded photos take priority; a single-tone placeholder gallery is
 // the fallback for properties that don't have any yet (see CLAUDE.md —
 // placeholders are expected until real photography exists).
@@ -28,19 +60,6 @@ export function PropertyGallery({
   const next = () => setActive((a) => (a + 1) % slideCount);
   const prev = () => setActive((a) => (a - 1 + slideCount) % slideCount);
 
-  const Slide = ({ index, className }: { index: number; className?: string }) =>
-    hasPhotos ? (
-      <Image
-        src={images[index]}
-        alt={title}
-        fill
-        sizes="(min-width: 1024px) 60vw, 100vw"
-        className={cn("object-cover", className)}
-      />
-    ) : (
-      <MediaPlaceholder tone={fallbackTone} className={cn("h-full w-full", className)} />
-    );
-
   return (
     <div>
       <div className="relative h-[60vh] max-h-[560px] w-full overflow-hidden rounded-md">
@@ -53,7 +72,7 @@ export function PropertyGallery({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
-            <Slide index={active} />
+            <Slide index={active} images={images} hasPhotos={hasPhotos} fallbackTone={fallbackTone} title={title} />
           </motion.div>
         </AnimatePresence>
 
@@ -96,7 +115,7 @@ export function PropertyGallery({
                 i === active ? "ring-accent-gold" : "ring-transparent opacity-70 hover:opacity-100"
               )}
             >
-              <Slide index={i} />
+              <Slide index={i} images={images} hasPhotos={hasPhotos} fallbackTone={fallbackTone} title={title} />
             </button>
           ))}
         </div>
@@ -122,7 +141,7 @@ export function PropertyGallery({
               className="relative h-[80vh] w-full max-w-5xl overflow-hidden rounded-md"
               onClick={(e) => e.stopPropagation()}
             >
-              <Slide index={active} />
+              <Slide index={active} images={images} hasPhotos={hasPhotos} fallbackTone={fallbackTone} title={title} />
               <button
                 onClick={prev}
                 aria-label="Previous image"

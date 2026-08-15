@@ -148,7 +148,7 @@ export default function CustomersPage() {
                                         <Calendar size={10} /> {new Date(enq.createdAt).toLocaleDateString()}
                                       </span>
                                     </div>
-                                    <p className="text-crm-text-secondary text-xs italic">"{enq.message}"</p>
+                                    <p className="text-crm-text-secondary text-xs italic">&ldquo;{enq.message}&rdquo;</p>
                                     {enq.notes && (
                                       <div className="pt-2 border-t border-crm-border/10 text-[10px] text-crm-text-secondary">
                                         <strong>Staff Note: </strong> {enq.notes}

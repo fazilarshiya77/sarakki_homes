@@ -105,7 +105,7 @@ export default function TasksPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-24 text-center text-xs text-crm-text-secondary bg-crm-card/25 border border-dashed border-crm-border/20 rounded-sm">
-          No tasks here. Add one from a lead's detail page.
+          No tasks here. Add one from a lead&apos;s detail page.
         </div>
       ) : (
         <div className="space-y-2.5">
