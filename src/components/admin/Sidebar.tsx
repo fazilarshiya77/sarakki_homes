@@ -92,7 +92,7 @@ export function Sidebar() {
               exit={{ opacity: 0, x: -10 }}
               className="flex flex-col"
             >
-              <span className="font-display text-sm tracking-[0.14em] uppercase text-crm-ivory font-semibold">
+              <span className="font-display text-sm tracking-[0.14em] uppercase text-crm-ivory font-bold">
                 Sarakki Homes
               </span>
               <span className="text-[9px] uppercase tracking-[0.18em] text-crm-gold/80 mt-0.5 font-semibold">
@@ -129,10 +129,10 @@ export function Sidebar() {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "group relative flex items-center gap-3 rounded-sm px-3.5 py-2.5 text-[13px] font-medium tracking-wide transition-all duration-200",
+                      "group relative flex items-center gap-3 rounded-sm px-3.5 py-2.5 text-[13px] tracking-wide transition-all duration-200",
                       isActive
-                        ? "bg-white/[0.06] text-crm-ivory"
-                        : "text-white/50 hover:bg-white/[0.035] hover:text-white/85"
+                        ? "bg-white/[0.06] text-crm-ivory font-semibold"
+                        : "text-white/50 font-medium hover:bg-white/[0.035] hover:text-white/85"
                     )}
                   >
                     {isActive && (

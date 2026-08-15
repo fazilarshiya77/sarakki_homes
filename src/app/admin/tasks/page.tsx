@@ -65,7 +65,7 @@ export default function TasksPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold tracking-wide text-crm-text flex items-center gap-2.5">
+        <h1 className="font-display text-2xl font-bold tracking-wide text-crm-text flex items-center gap-2.5">
           <CheckSquare size={22} className="text-crm-gold" />
           Tasks
         </h1>

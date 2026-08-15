@@ -89,7 +89,7 @@ export default function CmsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-wide text-crm-text">
+          <h1 className="font-display text-2xl font-bold tracking-wide text-crm-text">
             Website CMS Editor
           </h1>
           <p className="text-xs text-crm-text-secondary mt-0.5">
