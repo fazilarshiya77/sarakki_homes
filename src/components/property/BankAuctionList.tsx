@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { BankAuctionListItem } from "@/components/property/BankAuctionListItem";
 import { AuctionEmptyState } from "@/components/property/AuctionEmptyState";
-import type { AuctionProperty } from "@/lib/auctions";
+import type { AuctionProperty } from "@/lib/auctionHelpers";
 
 const PAGE_SIZE = 10;
 

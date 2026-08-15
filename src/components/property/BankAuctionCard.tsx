@@ -6,7 +6,7 @@ import { ArrowUpRight, Landmark, MapPin, MessageCircle, Ruler } from "lucide-rea
 import { NoPropertyImage } from "@/components/property/NoPropertyImage";
 import { AuctionStatusBadge } from "@/components/property/AuctionStatusBadge";
 import { useSiteSettings } from "@/components/providers/SettingsProvider";
-import { buildAuctionWhatsAppLink, type AuctionProperty } from "@/lib/auctions";
+import { buildAuctionWhatsAppLink, type AuctionProperty } from "@/lib/auctionHelpers";
 
 /**
  * Not a single whole-card <Link> (the pattern PropertyCard uses) — this card

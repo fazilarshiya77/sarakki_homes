@@ -5,7 +5,7 @@ import { BankAuctionFilters } from "@/components/property/BankAuctionFilters";
 import { BankAuctionGrid } from "@/components/property/BankAuctionGrid";
 import { BankAuctionList } from "@/components/property/BankAuctionList";
 import { AUCTION_DEFAULT_FILTERS, filterAndSortAuctions } from "@/lib/auctionFilters";
-import type { AuctionProperty } from "@/lib/auctions";
+import type { AuctionProperty } from "@/lib/auctionHelpers";
 
 export function BankAuctionExplorer({ properties }: { properties: AuctionProperty[] }) {
   const [filters, setFilters] = useState(AUCTION_DEFAULT_FILTERS);

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
+import { deriveAuctionStatus, type AuctionProperty } from "@/lib/auctionHelpers";
 
 // Bank Auction Properties render through this dedicated adapter rather than
 // the generic `Property` shape in src/lib/properties.ts — the auction
@@ -7,6 +8,12 @@ import type { Prisma } from "@prisma/client";
 // date, possession, full image set, live status) that the generic shape
 // either omits or collapses into a single cover image. Both adapters read
 // the same Property + AuctionInfo tables; this isn't a second data source.
+//
+// Server-only (imports Prisma) — client components must import types and
+// pure helpers (buildAuctionWhatsAppLink, deriveAuctionStatus,
+// AuctionProperty, AuctionStatus) from src/lib/auctionHelpers instead, or
+// they'll drag the Prisma module into the browser bundle. See that file's
+// header comment for the full story.
 
 const AUCTION_INCLUDE = {
   category: true,
@@ -16,61 +23,7 @@ const AUCTION_INCLUDE = {
 
 type DbAuctionProperty = Prisma.PropertyGetPayload<{ include: typeof AUCTION_INCLUDE }>;
 
-export type AuctionStatusTone = "gold" | "emerald" | "muted";
-
-export interface AuctionStatus {
-  label: string;
-  tone: AuctionStatusTone;
-}
-
-export interface AuctionProperty {
-  id: string;
-  propertyId: string;
-  slug: string;
-  title: string;
-  /** Optional — only present once the admin has filled in auction details. */
-  bank?: string;
-  location: string;
-  propertyType: string;
-  area?: string;
-  areaSqft?: number;
-  reservePrice?: string;
-  emd?: string;
-  /** ISO string, for sorting/filtering. */
-  auctionDateISO?: string;
-  auctionDateDisplay?: string;
-  physicalPossession?: boolean;
-  description: string;
-  images: string[];
-  status: string;
-  derivedStatus: AuctionStatus | null;
-  createdAtISO: string;
-}
-
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { day: "numeric", month: "long", year: "numeric" };
-
-/**
- * Turns raw DB status + auction date + possession into a single badge,
- * grounded entirely in fields that actually exist on the record. Returns
- * `null` rather than guessing when there's nothing to say.
- */
-export function deriveAuctionStatus(p: {
-  status: string;
-  physicalPossession?: boolean;
-  auctionDateISO?: string;
-}): AuctionStatus | null {
-  if (p.physicalPossession) return { label: "Physical Possession", tone: "gold" };
-  if (p.status === "SOLD") return { label: "Sold", tone: "muted" };
-  if (p.status === "AUCTION_CLOSED") return { label: "Auction Closed", tone: "muted" };
-  if (p.status === "UNDER_PROCESS") return { label: "Under Process", tone: "muted" };
-  if (p.auctionDateISO) {
-    return new Date(p.auctionDateISO) > new Date()
-      ? { label: "Auction Upcoming", tone: "emerald" }
-      : { label: "Available", tone: "emerald" };
-  }
-  if (p.status === "PUBLISHED") return { label: "Available", tone: "emerald" };
-  return null;
-}
 
 function toAuctionProperty(p: DbAuctionProperty): AuctionProperty {
   const auctionDateISO = p.auctionInfo?.auctionDate.toISOString();
@@ -124,13 +77,4 @@ export async function getAllBankAuctionPropertyIds(): Promise<string[]> {
     select: { propertyId: true },
   });
   return rows.map((r) => r.propertyId);
-}
-
-/** The WhatsApp number is the live, admin-editable one from Settings
- *  (src/lib/settings.ts) — callers fetch it via useSiteSettings() /
- *  getSiteSettings() and pass the digits through here rather than this
- *  module reading a static value itself. */
-export function buildAuctionWhatsAppLink(propertyId: string, whatsappNumber: string): string {
-  const message = `Hello Sarakki Homes, I am interested in Bank Auction Property ${propertyId}. Please share the complete property details.`;
-  return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 }

@@ -1,4 +1,4 @@
-import type { AuctionStatus } from "@/lib/auctions";
+import type { AuctionStatus } from "@/lib/auctionHelpers";
 import { cn } from "@/lib/utils";
 
 const TONE_CLASSES: Record<AuctionStatus["tone"], string> = {

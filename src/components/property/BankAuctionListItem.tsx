@@ -6,7 +6,7 @@ import { ArrowUpRight, Landmark, MapPin, MessageCircle } from "lucide-react";
 import { NoPropertyImage } from "@/components/property/NoPropertyImage";
 import { AuctionStatusBadge } from "@/components/property/AuctionStatusBadge";
 import { useSiteSettings } from "@/components/providers/SettingsProvider";
-import { buildAuctionWhatsAppLink, type AuctionProperty } from "@/lib/auctions";
+import { buildAuctionWhatsAppLink, type AuctionProperty } from "@/lib/auctionHelpers";
 
 /** The information-dense row for comparing many listings at once — same
  *  data as the grid card, laid out horizontally so it scans quickly. */

@@ -1,4 +1,4 @@
-import type { AuctionProperty } from "@/lib/auctions";
+import type { AuctionProperty } from "@/lib/auctionHelpers";
 
 export type AuctionSortOption = "newest" | "auction-date" | "price-asc" | "price-desc";
 export type AuctionView = "grid" | "list";

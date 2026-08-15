@@ -4,7 +4,7 @@ import { MessageCircle, PhoneCall } from "lucide-react";
 import { buttonClasses } from "@/components/ui/Button";
 import { ButtonFX } from "@/components/ui/ButtonFX";
 import { useSiteSettings } from "@/components/providers/SettingsProvider";
-import { buildAuctionWhatsAppLink } from "@/lib/auctions";
+import { buildAuctionWhatsAppLink } from "@/lib/auctionHelpers";
 
 /** The client's real workflow is WhatsApp-first — buyer sends the Property
  *  ID, Sarakki Homes shares full details, then coordinates a visit and the
