@@ -25,7 +25,7 @@ export const AUCTION_DEFAULT_FILTERS: AuctionFilterState = {
   dateFilter: "",
   possessionOnly: false,
   sort: "newest",
-  view: "grid",
+  view: "list",
 };
 
 export const AUCTION_BUDGET_RANGES = [
