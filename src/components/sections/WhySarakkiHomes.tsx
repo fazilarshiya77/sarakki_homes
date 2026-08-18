@@ -8,16 +8,20 @@ import { Container } from "@/components/ui/Container";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { PILLARS } from "@/lib/data";
 
-const GOLD = "#C4A66B";
+// v2 brand palette: Champagne Gold (was the CRM's espresso/gold hex,
+// reused here by mistake — the public site and CRM are meant to have
+// entirely separate token systems, see CLAUDE.md).
+const GOLD = "#C6A15B";
 const CINEMATIC_EASE = [0.22, 1, 0.36, 1] as const;
 
 export function WhySarakkiHomes() {
   return (
     <section id="why-sarakki-homes" className="relative">
       <Lamp
-        backgroundColor="#241E19"
+        backgroundColor="#052C27"
+        backgroundColorSecondary="#083C35"
         glowColor={GOLD}
-        glowCoreColor="#D8C18D"
+        glowCoreColor="#DCC28C"
         backgroundImage="/trust.jfif"
         backgroundImageOpacity={0.32}
       >
@@ -42,17 +46,18 @@ export function WhySarakkiHomes() {
           reads as part of the same lit room, not a new section. The photo
           continues here too, at the same visible-but-quiet opacity, so the
           two halves read as one continuous background rather than a seam. */}
-      <div className="relative overflow-hidden" style={{ backgroundColor: "#241E19" }}>
+      <div className="relative overflow-hidden" style={{ backgroundColor: "#052C27" }}>
         {/* eslint-disable-next-line @next/next/no-img-element -- decorative background photo, matches the treatment in Lamp */}
         <img
           src="/trust.jfif"
           alt=""
           aria-hidden="true"
           className="absolute inset-0 z-0 h-full w-full object-cover opacity-[0.24] grayscale"
+          style={{ filter: "sepia(0.3) saturate(1.1)" }}
         />
         <div
           className="absolute inset-0 z-0"
-          style={{ background: "radial-gradient(ellipse 90% 70% at 50% 0%, transparent 0%, #241E19 55%)" }}
+          style={{ background: "radial-gradient(ellipse 90% 70% at 50% 0%, transparent 0%, #052C27 55%)" }}
         />
         {/* pb kept small deliberately: the next section (AuctionJourney)
             already opens with its own Section wrapper's pt-24/pt-36 — the

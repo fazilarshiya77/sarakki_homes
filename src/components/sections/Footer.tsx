@@ -20,8 +20,9 @@ export async function Footer() {
       <Container className="py-20">
         <div className="grid grid-cols-1 gap-14 md:grid-cols-4">
           <div className="md:col-span-2">
-            <p className="font-display text-2xl">Sarakki Homes</p>
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-background/70">
+            <p className="font-display text-3xl font-medium tracking-[-0.01em]">Sarakki Homes</p>
+            <div className="mt-5 h-px w-12 bg-accent-gold/50" />
+            <p className="mt-6 max-w-sm text-sm leading-relaxed text-background/70">
               A premium Bengaluru real estate consultancy — guiding you
               through property selection, legal verification, financing, and
               registration with complete transparency.
@@ -88,7 +89,7 @@ export async function Footer() {
           </div>
         </div>
 
-        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-background/15 pt-8 text-xs text-background/50 md:flex-row">
+        <div className="mt-20 flex flex-col items-center justify-between gap-4 border-t border-background/15 pt-8 text-xs text-background/50 md:flex-row">
           <p>© {new Date().getFullYear()} Sarakki Homes. All rights reserved.</p>
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-background/80">

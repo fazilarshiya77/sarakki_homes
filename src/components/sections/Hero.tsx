@@ -57,23 +57,38 @@ export function Hero() {
       </div>
 
       <Container className="relative z-10 flex flex-1 flex-col justify-between gap-16 pb-28 pt-44">
-        <motion.div
-          className="max-w-4xl"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: heroDelayMs(0), ease: EASE }}
-        >
-          <Eyebrow light>Bengaluru&rsquo;s Trusted Property Consultancy</Eyebrow>
-          <h1
-            className="mt-6 font-display text-6xl leading-[1.05] tracking-[-0.02em] text-background md:text-[5.5rem]"
-            style={{ textShadow: "0 2px 10px rgba(0,0,0,0.25)" }}
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
+          <motion.div
+            className="md:col-span-9 lg:col-span-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: heroDelayMs(0), ease: EASE }}
           >
-            {heroTitle}
-          </h1>
-          <p className="mt-7 max-w-xl text-lg leading-relaxed text-background/85 md:text-xl">
-            {heroDescription}
-          </p>
-          <div className="mt-10 flex flex-wrap items-center gap-4">
+            <Eyebrow light>Bengaluru&rsquo;s Trusted Property Consultancy</Eyebrow>
+            <h1
+              className="mt-7 font-display text-7xl font-medium leading-[0.98] tracking-[-0.02em] text-background sm:text-8xl md:text-[7.5rem]"
+              style={{ textShadow: "0 2px 16px rgba(0,0,0,0.3)" }}
+            >
+              {heroTitle}
+            </h1>
+          </motion.div>
+
+          <motion.div
+            className="flex items-end md:col-span-3 lg:col-span-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: heroDelayMs(80), ease: EASE }}
+          >
+            <div className="border-l border-accent-gold/40 pl-6">
+              <p className="max-w-xs text-lg leading-relaxed text-background/85 md:text-xl">
+                {heroDescription}
+              </p>
+            </div>
+          </motion.div>
+        </div>
+
+        <div className="flex flex-col gap-16">
+          <div className="flex flex-wrap items-center gap-4">
             <a
               href="#properties"
               className="btn-fx group inline-flex items-center gap-2 rounded-pill bg-accent-gold px-7 py-3.5 text-sm font-semibold text-foreground shadow-soft transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-soft-lg active:translate-y-0 active:scale-[0.98] active:duration-150"
@@ -96,11 +111,9 @@ export function Hero() {
               WhatsApp Consultation
             </a>
           </div>
-        </motion.div>
- 
-        <div className="flex flex-col gap-8">
+
           <motion.div
-            className="glass-dark w-full max-w-4xl rounded-xl p-4 border border-white/10"
+            className="glass-dark w-full max-w-4xl rounded-md border border-white/10 p-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: heroDelayMs(150), ease: EASE }}
@@ -140,18 +153,21 @@ export function Hero() {
           </motion.div>
 
           <motion.div
-            className="glass-dark flex w-fit flex-wrap gap-x-8 gap-y-5 rounded-lg px-6 py-6 md:px-8"
+            className="flex w-fit flex-wrap gap-x-10 gap-y-5 border-t border-background/15 pt-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: heroDelayMs(300), ease: EASE }}
           >
-            {STATS.map((stat) => (
-              <div key={stat.label}>
+            {STATS.map((stat, i) => (
+              <div
+                key={stat.label}
+                className={i > 0 ? "border-l border-background/15 pl-10" : ""}
+              >
                 <Counter
                   value={stat.value}
                   prefix={stat.prefix}
                   suffix={stat.suffix}
-                  className="font-display text-3xl font-extrabold text-background md:text-4xl"
+                  className="font-display text-3xl font-medium text-background md:text-4xl"
                 />
                 <p className="mt-1.5 text-xs uppercase tracking-[0.14em] text-background/60">
                   {stat.label}

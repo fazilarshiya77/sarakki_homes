@@ -17,29 +17,35 @@ export function FAQ() {
       <Container className="max-w-4xl">
         <RevealOnScroll className="text-center">
           <Eyebrow className="justify-center">Frequently Asked</Eyebrow>
-          <h2 className="mt-4 font-display text-4xl leading-[1.1] tracking-[-0.01em] md:text-5xl">
+          <h2 className="mt-5 font-display text-4xl font-medium leading-[1.08] tracking-[-0.01em] text-foreground md:text-5xl">
             Questions, answered plainly.
           </h2>
         </RevealOnScroll>
 
-        <RevealOnScroll delay={0.1} className="mt-16 flex flex-col">
+        <RevealOnScroll delay={0.1} className="mt-20 flex flex-col">
           {FAQS.map((faq, i) => {
             const isOpen = open === i;
             return (
-              <div key={faq.question} className="border-b border-border">
+              <div key={faq.question} className="border-b border-border/70">
                 <button
                   onClick={() => setOpen(isOpen ? null : i)}
-                  className="flex w-full items-center justify-between gap-6 py-6 text-left"
+                  className="group flex w-full items-center justify-between gap-8 py-7 text-left"
                   aria-expanded={isOpen}
                 >
-                  <span className="font-display text-xl leading-snug">
+                  <span
+                    className={cn(
+                      "font-display text-xl font-medium leading-snug transition-colors duration-300 md:text-2xl",
+                      isOpen ? "text-accent-emerald" : "text-foreground group-hover:text-accent-emerald"
+                    )}
+                  >
                     {faq.question}
                   </span>
                   <Plus
-                    size={20}
+                    size={18}
+                    strokeWidth={1.75}
                     className={cn(
-                      "shrink-0 text-accent-gold-dark transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                      isOpen && "rotate-45"
+                      "shrink-0 text-muted-foreground transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                      isOpen && "rotate-45 text-accent-gold"
                     )}
                   />
                 </button>
@@ -52,7 +58,7 @@ export function FAQ() {
                       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                       className="overflow-hidden"
                     >
-                      <p className="max-w-2xl pb-6 text-base leading-relaxed text-muted-foreground">
+                      <p className="max-w-2xl pb-8 text-base leading-relaxed text-muted-foreground">
                         {faq.answer}
                       </p>
                     </motion.div>

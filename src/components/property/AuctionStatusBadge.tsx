@@ -2,9 +2,9 @@ import type { AuctionStatus } from "@/lib/auctionHelpers";
 import { cn } from "@/lib/utils";
 
 const TONE_CLASSES: Record<AuctionStatus["tone"], string> = {
-  gold: "border-[#C4A66B]/50 bg-[#C4A66B]/10 text-[#8A6F3E]",
-  emerald: "border-[#0E6B5C]/35 bg-[#0E6B5C]/10 text-[#0E6B5C]",
-  muted: "border-[#67615B]/30 bg-[#67615B]/10 text-[#67615B]",
+  gold: "border-accent-gold/50 bg-accent-gold/10 text-accent-gold-dark",
+  emerald: "border-accent-emerald/35 bg-accent-emerald/10 text-accent-emerald",
+  muted: "border-muted-foreground/30 bg-muted-foreground/10 text-muted-foreground",
 };
 
 /** Renders nothing when there's no status to report — never fabricates one. */

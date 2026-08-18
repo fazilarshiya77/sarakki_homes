@@ -69,14 +69,14 @@ export function BuilderMarquee() {
     <div
       role="region"
       aria-label="Partner builders Sarakki Homes works with"
-      className="fixed inset-x-0 bottom-0 z-30 border-y border-accent-gold/40 bg-[#241E19] shadow-[0_-6px_18px_rgba(0,0,0,0.18)]"
+      className="fixed inset-x-0 bottom-0 z-30 border-y border-accent-gold/40 bg-accent-emerald-dark shadow-[0_-6px_18px_rgba(0,0,0,0.18)]"
     >
       <div
         className="flex h-10 items-center overflow-hidden md:h-11"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        <div className="hidden shrink-0 items-center gap-2 self-stretch border-r border-accent-gold/25 bg-[#241E19] px-4 sm:flex md:px-6">
+        <div className="hidden shrink-0 items-center gap-2 self-stretch border-r border-accent-gold/25 bg-accent-emerald-dark px-4 sm:flex md:px-6">
           <span className="h-1 w-1 shrink-0 rounded-full bg-accent-gold" aria-hidden />
           <span className="whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-[0.18em] text-accent-gold">
             Partner Builders
@@ -84,8 +84,8 @@ export function BuilderMarquee() {
         </div>
 
         <div className="relative min-w-0 flex-1 overflow-hidden">
-          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-[#241E19] to-transparent md:w-16" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-[#241E19] to-transparent md:w-16" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-accent-emerald-dark to-transparent md:w-16" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-accent-emerald-dark to-transparent md:w-16" />
 
           {reduceMotion ? (
             <div

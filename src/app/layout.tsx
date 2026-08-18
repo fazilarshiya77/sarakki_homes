@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bodoni_Moda, Cormorant_Garamond, Manrope } from "next/font/google";
+import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { FloatingSocialDock } from "@/components/ui/FloatingSocialDock";
 import { BuilderMarquee } from "@/components/ui/BuilderMarquee";
 import { AuthProvider } from "@/components/admin/AuthProvider";
@@ -7,13 +7,20 @@ import { SettingsProvider } from "@/components/providers/SettingsProvider";
 import { getSiteSettings } from "@/lib/settings";
 import "./globals.css";
 
-const bodoniModa = Bodoni_Moda({
+// Editorial serif for every major headline — swapped from Bodoni Moda
+// (a heavier didone that read as generic "luxury template") to
+// Cormorant Garamond per the v2 brand direction: elegant, editorial,
+// not flashy. Loaded twice at different variables (both the same
+// typeface) so display headings and rare italic pull-quote moments can
+// carry different weight/style without a third font ever entering the
+// page — the brand rule is exactly two typefaces, serif + sans.
+const cormorantGaramond = Cormorant_Garamond({
   variable: "--font-display",
   subsets: ["latin"],
   weight: ["500", "600", "700"],
 });
 
-const cormorantGaramond = Cormorant_Garamond({
+const cormorantGaramondAccent = Cormorant_Garamond({
   variable: "--font-accent",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
@@ -74,7 +81,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${bodoniModa.variable} ${cormorantGaramond.variable} ${manrope.variable} h-full antialiased`}
+      className={`${cormorantGaramond.variable} ${cormorantGaramondAccent.variable} ${manrope.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body

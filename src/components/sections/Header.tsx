@@ -344,7 +344,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.95, y: 15 }}
                 transition={{ duration: 0.4, ease: EASE }}
-                className="relative w-full max-w-lg overflow-hidden rounded-md border border-[#C4A66B]/20 bg-[#FCFBF9] p-8 shadow-soft-lg text-xs"
+                className="relative w-full max-w-lg overflow-hidden rounded-md border border-[#C6A15B]/20 bg-[#F5F1E8] p-8 shadow-soft-lg text-xs"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Close Button */}
@@ -356,16 +356,16 @@ export function Header({ solid = false }: { solid?: boolean }) {
                   <X size={18} />
                 </button>
 
-                <div className="space-y-6 text-[#1C1C1C]">
+                <div className="space-y-6 text-[#171715]">
                   <div>
-                    <span className="text-[10px] uppercase tracking-[0.15em] text-[#C4A66B] font-semibold">Contact & Location</span>
-                    <h3 className="font-display text-2xl tracking-wide mt-1 text-[#1C1C1C]">Sarakki Homes</h3>
-                    <div className="w-12 h-[1.5px] bg-[#C4A66B] mt-3" />
+                    <span className="text-[10px] uppercase tracking-[0.15em] text-[#C6A15B] font-semibold">Contact & Location</span>
+                    <h3 className="font-display text-2xl tracking-wide mt-1 text-[#171715]">Sarakki Homes</h3>
+                    <div className="w-12 h-[1.5px] bg-[#C6A15B] mt-3" />
                   </div>
 
                   <div className="space-y-4 text-xs leading-relaxed">
                     <div className="flex gap-3 border-b border-border/60 pb-3">
-                      <MapPin size={16} className="text-[#C4A66B] shrink-0 mt-0.5" />
+                      <MapPin size={16} className="text-[#C6A15B] shrink-0 mt-0.5" />
                       <p className="font-semibold text-foreground uppercase text-[11px] tracking-wide leading-relaxed">
                         SARAKKI HOMES, # 5A, DR. PUNEETH RAJKUMAR ROAD, NEXT TO UNION BANK OF INDIA, OPP. NANDI GARDEN RESTAURANT, NEAR J P NAGAR METRO STATION, J P NAGAR 6TH PHASE, BENGALURU 560078.
                       </p>
@@ -373,28 +373,28 @@ export function Header({ solid = false }: { solid?: boolean }) {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="flex items-center gap-3">
-                        <Phone size={14} className="text-[#C4A66B] shrink-0" />
+                        <Phone size={14} className="text-[#C6A15B] shrink-0" />
                         <p>
                           <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Phone</span>
                           <span className="font-semibold font-mono text-[11px]">080-41550138</span>
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <MessageCircle size={14} className="text-[#C4A66B] shrink-0" />
+                        <MessageCircle size={14} className="text-[#C6A15B] shrink-0" />
                         <p>
                           <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Mobile / WhatsApp</span>
                           <span className="font-semibold font-mono text-[11px]">9663676464</span>
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Mail size={14} className="text-[#C4A66B] shrink-0" />
+                        <Mail size={14} className="text-[#C6A15B] shrink-0" />
                         <p>
                           <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Email</span>
                           <span className="font-semibold text-[11px]">SARAKKIHOMES@GMAIL.COM</span>
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Globe size={14} className="text-[#C4A66B] shrink-0" />
+                        <Globe size={14} className="text-[#C6A15B] shrink-0" />
                         <p>
                           <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Website</span>
                           <span className="font-semibold text-[11px]">SARAKKIHOMES.COM</span>
@@ -403,7 +403,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
                     </div>
 
                     <div className="flex items-start gap-3 pt-3 border-t border-border/60">
-                      <Clock size={15} className="text-[#C4A66B] shrink-0 mt-0.5" />
+                      <Clock size={15} className="text-[#C6A15B] shrink-0 mt-0.5" />
                       <p>
                         <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Office Timings</span>
                         <span className="font-semibold text-[11px] uppercase">MONDAY TO SATURDAY 10 AM TO 7 PM. SUNDAY HOLIDAY.</span>
@@ -416,13 +416,13 @@ export function Header({ solid = false }: { solid?: boolean }) {
                       href="https://maps.google.com/?q=Sarakki+Homes,+J+P+Nagar+6th+Phase,+Bengaluru"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 inline-flex items-center justify-center gap-2 border border-[#C4A66B]/50 rounded-sm py-3 text-[10px] font-semibold uppercase tracking-wider text-[#C4A66B] hover:bg-[#F6F3EE] transition-colors"
+                      className="flex-1 inline-flex items-center justify-center gap-2 border border-[#C6A15B]/50 rounded-sm py-3 text-[10px] font-semibold uppercase tracking-wider text-[#C6A15B] hover:bg-[#E8DFD0] transition-colors"
                     >
                       <Map size={12} /> Location Map
                     </a>
                     <button
                       onClick={() => setModalOpen(false)}
-                      className="px-6 rounded-sm bg-[#C4A66B] py-3 text-[10px] font-semibold uppercase tracking-wider text-background hover:bg-[#B3955A] transition-colors"
+                      className="px-6 rounded-sm bg-[#C6A15B] py-3 text-[10px] font-semibold uppercase tracking-wider text-background hover:bg-[#A98847] transition-colors"
                     >
                       Close
                     </button>

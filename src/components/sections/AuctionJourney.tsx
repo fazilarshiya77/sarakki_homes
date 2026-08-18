@@ -59,12 +59,12 @@ export function AuctionJourney() {
       <Container>
         <RevealOnScroll className="max-w-2xl">
           <Eyebrow>The Bank Auction Journey</Eyebrow>
-          <h2 className="mt-4 font-display text-4xl leading-[1.1] tracking-[-0.01em] md:text-5xl">
+          <h2 className="mt-5 font-display text-4xl font-medium leading-[1.08] tracking-[-0.01em] text-foreground md:text-5xl">
             Six steps. Zero guesswork.
           </h2>
         </RevealOnScroll>
 
-        <RevealOnScroll delay={0.1} className="mt-20">
+        <RevealOnScroll delay={0.1} className="mt-24">
           <div className="relative">
             <div className="absolute left-0 right-0 top-12 h-px bg-border md:top-14" />
             <motion.div
@@ -110,57 +110,28 @@ export function AuctionJourney() {
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.6 }}
                           transition={{ type: "spring", stiffness: 340, damping: 30 }}
-                          className="absolute inset-0 rounded-full"
+                          className="absolute inset-0 rounded-full bg-accent-emerald"
                           style={{
-                            background:
-                              "radial-gradient(circle at 32% 28%, #F6E7BE 0%, #E3C98F 26%, #C4A66B 55%, #9C7C43 100%)",
                             boxShadow:
-                              "0 12px 28px rgba(139,111,63,0.4), inset 0 1.5px 2px rgba(255,255,255,0.55), inset 0 -4px 8px rgba(94,72,34,0.4)",
-                            border: "1px solid rgba(139,111,63,0.6)",
+                              "0 10px 24px rgba(5,44,39,0.28), inset 0 1px 1px rgba(255,255,255,0.12)",
+                            border: "1px solid rgba(198,161,91,0.35)",
                           }}
                         />
                       )}
                     </AnimatePresence>
 
-                    {/* A band of light sweeps diagonally across the plate on
-                        a loop — real gold catching light — cascading step to
-                        step rather than firing in unison. */}
-                    {i <= active && !reduceMotion && (
-                      <motion.span
-                        aria-hidden
-                        className="pointer-events-none absolute inset-0 rounded-full mix-blend-overlay"
-                        style={{
-                          backgroundImage:
-                            "linear-gradient(115deg, transparent 25%, rgba(255,255,255,0.85) 45%, rgba(255,255,255,0.2) 52%, transparent 68%)",
-                          backgroundSize: "300% 300%",
-                        }}
-                        animate={{ backgroundPosition: ["120% -20%", "-20% 120%"] }}
-                        transition={{
-                          duration: 1.5,
-                          ease: "easeInOut",
-                          repeat: Infinity,
-                          repeatDelay: 3.6,
-                          delay: i * 0.22,
-                        }}
-                      />
-                    )}
                     <span
                       className={cn(
                         "relative flex h-24 w-24 items-center justify-center rounded-full px-3 text-center transition-all duration-300 group-hover:-translate-y-1 md:h-28 md:w-28",
                         i > active &&
-                          "border border-border bg-gradient-to-br from-[#FCFBF9] to-[#EFE9E0] shadow-[0_4px_14px_rgba(20,20,20,0.06)] group-hover:border-accent-gold-dark/50"
+                          "border border-border bg-surface shadow-[0_2px_10px_rgba(23,23,21,0.05)] group-hover:border-accent-gold-dark/40"
                       )}
                     >
                       <span
                         className={cn(
-                          "font-display text-[0.8rem] font-semibold leading-tight tracking-[0.01em] md:text-[0.9rem]",
-                          i <= active ? "text-[#3B2A12]" : "text-muted-foreground group-hover:text-foreground/80"
+                          "font-display text-[0.85rem] font-medium leading-tight tracking-[0.01em] md:text-[0.95rem]",
+                          i <= active ? "text-background" : "text-muted-foreground group-hover:text-foreground/80"
                         )}
-                        style={
-                          i <= active
-                            ? { textShadow: "0 1px 0 rgba(255,255,255,0.4), 0 -1px 0 rgba(60,40,10,0.35)" }
-                            : undefined
-                        }
                       >
                         {item.title}
                       </span>
@@ -173,7 +144,7 @@ export function AuctionJourney() {
                           animate={{ opacity: 1, scale: 1, rotate: 0 }}
                           exit={{ opacity: 0, scale: 0.4 }}
                           transition={{ duration: 0.3, ease: EASE }}
-                          className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-background bg-[#3B2A12] text-accent-gold shadow-[0_2px_6px_rgba(0,0,0,0.25)]"
+                          className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-background bg-accent-gold text-accent-emerald-dark shadow-[0_2px_6px_rgba(0,0,0,0.2)]"
                         >
                           <Check size={13} strokeWidth={3} />
                         </motion.span>
@@ -204,29 +175,31 @@ export function AuctionJourney() {
                 animate="center"
                 exit="exit"
                 transition={{ duration: 0.45, ease: EASE }}
-                className="relative flex flex-col items-start gap-6 p-10 md:flex-row md:items-center"
+                className="relative flex flex-col items-start gap-7 p-10 md:flex-row md:items-center md:p-12"
               >
                 <motion.div
                   initial={{ opacity: 0, scale: 0.7, rotate: reduceMotion ? 0 : -12 }}
                   animate={{ opacity: 1, scale: 1, rotate: 0 }}
                   transition={{ duration: 0.45, ease: EASE, delay: 0.05 }}
-                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-sm bg-accent-gold/15 text-accent-gold-dark"
+                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-sm bg-accent-emerald/10 text-accent-emerald"
                 >
-                  <StepIcon size={26} strokeWidth={1.75} />
+                  <StepIcon size={26} strokeWidth={1.5} />
                 </motion.div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.14em] text-accent-gold-dark">
+                  <p className="font-body text-xs font-semibold uppercase tracking-[0.16em] text-accent-gold-dark">
                     Step {String(active + 1).padStart(2, "0")} of {total}
                   </p>
-                  <h3 className="mt-2 font-display text-2xl">{step.title}</h3>
-                  <p className="mt-2 max-w-xl text-base leading-relaxed text-muted-foreground">
+                  <h3 className="mt-3 font-display text-2xl font-medium leading-snug text-foreground md:text-[1.75rem]">
+                    {step.title}
+                  </h3>
+                  <p className="mt-3 max-w-xl text-base leading-relaxed text-muted-foreground">
                     {step.description}
                   </p>
                 </div>
               </motion.div>
             </AnimatePresence>
 
-            <div className="relative flex items-center justify-between gap-4 border-t border-border/60 px-10 py-5">
+            <div className="relative flex items-center justify-between gap-4 border-t border-border/60 px-10 py-5 md:px-12">
               <button
                 onClick={() => {
                   goTo(active === 0 ? total - 1 : active - 1);

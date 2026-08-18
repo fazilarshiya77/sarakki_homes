@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
-import { revealItemVariants } from "@/components/ui/RevealOnScroll";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { CATEGORIES } from "@/lib/data";
 
@@ -27,20 +26,19 @@ const CATEGORY_PHOTO: Record<string, string> = {
   resale: "/media/sections/resale.jpg",
 };
 
-// A distinct, muted jewel-tone accent per category — colorful but restrained,
-// never a bright/saturated SaaS palette. Keyed by slug rather than the
-// shared `tone` field on CATEGORIES, since that only has 4 values and
-// repeats across categories (not enough variety for six distinct cards).
+// A per-category accent restrained toward the brand palette — Forest and
+// Gold in varying weight/tint, rather than an arbitrary jewel-tone map.
+// Keyed by slug rather than the shared `tone` field on CATEGORIES, since
+// that only has 4 values and repeats across categories (not enough
+// variety for six distinct cards).
 const ACCENTS: Record<string, string> = {
-  "bank-auctions": "#B08D57",
-  "rental-income": "#0E6B5C",
-  "chance-deals": "#B5651D",
-  resale: "#3D6E85",
-  "upcoming-projects": "#7A3B5C",
-  "ready-to-move": "#6E7F3D",
+  "bank-auctions": "#C6A15B",
+  "rental-income": "#083C35",
+  "chance-deals": "#A8874F",
+  resale: "#0E6B5C",
+  "upcoming-projects": "#052C27",
+  "ready-to-move": "#766F65",
 };
-
-const MotionLink = motion(Link);
 
 const LISTING_LABELS: Record<string, string> = {
   "bank-auctions": "3 Vetted Listings",
@@ -51,78 +49,86 @@ const LISTING_LABELS: Record<string, string> = {
   "ready-to-move": "6 Ready Homes",
 };
 
-export function ServiceCard({ slug }: { slug: string }) {
+/**
+ * Editorial service/category card — restyled to match the PropertyCard
+ * reference pattern: image-first, content sits directly on the page
+ * background below it (no card box, no shadow), separated by a single
+ * hairline rule. Hover state is an image scale + moving arrow, not a
+ * lift-and-shadow "floating card" motion.
+ */
+export function ServiceCard({ slug, featured = false }: { slug: string; featured?: boolean }) {
   const category = CATEGORIES.find((c) => c.slug === slug);
   if (!category) return null;
-  const accent = ACCENTS[slug] ?? "#C4A66B";
+  const accent = ACCENTS[slug] ?? "#C6A15B";
   const label = LISTING_LABELS[slug] ?? "Vetted Listings";
   const photo = CATEGORY_PHOTO[slug];
 
   return (
-    <motion.div variants={revealItemVariants} className="h-full">
-      <MotionLink
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <Link
         href={`/services/${category.slug}`}
         style={{ "--accent": accent } as React.CSSProperties}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 400, damping: 28 }}
-        className="group relative flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card shadow-soft transition-all duration-500 hover:-translate-y-2 hover:border-[var(--accent)]/40 hover:shadow-soft-lg"
+        className="group relative block"
       >
-        {/* Image */}
-        <div className="relative h-52 overflow-hidden">
+        <div
+          className={`relative overflow-hidden ${
+            featured ? "aspect-[16/11]" : "aspect-[4/5]"
+          }`}
+        >
           {photo ? (
             <Image
               src={photo}
               alt={category.title}
               fill
-              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-              className="object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.045]"
             />
           ) : (
             <MediaPlaceholder
               tone={category.tone}
-              className="absolute inset-0 h-full w-full transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
+              className="absolute inset-0 h-full w-full transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.045]"
             />
           )}
-          {/* The centred icon-in-a-translucent-circle that used to sit here
-              has been removed. Once each card carries a real photograph,
-              that chip stopped being a stand-in for missing art and became
-              a badge obscuring the middle of the image — the exact
-              stock-UI-kit look this page is trying to avoid. The photo
-              alone now carries the card; the category is named directly
-              underneath it. */}
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/35 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+          <span
+            className="absolute left-0 top-0 z-10 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-background"
+            style={{ backgroundColor: "var(--accent)" }}
+          >
+            {label}
+          </span>
         </div>
 
-        {/* Thin accent seam between image and content */}
-        <span className="h-1 w-full bg-[var(--accent)] transition-all duration-500 group-hover:h-1.5" />
-
-        <div className="relative flex flex-1 flex-col p-8">
-          {/* Ambient Radial Hover Glow */}
-          <div className="pointer-events-none absolute -right-24 -top-24 h-48 w-48 rounded-full bg-[var(--accent)]/5 blur-3xl transition-opacity duration-500 opacity-0 group-hover:opacity-100" />
-
-          <div className="relative z-10">
-            <h3 className="font-display text-2xl tracking-wide text-foreground transition-colors duration-300 group-hover:text-accent-gold-dark">
+        {/* Content sits directly on the page background, no card box — a
+            single hairline rule is the only separator. */}
+        <div className="border-t border-border pt-5">
+          <div className="flex items-start justify-between gap-4">
+            <h3
+              className={`font-display leading-snug text-foreground ${
+                featured ? "text-3xl md:text-4xl" : "text-2xl"
+              }`}
+            >
               {category.title}
             </h3>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              {category.description}
-            </p>
+            <ArrowUpRight
+              size={20}
+              className="mt-1 shrink-0 text-accent-gold-dark opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100"
+            />
           </div>
-
-          <div className="mt-8 flex items-center justify-between border-t border-border/60 pt-5 relative z-10 text-xs font-semibold">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 group-hover:text-foreground/70 transition-colors">
-              {label}
-            </span>
-            <div className="flex items-center gap-1.5 text-foreground group-hover:text-accent-gold-dark transition-colors">
-              Explore Properties
-              <ArrowUpRight
-                size={15}
-                className="transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
-              />
-            </div>
-          </div>
+          <p
+            className={`mt-3 leading-relaxed text-muted-foreground ${
+              featured ? "max-w-md text-base" : "text-sm"
+            }`}
+          >
+            {category.description}
+          </p>
         </div>
-      </MotionLink>
+      </Link>
     </motion.div>
   );
 }
