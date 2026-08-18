@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { safeDbCall } from "@/lib/db-safe";
 
@@ -64,7 +65,14 @@ function contactFromPhone(raw: string): SiteContact {
   };
 }
 
-export async function getSiteSettings(): Promise<SiteSettings> {
+// Wrapped in React's cache() so every call within the SAME request (root
+// layout's generateMetadata + layout body, Footer, LoanEligibilityCard,
+// and any page that reads it directly) shares one Prisma query instead
+// of each triggering its own round-trip to Supabase — previously up to
+// 3-4 duplicate identical queries per page load. cache() only dedupes
+// within a single request; it's not cross-request/global caching, so
+// admin-edited settings still show up on the very next request.
+export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
   return safeDbCall(
     async () => {
       const row = await prisma.setting.findFirst();
@@ -87,4 +95,4 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     FALLBACK,
     "getSiteSettings"
   );
-}
+});

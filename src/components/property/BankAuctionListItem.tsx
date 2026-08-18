@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Landmark, MapPin, MessageCircle } from "lucide-react";
 import { NoPropertyImage } from "@/components/property/NoPropertyImage";
@@ -25,10 +26,12 @@ export function BankAuctionListItem({ property }: { property: AuctionProperty })
     >
       <Link href={detailHref} className="relative block h-40 w-full shrink-0 overflow-hidden rounded-sm sm:h-28 sm:w-40">
         {hasImage ? (
-          <img
+          <Image
             src={property.images[0]}
             alt={property.title}
-            className="h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
+            fill
+            sizes="(min-width: 640px) 160px, 100vw"
+            className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
           />
         ) : (
           <NoPropertyImage propertyId={property.propertyId} className="rounded-sm" />

@@ -30,7 +30,7 @@ export function Hero() {
           alt="Sarakki Homes — premium residential property"
           fill
           priority
-          unoptimized
+          sizes="100vw"
           className="object-cover object-center"
         />
       </div>

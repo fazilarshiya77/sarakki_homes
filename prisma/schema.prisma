@@ -87,6 +87,14 @@ model Property {
   videos    PropertyVideo[]
   documents Document[]
   enquiries Enquiry[]
+
+  // status/featured/createdAt are filtered and sorted on in nearly every
+  // public + CRM property query (getPublishedProperties, dashboard
+  // counts, admin listing) — indexed so those stay fast as the table
+  // grows past today's small row count.
+  @@index([status])
+  @@index([featured])
+  @@index([createdAt])
 }
 
 model AuctionInfo {
@@ -148,6 +156,9 @@ model Enquiry {
   assignedTo User?    @relation("AssignedStaff", fields: [staffId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Customer {
@@ -259,6 +270,10 @@ model Lead {
   tasks    LeadTask[]
   notes    LeadNote[]
   timeline LeadTimelineEntry[]
+
+  @@index([stage])
+  @@index([agentId])
+  @@index([createdAt])
 }
 
 // Status: PENDING, IN_PROGRESS, DONE
