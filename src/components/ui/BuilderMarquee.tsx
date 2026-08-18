@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, useAnimationFrame, useMotionValue, useReducedMotion } from "framer-motion";
 import { PARTNER_BUILDERS } from "@/lib/data";
-import { cn } from "@/lib/utils";
 
 // Full cycle (list A fully replaced by list B) target duration — calm,
 // financial-news-ticker pace, not breaking news.
@@ -13,27 +12,20 @@ const HOVER_SPEED_FACTOR = 0.3;
 
 /**
  * Sarakki Homes' signature bottom ticker — a persistent, brand-credibility
- * strip naming every builder the client works with. Behaves like a
- * sticky-to-fixed headline ticker: glued to the viewport bottom while the
- * page scrolls, then handed off to normal document flow just before the
- * footer so it scrolls away with the page and never covers footer content.
+ * strip naming every builder the client works with. Always pinned to the
+ * viewport bottom (`position: fixed`), on top of whatever is scrolled
+ * beneath it — including the footer.
  *
- * Why not plain `position: sticky`: every page renders its own <Header/>
- * …<Footer/> independently (no shared per-page layout wrapper), so a
- * layout-mounted ticker has no DOM-proximity relationship to any given
- * page's footer for CSS sticky to key off. Instead this finds the live
- * <footer> at runtime and uses an IntersectionObserver + a one-time
- * position handoff — see the effect below for the exact mechanics.
+ * Previously this handed off to normal document flow right before the
+ * footer so the ticker would never cover footer content. That was
+ * deliberately reversed here: the ticker now stays stuck through the
+ * footer too, per explicit direction to always keep it visible.
  */
 export function BuilderMarquee() {
   const pathname = usePathname();
   const reduceMotion = useReducedMotion();
-  const [hasFooter, setHasFooter] = useState(false);
-  const [stuck, setStuck] = useState(true);
-  const [releaseTop, setReleaseTop] = useState(0);
   const [hovered, setHovered] = useState(false);
 
-  const barRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const speedRef = useRef(0);
@@ -43,53 +35,10 @@ export function BuilderMarquee() {
   // marketing site this ticker brands — never render there.
   const hidden = pathname?.startsWith("/admin") ?? false;
 
-  useEffect(() => {
-    if (hidden) return;
-    const footer = document.querySelector("footer");
-    setHasFooter(!!footer);
-    if (!footer) return;
-
-    const barHeight = () => barRef.current?.offsetHeight ?? 44;
-
-    // Fires the instant the footer's top edge reaches the viewport's
-    // bottom edge — the latest safe moment to hand off before the fixed
-    // bar would start covering footer content. At that exact scroll
-    // position, `position: absolute; top: footerDocTop - barHeight`
-    // occupies precisely the same screen pixels the fixed bar just
-    // vacated, so the switch is visually seamless.
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          const footerDocTop = footer.getBoundingClientRect().top + window.scrollY;
-          setReleaseTop(footerDocTop - barHeight());
-          setStuck(false);
-        } else {
-          setStuck(true);
-        }
-      },
-      { threshold: 0 }
-    );
-    observer.observe(footer);
-
-    const onResize = () => {
-      const footerDocTop = footer.getBoundingClientRect().top + window.scrollY;
-      setReleaseTop(footerDocTop - barHeight());
-    };
-    window.addEventListener("resize", onResize);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", onResize);
-    };
-  }, [pathname, hidden]);
-
   // Measure the (single-copy) track width so the loop wraps at exactly
   // half the doubled track — a real seamless loop, not a visible reset.
-  // Depends on `hasFooter` too: the component renders `null` until that
-  // flips true, so `trackRef` isn't attached to anything on the very
-  // first pass — without this dependency the measurement would run once
-  // against a null ref and never again, leaving the track stuck at 0.
   useEffect(() => {
-    if (reduceMotion || !hasFooter) return;
+    if (reduceMotion || hidden) return;
     const measure = () => {
       const full = trackRef.current?.scrollWidth ?? 0;
       halfWidthRef.current = full / 2;
@@ -97,7 +46,7 @@ export function BuilderMarquee() {
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
-  }, [reduceMotion, hasFooter]);
+  }, [reduceMotion, hidden]);
 
   // Manual rAF-driven loop (not a CSS/Framer keyframe tween) is what makes
   // the hover slow-down smooth rather than an abrupt stop or a jarring
@@ -112,20 +61,15 @@ export function BuilderMarquee() {
     x.set(next);
   });
 
-  if (hidden || !hasFooter) return null;
+  if (hidden) return null;
 
   const doubled = [...PARTNER_BUILDERS, ...PARTNER_BUILDERS];
 
   return (
     <div
-      ref={barRef}
       role="region"
       aria-label="Partner builders Sarakki Homes works with"
-      style={stuck ? undefined : { position: "absolute", top: releaseTop, left: 0, right: 0 }}
-      className={cn(
-        "z-30 border-y border-accent-gold/40 bg-[#241E19] shadow-[0_-6px_18px_rgba(0,0,0,0.18)]",
-        stuck && "fixed inset-x-0 bottom-0"
-      )}
+      className="fixed inset-x-0 bottom-0 z-30 border-y border-accent-gold/40 bg-[#241E19] shadow-[0_-6px_18px_rgba(0,0,0,0.18)]"
     >
       <div
         className="flex h-10 items-center overflow-hidden md:h-11"
