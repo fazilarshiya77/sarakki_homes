@@ -19,6 +19,7 @@ const PAGE_TITLES: { prefix: string; title: string }[] = [
   { prefix: "/admin/cms", title: "Website CMS" },
   { prefix: "/admin/blog", title: "Blog" },
   { prefix: "/admin/testimonials", title: "Testimonials" },
+  { prefix: "/admin/staff", title: "Staff" },
   { prefix: "/admin/users", title: "Users" },
   { prefix: "/admin/settings", title: "Settings" },
 ];

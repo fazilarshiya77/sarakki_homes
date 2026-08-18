@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireRole, CAN } from "@/lib/authz";
+
+const GENERIC_ERROR = "Something went wrong. Please try again.";
 
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await requireRole(CAN.MANAGE_CRM);
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
 
@@ -20,7 +19,7 @@ export async function POST(
       return NextResponse.json({ error: "Note content is required." }, { status: 400 });
     }
 
-    const author = session.user.name || session.user.email || "Staff";
+    const author = auth.user.name || auth.user.email || "Staff";
 
     const note = await prisma.leadNote.create({
       data: {
@@ -42,7 +41,8 @@ export async function POST(
     });
 
     return NextResponse.json({ note });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[api/admin/leads/[id]/notes] POST failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }

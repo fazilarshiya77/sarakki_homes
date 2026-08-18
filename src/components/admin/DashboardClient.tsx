@@ -14,7 +14,31 @@ import {
   Activity,
   ChevronRight,
   FileCheck,
+  IndianRupee,
+  Wallet,
+  Target,
+  Trophy,
 } from "lucide-react";
+import { formatMoneyLakh } from "@/lib/crm";
+
+export interface RevenueSummary {
+  totalRevenueLakh: number;
+  totalDealValueLakh: number;
+  openPipelineLakh: number;
+  openPipelineCount: number;
+  avgDealSizeLakh: number;
+  revenueThisMonthLakh: number;
+  dealsClosedThisMonth: number;
+  wonCount: number;
+  lostCount: number;
+  winRatePct: number;
+}
+
+export interface MonthlyRevenuePoint {
+  month: string;
+  revenueLakh: number;
+  deals: number;
+}
 
 interface DashboardClientProps {
   stats: {
@@ -30,6 +54,8 @@ interface DashboardClientProps {
     todayEnquiries: number;
     views: number;
   };
+  revenue: RevenueSummary;
+  monthlyRevenue: MonthlyRevenuePoint[];
   recentEnquiries: Array<{
     id: string;
     customer: { name: string; email: string; phone: string };
@@ -39,18 +65,22 @@ interface DashboardClientProps {
   }>;
 }
 
-export function DashboardClient({ stats, recentEnquiries }: DashboardClientProps) {
-  // Static monthly analytics for custom SVG chart
-  const monthlyData = [
-    { month: "Jan", views: 240, enquiries: 12 },
-    { month: "Feb", views: 360, enquiries: 19 },
-    { month: "Mar", views: 480, enquiries: 24 },
-    { month: "Apr", views: 600, enquiries: 35 },
-    { month: "May", views: 800, enquiries: 48 },
-    { month: "Jun", views: 950, enquiries: 62 },
-  ];
-
-  const maxViews = Math.max(...monthlyData.map((d) => d.views));
+export function DashboardClient({
+  stats,
+  revenue,
+  monthlyRevenue,
+  recentEnquiries,
+}: DashboardClientProps) {
+  // The chart series is real, database-derived data (revenue and deals
+  // closed per month over the last 6 months, by Lead.closedAt) — it
+  // replaces a hardcoded Jan–Jun demo array that used to live here.
+  // Months with no closed deals are genuine zeros.
+  const maxRevenue = Math.max(...monthlyRevenue.map((d) => d.revenueLakh), 0);
+  const maxDeals = Math.max(...monthlyRevenue.map((d) => d.deals), 0);
+  const hasChartData = maxRevenue > 0 || maxDeals > 0;
+  // Guard every bar height against a zero denominator — an empty CRM
+  // must render flat bars, not NaN%.
+  const barPct = (value: number, max: number) => (max > 0 ? (value / max) * 100 : 0);
 
   return (
     <div className="space-y-10">
@@ -127,68 +157,216 @@ export function DashboardClient({ stats, recentEnquiries }: DashboardClientProps
         })}
       </div>
 
-      {/* Main split row: Charts & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Analytics Chart Card */}
-        <div className="lg:col-span-2 crm-card p-6">
+      {/* Revenue & deal performance */}
+      <div className="space-y-5">
+        <div className="flex items-end justify-between">
+          <div>
+            <h2 className="font-display text-2xl font-bold tracking-wide text-crm-text">
+              Revenue &amp; Deals
+            </h2>
+            <p className="text-sm text-crm-text-secondary mt-1">
+              Commission earned on won deals, and the value still in play.
+            </p>
+          </div>
+          <Link
+            href="/admin/leads"
+            className="hidden md:flex items-center gap-1 text-[11px] font-semibold text-crm-gold hover:text-crm-gold-bright uppercase tracking-wider transition-colors"
+          >
+            <span>Open Pipeline</span>
+            <ChevronRight size={12} />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {[
+            {
+              label: "Revenue Earned",
+              value: formatMoneyLakh(revenue.totalRevenueLakh),
+              desc: `${formatMoneyLakh(revenue.revenueThisMonthLakh)} this month`,
+              icon: IndianRupee,
+              accent: true,
+            },
+            {
+              label: "Deal Value Closed",
+              value: formatMoneyLakh(revenue.totalDealValueLakh),
+              desc:
+                revenue.wonCount > 0
+                  ? `${revenue.wonCount} won · avg ${formatMoneyLakh(revenue.avgDealSizeLakh)}`
+                  : "No deals closed yet",
+              icon: Trophy,
+            },
+            {
+              label: "Open Pipeline",
+              value: formatMoneyLakh(revenue.openPipelineLakh),
+              desc: `${revenue.openPipelineCount} active lead${revenue.openPipelineCount === 1 ? "" : "s"}`,
+              icon: Wallet,
+            },
+            {
+              label: "Win Rate",
+              value:
+                revenue.wonCount + revenue.lostCount > 0
+                  ? `${revenue.winRatePct.toFixed(0)}%`
+                  : "—",
+              desc: `${revenue.wonCount} won · ${revenue.lostCount} lost`,
+              icon: Target,
+            },
+          ].map((card, idx) => {
+            const Icon = card.icon;
+            return (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: idx * 0.05 }}
+                key={card.label}
+                className={
+                  card.accent
+                    ? "crm-card p-6 border-crm-gold/40 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(36,30,25,0.09)]"
+                    : "crm-card p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(36,30,25,0.09)]"
+                }
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-wider font-semibold text-crm-text-muted">
+                    {card.label}
+                  </span>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-crm-gold/12 text-crm-gold">
+                    <Icon size={14} strokeWidth={1.75} />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="font-display text-3xl font-bold tracking-tight text-crm-text">
+                    {card.value}
+                  </span>
+                </div>
+                <p className="text-[11px] text-crm-text-secondary mt-2 font-medium">
+                  {card.desc}
+                </p>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Revenue closed per month — real data from Lead.closedAt */}
+        <div className="crm-card p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex flex-col">
               <span className="text-sm font-semibold tracking-wide text-crm-text">
-                Property Views & Leads
+                Revenue Closed by Month
               </span>
               <span className="text-xs text-crm-text-secondary mt-0.5">
-                Performance tracking over the last 6 months
+                Commission earned and deals won over the last 6 months
               </span>
             </div>
             <div className="flex items-center gap-4 text-xs font-semibold text-crm-text-secondary">
               <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-crm-gold" /> Views
+                <span className="h-2 w-2 rounded-full bg-crm-gold" /> Revenue
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" /> Enquiries
+                <span className="h-2 w-2 rounded-full bg-emerald-500" /> Deals Won
               </span>
             </div>
           </div>
 
-          {/* SVG Custom Graph */}
-          <div className="h-64 w-full flex items-end justify-between gap-4 pt-4 border-b border-crm-border">
-            {monthlyData.map((d) => {
-              const viewHeight = (d.views / maxViews) * 100;
-              const enquiryHeight = (d.enquiries / 80) * 100;
+          {!hasChartData && (
+            <p className="mb-4 text-[11px] text-crm-text-muted">
+              No deals have been closed in the last six months yet — every month below is a
+              real zero, not a placeholder.
+            </p>
+          )}
 
-              return (
-                <div key={d.month} className="flex-1 flex flex-col items-center h-full justify-end group">
-                  <div className="w-full flex items-end gap-2 justify-center h-full relative">
-                    {/* View Bar */}
-                    <motion.div
-                      initial={{ height: 0 }}
-                      animate={{ height: `${viewHeight}%` }}
-                      transition={{ duration: 1, ease: "easeOut" }}
-                      className="w-4 rounded-t-sm bg-gradient-to-t from-crm-gold to-crm-gold-bright/50 relative cursor-pointer group-hover:brightness-110"
-                    >
-                      <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-crm-espresso text-crm-ivory text-[9px] px-1.5 py-0.5 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                        {d.views} views
-                      </div>
-                    </motion.div>
-                    {/* Enquiry Bar */}
-                    <motion.div
-                      initial={{ height: 0 }}
-                      animate={{ height: `${enquiryHeight}%` }}
-                      transition={{ duration: 1, delay: 0.1, ease: "easeOut" }}
-                      className="w-4 rounded-t-sm bg-gradient-to-t from-emerald-600 to-emerald-500/40 relative cursor-pointer group-hover:brightness-110"
-                    >
-                      <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-crm-espresso text-crm-ivory text-[9px] px-1.5 py-0.5 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                        {d.enquiries} leads
-                      </div>
-                    </motion.div>
-                  </div>
-                  <span className="text-[10px] font-semibold text-crm-text-muted uppercase mt-3">
-                    {d.month}
-                  </span>
+          <div className="h-64 w-full flex items-end justify-between gap-4 pt-4 border-b border-crm-border">
+            {monthlyRevenue.map((d) => (
+              <div
+                key={d.month}
+                className="flex-1 flex flex-col items-center h-full justify-end group"
+              >
+                <div className="w-full flex items-end gap-2 justify-center h-full relative">
+                  <motion.div
+                    initial={{ height: 0 }}
+                    animate={{ height: `${barPct(d.revenueLakh, maxRevenue)}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className="w-4 min-h-[2px] rounded-t-sm bg-gradient-to-t from-crm-gold to-crm-gold-bright/50 relative cursor-pointer group-hover:brightness-110"
+                  >
+                    <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-crm-espresso text-crm-ivory text-[9px] px-1.5 py-0.5 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                      {formatMoneyLakh(d.revenueLakh)}
+                    </div>
+                  </motion.div>
+                  <motion.div
+                    initial={{ height: 0 }}
+                    animate={{ height: `${barPct(d.deals, maxDeals)}%` }}
+                    transition={{ duration: 1, delay: 0.1, ease: "easeOut" }}
+                    className="w-4 min-h-[2px] rounded-t-sm bg-gradient-to-t from-emerald-600 to-emerald-500/40 relative cursor-pointer group-hover:brightness-110"
+                  >
+                    <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-crm-espresso text-crm-ivory text-[9px] px-1.5 py-0.5 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                      {d.deals} deal{d.deals === 1 ? "" : "s"}
+                    </div>
+                  </motion.div>
                 </div>
-              );
-            })}
+                <span className="text-[10px] font-semibold text-crm-text-muted uppercase mt-3">
+                  {d.month}
+                </span>
+              </div>
+            ))}
           </div>
+        </div>
+      </div>
+
+      {/* Main split row: Charts & Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Deal performance summary — real figures only */}
+        <div className="lg:col-span-2 crm-card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold tracking-wide text-crm-text">
+                Deal Performance
+              </span>
+              <span className="text-xs text-crm-text-secondary mt-0.5">
+                Closed and in-flight business, straight from the CRM
+              </span>
+            </div>
+            <Activity size={14} className="text-crm-gold" />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              {
+                label: "Average Deal Size (Won)",
+                value: revenue.wonCount > 0 ? formatMoneyLakh(revenue.avgDealSizeLakh) : "—",
+                desc: `Across ${revenue.wonCount} won deal${revenue.wonCount === 1 ? "" : "s"}`,
+              },
+              {
+                label: "Revenue This Month",
+                value: formatMoneyLakh(revenue.revenueThisMonthLakh),
+                desc: `${revenue.dealsClosedThisMonth} deal${revenue.dealsClosedThisMonth === 1 ? "" : "s"} closed`,
+              },
+              {
+                label: "Deals Won / Lost",
+                value: `${revenue.wonCount} / ${revenue.lostCount}`,
+                desc:
+                  revenue.wonCount + revenue.lostCount > 0
+                    ? `${revenue.winRatePct.toFixed(0)}% win rate`
+                    : "No closed deals yet",
+              },
+              {
+                label: "Pipeline Coverage",
+                value: formatMoneyLakh(revenue.openPipelineLakh),
+                desc: `${revenue.openPipelineCount} lead${revenue.openPipelineCount === 1 ? "" : "s"} still open`,
+              },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="rounded-sm border border-crm-border/70 bg-crm-bg/60 p-4"
+              >
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-crm-text-muted">
+                  {item.label}
+                </span>
+                <p className="font-display text-2xl font-bold tracking-tight text-crm-text mt-2">
+                  {item.value}
+                </p>
+                <p className="text-[11px] text-crm-text-secondary mt-1 font-medium">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
         </div>
 
         {/* Quick Actions Panel */}

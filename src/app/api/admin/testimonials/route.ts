@@ -1,23 +1,28 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireRole, CAN } from "@/lib/authz";
 
-export async function GET(req: Request) {
+const GENERIC_ERROR = "Something went wrong. Please try again.";
+
+export async function GET() {
+  const auth = await requireRole(CAN.MANAGE_CONTENT);
+  if (!auth.ok) return auth.response;
+
   try {
     const testimonials = await prisma.testimonial.findMany({
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json({ testimonials });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[api/admin/testimonials] GET failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await requireRole(CAN.MANAGE_CONTENT);
+  if (!auth.ok) return auth.response;
 
   try {
     const body = await req.json();
@@ -38,7 +43,7 @@ export async function POST(req: Request) {
 
     await prisma.activityLog.create({
       data: {
-        userId: (session.user as any).id,
+        userId: auth.user.id,
         action: "CREATE_TESTIMONIAL",
         details: `Created testimonial by ${body.name}`,
       },
@@ -50,7 +55,8 @@ export async function POST(req: Request) {
     revalidatePath("/process");
 
     return NextResponse.json({ testimonial });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[api/admin/testimonials] POST failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }

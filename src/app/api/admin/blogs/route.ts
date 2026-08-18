@@ -1,22 +1,31 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireRole, CAN } from "@/lib/authz";
 
-export async function GET(req: Request) {
+// SECURITY: unexpected exceptions are logged server-side (visible in the
+// Vercel logs) but never echoed to the client — raw Prisma errors leak
+// table/column names and connection details. Deliberate validation
+// messages below are safe and stay verbatim.
+const GENERIC_ERROR = "Something went wrong. Please try again.";
+
+export async function GET() {
+  const auth = await requireRole(CAN.MANAGE_CONTENT);
+  if (!auth.ok) return auth.response;
+
   try {
     const blogs = await prisma.blog.findMany({
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json({ blogs });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[api/admin/blogs] GET failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await requireRole(CAN.MANAGE_CONTENT);
+  if (!auth.ok) return auth.response;
 
   try {
     const body = await req.json();
@@ -41,14 +50,15 @@ export async function POST(req: Request) {
 
     await prisma.activityLog.create({
       data: {
-        userId: (session.user as any).id,
+        userId: auth.user.id,
         action: "CREATE_BLOG",
         details: `Published blog article: ${body.title}`,
       },
     });
 
     return NextResponse.json({ blog });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[api/admin/blogs] POST failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }

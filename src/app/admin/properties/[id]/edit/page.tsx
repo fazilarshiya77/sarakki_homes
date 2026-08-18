@@ -55,7 +55,10 @@ export default async function EditPropertyPage({
     baths: String(property.baths),
     area: property.area,
     areaSqft: String(property.areaSqft),
-    imageUrl: property.images[0]?.url || "",
+    // Full ordered gallery, not just the cover — the wizard now manages
+    // every image, so passing only images[0] here would silently drop
+    // the rest of an existing property's photos on save.
+    images: property.images.map((img) => ({ url: img.url })),
     seoTitle: property.title,
     seoDescription: property.description.substring(0, 155),
     slug: property.slug,

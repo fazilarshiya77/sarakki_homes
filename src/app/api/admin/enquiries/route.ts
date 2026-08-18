@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireRole, CAN } from "@/lib/authz";
 
-export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+const GENERIC_ERROR = "Something went wrong. Please try again.";
+
+export async function GET() {
+  const auth = await requireRole(CAN.MANAGE_CRM);
+  if (!auth.ok) return auth.response;
 
   try {
     const enquiries = await prisma.enquiry.findMany({
@@ -20,7 +19,8 @@ export async function GET(req: Request) {
     });
 
     return NextResponse.json({ enquiries });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[api/admin/enquiries] GET failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }

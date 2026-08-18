@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireRole, CAN } from "@/lib/authz";
+
+// SECURITY: unexpected exceptions are logged server-side but never echoed
+// to the client — raw Prisma errors leak schema and connection details.
+const GENERIC_ERROR = "Something went wrong. Please try again.";
 
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await requireRole(CAN.MANAGE_CONTENT);
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
 
@@ -32,8 +33,9 @@ export async function GET(
     }
 
     return NextResponse.json({ property });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[api/admin/properties/[id]] request failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }
 
@@ -41,10 +43,8 @@ export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await requireRole(CAN.MANAGE_CONTENT);
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
 
@@ -136,7 +136,7 @@ export async function PUT(
       // Create new ones
       if (body.images.length > 0) {
         await prisma.propertyImage.createMany({
-          data: body.images.map((img: any, idx: number) => ({
+          data: body.images.map((img: { url: string; publicId?: string }, idx: number) => ({
             url: img.url,
             publicId: img.publicId || `manual_${property.slug}_${idx}`,
             order: idx,
@@ -149,7 +149,7 @@ export async function PUT(
     // Log activity
     await prisma.activityLog.create({
       data: {
-        userId: (session.user as any).id,
+        userId: auth.user.id,
         action: "UPDATE_PROPERTY",
         details: `Updated property ${property.title} (${property.propertyId})`,
       },
@@ -163,8 +163,9 @@ export async function PUT(
     revalidatePath(`/properties/bank-auctions/${property.propertyId}`);
 
     return NextResponse.json({ property });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[api/admin/properties/[id]] request failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }
 
@@ -172,10 +173,10 @@ export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // Deleting a live listing is destructive and public-facing — narrower
+  // than general content editing (see CAN.DELETE_CONTENT in src/lib/authz).
+  const auth = await requireRole(CAN.DELETE_CONTENT);
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
 
@@ -196,7 +197,7 @@ export async function DELETE(
     // Log activity
     await prisma.activityLog.create({
       data: {
-        userId: (session.user as any).id,
+        userId: auth.user.id,
         action: "DELETE_PROPERTY",
         details: `Deleted property ${existing.title} (${existing.propertyId})`,
       },
@@ -208,7 +209,8 @@ export async function DELETE(
     revalidatePath(`/properties/${existing.slug}`);
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[api/admin/properties/[id]] request failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }

@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireRole, CAN } from "@/lib/authz";
+
+const GENERIC_ERROR = "Something went wrong. Please try again.";
 
 export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await requireRole(CAN.MANAGE_CRM);
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
 
@@ -33,14 +32,15 @@ export async function PUT(
           leadId: task.leadId,
           type: "TASK",
           title: `Task "${task.title}" marked ${body.status.replace(/_/g, " ").toLowerCase()}`,
-          author: session.user.name || session.user.email || "Staff",
+          author: auth.user.name || auth.user.email || "Staff",
         },
       });
     }
 
     return NextResponse.json({ task });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[api/admin/tasks/[id]] PUT failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }
 
@@ -48,17 +48,18 @@ export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // CRM workflow data, not public-facing content — DELETE_CONTENT is
+  // about published inventory, so deleting a task stays MANAGE_CRM.
+  const auth = await requireRole(CAN.MANAGE_CRM);
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
 
   try {
     await prisma.leadTask.delete({ where: { id } });
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[api/admin/tasks/[id]] DELETE failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }

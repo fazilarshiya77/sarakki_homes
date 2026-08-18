@@ -87,6 +87,8 @@ model Property {
   videos    PropertyVideo[]
   documents Document[]
   enquiries Enquiry[]
+  // CRM deals closed against this listing (see Lead.propertyId).
+  leads     Lead[]          @relation("LeadProperty")
 
   // status/featured/createdAt are filtered and sorted on in nearly every
   // public + CRM property query (getPublishedProperties, dashboard
@@ -264,6 +266,33 @@ model Lead {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // --- Deal / revenue tracking -------------------------------------
+  // All amounts are in lakh (₹), matching the existing budget*Lakh and
+  // Property.priceValueLakh convention so nothing needs unit conversion
+  // when comparing a lead's budget to the deal it actually closed at.
+  //
+  // dealValueLakh   = the transaction size (what the property sold for)
+  // commissionPct   = Sarakki Homes' cut, as a percentage of the deal
+  // commissionLakh  = the actual earned revenue. Stored rather than
+  //                   always derived, because a negotiated/flat fee can
+  //                   differ from a straight percentage — the UI
+  //                   pre-fills it from the percentage but allows an
+  //                   override, and reports read this field.
+  // closedAt        = when the lead reached WON or LOST. Distinct from
+  //                   updatedAt (which any edit touches), so
+  //                   revenue-by-period reporting stays accurate.
+  dealValueLakh  Float?
+  commissionPct  Float?
+  commissionLakh Float?
+  closedAt       DateTime?
+
+  // The specific listing this deal was closed on, when applicable.
+  // Optional: plenty of leads are closed on off-listing or
+  // yet-to-be-listed inventory, and a lead exists long before any
+  // property is chosen.
+  propertyId String?
+  property   Property? @relation("LeadProperty", fields: [propertyId], references: [id], onDelete: SetNull)
+
   agentId String?
   agent   User?   @relation("AssignedAgent", fields: [agentId], references: [id])
 
@@ -274,6 +303,10 @@ model Lead {
   @@index([stage])
   @@index([agentId])
   @@index([createdAt])
+  // Revenue reporting filters on closedAt (period) and propertyId
+  // (revenue attributed to a listing).
+  @@index([closedAt])
+  @@index([propertyId])
 }
 
 // Status: PENDING, IN_PROGRESS, DONE

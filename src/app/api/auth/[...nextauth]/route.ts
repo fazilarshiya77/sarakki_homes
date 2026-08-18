@@ -4,6 +4,60 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
+/**
+ * Login brute-force speed bump.
+ *
+ * CAVEAT, deliberately stated: this is plain in-memory state, scoped to a
+ * single serverless instance and wiped on cold start. It is therefore a
+ * speed bump, not a distributed guarantee — a determined attacker spraying
+ * across instances gets more than 5 tries per window. A proper
+ * implementation would keep counters in Redis/Upstash (or a rate-limit
+ * table) so every instance shares one view. Even so, this raises the cost
+ * of a naive online password-guessing attack by orders of magnitude at
+ * zero infrastructure cost, which is the right trade for this deployment.
+ */
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+
+const failedAttempts = new Map<string, { count: number; firstAttemptAt: number }>();
+
+/** True if this email is currently locked out. Also expires stale windows. */
+function isLockedOut(email: string): boolean {
+  const entry = failedAttempts.get(email);
+  if (!entry) return false;
+  if (Date.now() - entry.firstAttemptAt > LOCKOUT_WINDOW_MS) {
+    failedAttempts.delete(email);
+    return false;
+  }
+  return entry.count >= MAX_FAILED_ATTEMPTS;
+}
+
+function recordFailure(email: string): void {
+  const entry = failedAttempts.get(email);
+  if (!entry || Date.now() - entry.firstAttemptAt > LOCKOUT_WINDOW_MS) {
+    failedAttempts.set(email, { count: 1, firstAttemptAt: Date.now() });
+    return;
+  }
+  entry.count += 1;
+
+  // Cheap bound on memory: an attacker cycling through invented emails
+  // would otherwise grow this map without limit. Drop expired windows
+  // once it gets large; genuine lockouts in progress are recent entries.
+  if (failedAttempts.size > 10_000) {
+    const cutoff = Date.now() - LOCKOUT_WINDOW_MS;
+    for (const [key, value] of failedAttempts) {
+      if (value.firstAttemptAt < cutoff) failedAttempts.delete(key);
+    }
+  }
+}
+
+function clearFailures(email: string): void {
+  failedAttempts.delete(email);
+}
+
+const RATE_LIMIT_MESSAGE =
+  "Too many failed sign-in attempts. Please try again in a few minutes.";
+
 export const authOptions: AuthOptions = {
   session: {
     strategy: "jwt",
@@ -21,6 +75,14 @@ export const authOptions: AuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Please enter your email and password.");
+        }
+
+        // Normalized so "Admin@x.com" and "admin@x.com" share one counter
+        // and the lockout can't be sidestepped by changing capitalization.
+        const rateLimitKey = credentials.email.trim().toLowerCase();
+
+        if (isLockedOut(rateLimitKey)) {
+          throw new Error(RATE_LIMIT_MESSAGE);
         }
 
         // A raw, uncaught PrismaClientInitializationError bubbling out of
@@ -51,6 +113,7 @@ export const authOptions: AuthOptions = {
         }
 
         if (!user || !user.passwordHash) {
+          recordFailure(rateLimitKey);
           throw new Error("No user found with this email.");
         }
 
@@ -60,8 +123,16 @@ export const authOptions: AuthOptions = {
         );
 
         if (!isPasswordCorrect) {
-          throw new Error("Invalid password.");
+          recordFailure(rateLimitKey);
+          // Surface the lockout on the attempt that trips it, rather than
+          // making the user discover it on their next try.
+          throw new Error(
+            isLockedOut(rateLimitKey) ? RATE_LIMIT_MESSAGE : "Invalid password."
+          );
         }
+
+        // A successful sign-in wipes the counter for this email.
+        clearFailures(rateLimitKey);
 
         return {
           id: user.id,

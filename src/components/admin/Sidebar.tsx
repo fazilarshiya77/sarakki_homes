@@ -22,6 +22,7 @@ import {
   ChevronRight,
   Target,
   CheckSquare,
+  UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -61,6 +62,7 @@ const NAV_GROUPS = [
   {
     label: "System",
     items: [
+      { label: "Staff", href: "/admin/staff", icon: UserCog },
       { label: "Users", href: "/admin/users", icon: UserCheck },
       { label: "Settings", href: "/admin/settings", icon: Settings },
     ],

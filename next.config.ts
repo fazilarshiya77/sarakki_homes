@@ -15,6 +15,42 @@ const nextConfig: NextConfig = {
   devIndicators: {
     position: "top-left",
   },
+
+  // Baseline security headers, applied to every route.
+  //
+  // Deliberately NOT included: Content-Security-Policy. This app relies on
+  // Next.js's inline bootstrap scripts, Google Fonts (fonts.googleapis.com /
+  // fonts.gstatic.com via next/font), and a Google Maps iframe embed on the
+  // property detail pages. A CSP bolted on without per-directive testing and
+  // a nonce strategy for the inline scripts would break all three, so it is
+  // left as deliberate future work rather than shipped half-configured.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          // Nothing in this app is meant to be framed — blocks clickjacking.
+          { key: "X-Frame-Options", value: "DENY" },
+          // Stops browsers guessing a response's type from its bytes.
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          // Send the full referrer same-origin, origin-only cross-origin,
+          // and nothing at all when downgrading to http.
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // The site never needs these — deny them outright.
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+          // Force HTTPS for 2 years, subdomains included. Ignored by
+          // browsers over plain http, so it's inert in local dev.
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

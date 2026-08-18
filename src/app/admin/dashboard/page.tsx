@@ -1,16 +1,38 @@
 import { prisma } from "@/lib/prisma";
 import { DashboardClient } from "@/components/admin/DashboardClient";
+import { safePercent } from "@/lib/crm";
 
 export const dynamic = "force-dynamic";
 
+const CLOSED = ["WON", "LOST"];
+
+/** The last 6 calendar months, oldest first, as half-open [start, end) ranges. */
+function lastSixMonths(now: Date) {
+  const months: { label: string; start: Date; end: Date }[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+    months.push({
+      label: start.toLocaleDateString("en-IN", { month: "short" }),
+      start,
+      end,
+    });
+  }
+  return months;
+}
+
 export default async function DashboardPage() {
-  // Query the live Supabase database. All 11 queries below are
-  // independent of each other, so they're fired together with
-  // Promise.all instead of one `await` at a time — previously this page
-  // waited for the SUM of 11 sequential network round-trips to
-  // Supabase; now it waits for the slowest single one.
+  // Query the live Supabase database. Every query below is independent
+  // of the others, so they're fired together with Promise.all instead of
+  // one `await` at a time — previously this page waited for the SUM of
+  // all sequential network round-trips to Supabase; now it waits for the
+  // slowest single one. Anything added here MUST join this array rather
+  // than being awaited separately.
+  const now = new Date();
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const months = lastSixMonths(now);
 
   const [
     totalProperties,
@@ -25,6 +47,12 @@ export default async function DashboardPage() {
     todayEnquiries,
     viewAggregate,
     recentEnquiriesDb,
+    // --- revenue aggregates, all summed by the database ---
+    wonAggregate,
+    openPipelineAggregate,
+    monthRevenueAggregate,
+    stageCounts,
+    monthlyAggregates,
   ] = await Promise.all([
     prisma.property.count(),
     prisma.property.count({ where: { featured: "true" } }),
@@ -42,9 +70,74 @@ export default async function DashboardPage() {
       orderBy: { createdAt: "desc" },
       include: { customer: true, property: true },
     }),
+    // Revenue earned, deal value closed and average deal size — one pass.
+    prisma.lead.aggregate({
+      where: { stage: "WON" },
+      _sum: { commissionLakh: true, dealValueLakh: true },
+      _avg: { dealValueLakh: true },
+      _count: { _all: true },
+    }),
+    // Open pipeline: everything not yet closed either way.
+    prisma.lead.aggregate({
+      where: { stage: { notIn: CLOSED } },
+      _sum: { dealValueLakh: true },
+      _count: { _all: true },
+    }),
+    // Revenue booked this calendar month, by closedAt (not updatedAt).
+    prisma.lead.aggregate({
+      where: { stage: "WON", closedAt: { gte: monthStart } },
+      _sum: { commissionLakh: true },
+      _count: { _all: true },
+    }),
+    // Won/lost counts for the win rate, in a single grouped query.
+    prisma.lead.groupBy({
+      by: ["stage"],
+      where: { stage: { in: CLOSED } },
+      _count: { _all: true },
+    }),
+    // The 6-month chart series: one bounded aggregate per month, all
+    // issued concurrently as part of this same Promise.all (the inner
+    // Promise.all does not serialize them). No lead rows are pulled into
+    // JS to be reduced.
+    Promise.all(
+      months.map((m) =>
+        prisma.lead.aggregate({
+          where: { stage: "WON", closedAt: { gte: m.start, lt: m.end } },
+          _sum: { commissionLakh: true },
+          _count: { _all: true },
+        })
+      )
+    ),
   ]);
 
   const views = viewAggregate._sum.views || 0;
+
+  const wonCount = stageCounts.find((s) => s.stage === "WON")?._count._all ?? 0;
+  const lostCount = stageCounts.find((s) => s.stage === "LOST")?._count._all ?? 0;
+
+  const revenue = {
+    totalRevenueLakh: wonAggregate._sum.commissionLakh ?? 0,
+    totalDealValueLakh: wonAggregate._sum.dealValueLakh ?? 0,
+    openPipelineLakh: openPipelineAggregate._sum.dealValueLakh ?? 0,
+    openPipelineCount: openPipelineAggregate._count._all ?? 0,
+    avgDealSizeLakh: wonAggregate._avg.dealValueLakh ?? 0,
+    revenueThisMonthLakh: monthRevenueAggregate._sum.commissionLakh ?? 0,
+    dealsClosedThisMonth: monthRevenueAggregate._count._all ?? 0,
+    wonCount,
+    lostCount,
+    // A brand-new CRM has zero of both — safePercent returns 0 rather
+    // than NaN so the card never renders "NaN%".
+    winRatePct: safePercent(wonCount, wonCount + lostCount),
+  };
+
+  // Real per-month figures — this replaces the hardcoded Jan–Jun demo
+  // series that used to live in DashboardClient. A month with no closed
+  // deals reports zero; nothing is interpolated or invented.
+  const monthlyRevenue = months.map((m, i) => ({
+    month: m.label,
+    revenueLakh: Number((monthlyAggregates[i]._sum.commissionLakh ?? 0).toFixed(2)),
+    deals: monthlyAggregates[i]._count._all ?? 0,
+  }));
 
   // Map database entries to match the client component interface
   const stats = {
@@ -75,5 +168,12 @@ export default async function DashboardPage() {
     createdAt: enq.createdAt.toISOString(),
   }));
 
-  return <DashboardClient stats={stats} recentEnquiries={recentEnquiries} />;
+  return (
+    <DashboardClient
+      stats={stats}
+      revenue={revenue}
+      monthlyRevenue={monthlyRevenue}
+      recentEnquiries={recentEnquiries}
+    />
+  );
 }

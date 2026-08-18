@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireRole, CAN } from "@/lib/authz";
 
-export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+const GENERIC_ERROR = "Something went wrong. Please try again.";
+
+export async function GET() {
+  const auth = await requireRole(CAN.MANAGE_CONTENT);
+  if (!auth.ok) return auth.response;
 
   try {
     const categories = await prisma.category.findMany({
@@ -13,14 +14,15 @@ export async function GET(req: Request) {
       orderBy: { title: "asc" },
     });
     return NextResponse.json({ categories });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[api/admin/categories] GET failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await requireRole(CAN.MANAGE_CONTENT);
+  if (!auth.ok) return auth.response;
 
   try {
     const body = await req.json();
@@ -43,14 +45,15 @@ export async function POST(req: Request) {
 
     await prisma.activityLog.create({
       data: {
-        userId: (session.user as any).id,
+        userId: auth.user.id,
         action: "CREATE_CATEGORY",
         details: `Created category: ${body.title}`,
       },
     });
 
     return NextResponse.json({ category });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[api/admin/categories] POST failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }

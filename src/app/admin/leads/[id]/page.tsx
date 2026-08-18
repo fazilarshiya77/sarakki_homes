@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -27,8 +28,10 @@ import {
   TASK_STATUSES,
   TASK_STATUS_BADGE_CLASS,
   budgetRangeLabel,
+  formatMoneyLakh,
 } from "@/lib/crm";
 import { cn } from "@/lib/utils";
+import { DealRevenuePanel } from "@/components/admin/revenue/DealRevenuePanel";
 
 interface LeadDetail {
   id: string;
@@ -52,6 +55,12 @@ interface LeadDetail {
   lostReason: string | null;
   lastContact: string | null;
   createdAt: string;
+  dealValueLakh: number | null;
+  commissionPct: number | null;
+  commissionLakh: number | null;
+  closedAt: string | null;
+  propertyId: string | null;
+  property: { id: string; title: string; propertyId: string } | null;
   agent: { id: string; name: string } | null;
   notes: { id: string; author: string; content: string; pinned: boolean; createdAt: string }[];
   tasks: { id: string; title: string; description: string | null; status: string; priority: string; dueDate: string | null; assignedTo: string | null; createdAt: string }[];
@@ -66,6 +75,9 @@ const labelClass = "text-[10px] font-semibold uppercase tracking-wider text-crm-
 
 export default function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { data: session } = useSession();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  const canViewRevenue = role === "ADMIN" || role === "MANAGER";
   const [lead, setLead] = useState<LeadDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("notes");
@@ -107,6 +119,21 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     } finally {
       setUpdating(false);
     }
+  };
+
+  // Deliberately separate from patchLead: patchLead swallows errors (its
+  // callers are fire-and-forget toggles), whereas the deal panel needs
+  // failures surfaced so a rejected 400/403 isn't shown to the user as a
+  // successful save of revenue data.
+  const saveDeal = async (payload: Record<string, unknown>) => {
+    const res = await fetch(`/api/admin/leads/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Could not save deal details.");
+    await fetchLead();
   };
 
   const addNote = async () => {
@@ -282,6 +309,49 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
             <DetailRow label="Source" value={lead.source} />
             {lead.agent && <DetailRow label="Assigned Agent" value={lead.agent.name} />}
           </div>
+
+          <DealRevenuePanel
+            key={`${lead.dealValueLakh}-${lead.commissionPct}-${lead.commissionLakh}-${lead.propertyId}`}
+            canEdit={canViewRevenue}
+            values={{
+              dealValueLakh: lead.dealValueLakh,
+              commissionPct: lead.commissionPct,
+              commissionLakh: lead.commissionLakh,
+              propertyId: lead.propertyId,
+              closedAt: lead.closedAt,
+            }}
+            onSave={saveDeal}
+          />
+
+          {canViewRevenue && (lead.dealValueLakh !== null || lead.commissionLakh !== null) && (
+            <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-5 space-y-3">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary mb-1">
+                Deal Summary
+              </p>
+              <DetailRow label="Deal Value" value={formatMoneyLakh(lead.dealValueLakh)} />
+              <DetailRow
+                label="Commission"
+                value={
+                  lead.commissionPct !== null
+                    ? `${formatMoneyLakh(lead.commissionLakh)} (${lead.commissionPct}%)`
+                    : formatMoneyLakh(lead.commissionLakh)
+                }
+              />
+              <DetailRow label="Property" value={lead.property?.title ?? "Not linked"} />
+              <DetailRow
+                label="Closed"
+                value={
+                  lead.closedAt
+                    ? new Date(lead.closedAt).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : "Open"
+                }
+              />
+            </div>
+          )}
 
           {(lead.stage === "WON" || lead.stage === "LOST") && (
             <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-5 space-y-2">

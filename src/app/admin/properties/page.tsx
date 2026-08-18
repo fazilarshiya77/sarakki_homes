@@ -206,7 +206,13 @@ export default function PropertiesListPage() {
               setPage(1);
             }}
             placeholder="Search by ID, name, location..."
-            className="crm-input pl-10"
+            // `.crm-input`'s own CSS sets a `padding` shorthand (globals.css)
+            // that, due to stylesheet load order, wins over Tailwind's
+            // `pl-10` and silently resets left padding back down — text was
+            // rendering right under the search icon. `pl-10!` forces
+            // Tailwind's `!important` variant so the icon offset actually
+            // sticks regardless of cascade order.
+            className="crm-input pl-10!"
           />
         </div>
 

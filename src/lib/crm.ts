@@ -85,3 +85,69 @@ export function budgetRangeLabel(min?: number | null, max?: number | null): stri
   if (min) return `${formatLakh(min)}+`;
   return `Up to ${formatLakh(max)}`;
 }
+
+// --- Deal / revenue helpers ------------------------------------------
+// Every money value in the CRM is stored in lakh (₹), matching
+// Property.priceValueLakh and Lead.budget*Lakh. This is the single
+// display formatter for those values so revenue never renders in one
+// unit on the dashboard and another on a lead.
+
+/**
+ * Format a lakh-denominated amount as Indian currency.
+ *   45.5 -> "₹ 45.5 L" · 120 -> "₹ 1.2 Cr" · 0 -> "₹ 0" · null -> "—"
+ * Never returns "NaN": non-finite input is treated as missing, which
+ * matters because a brand-new CRM has zero closed deals and several
+ * aggregates legitimately come back null.
+ */
+export function formatMoneyLakh(value?: number | null): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "—";
+  if (value === 0) return "₹ 0";
+  const negative = value < 0;
+  const abs = Math.abs(value);
+  const body =
+    abs >= 100
+      ? `₹ ${trimNumber(abs / 100, abs / 100 >= 100 ? 1 : 2)} Cr`
+      : `₹ ${trimNumber(abs, abs >= 10 ? 1 : 2)} L`;
+  return negative ? `-${body}` : body;
+}
+
+/** Round to at most `decimals` places and drop trailing zeros. */
+function trimNumber(value: number, decimals: number): string {
+  const rounded = Number(value.toFixed(decimals));
+  return rounded.toLocaleString("en-IN", { maximumFractionDigits: decimals });
+}
+
+/** Commission amount implied by a deal value and a percentage. */
+export function deriveCommissionLakh(
+  dealValueLakh?: number | null,
+  commissionPct?: number | null
+): number | null {
+  if (
+    dealValueLakh === null ||
+    dealValueLakh === undefined ||
+    commissionPct === null ||
+    commissionPct === undefined ||
+    !Number.isFinite(dealValueLakh) ||
+    !Number.isFinite(commissionPct)
+  ) {
+    return null;
+  }
+  return Number(((dealValueLakh * commissionPct) / 100).toFixed(4));
+}
+
+/** Percentage helper that never divides by zero (returns 0, not NaN). */
+export function safePercent(part: number, whole: number): number {
+  if (!whole || !Number.isFinite(whole) || !Number.isFinite(part)) return 0;
+  return (part / whole) * 100;
+}
+
+/** Stages that mean the lead is no longer in the open pipeline. */
+export const CLOSED_STAGES = ["WON", "LOST"] as const;
+
+/** The lead fields that carry revenue data — gated on CAN.VIEW_REVENUE. */
+export const REVENUE_FIELDS = [
+  "dealValueLakh",
+  "commissionPct",
+  "commissionLakh",
+  "propertyId",
+] as const;

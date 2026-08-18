@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   Check,
 } from "lucide-react";
+import { PropertyImageManager, type ManagedImage } from "@/components/admin/PropertyImageManager";
 
 // Form validation schema with Zod
 const propertySchema = z.object({
@@ -49,8 +50,8 @@ const propertySchema = z.object({
   area: z.string().min(1, "Area display value is required (e.g. 3,200 sq.ft)"),
   areaSqft: z.string(),
 
-  // Media
-  imageUrl: z.string().url("Must be a valid image URL").or(z.string().length(0)),
+  // Media is managed outside this schema by PropertyImageManager (an
+  // ordered array, not a single registered input) — see `galleryImages`.
 
   // SEO
   seoTitle: z.string().optional(),
@@ -80,6 +81,21 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  // Gallery lives outside react-hook-form: it's an ordered array built by
+  // uploads/drag-reorder rather than a registered input, and the API has
+  // always accepted `images: [{url}]` (PropertyImage.createMany) even
+  // though the old UI could only ever supply one. Seeded from the
+  // existing record when editing so saving doesn't wipe current photos.
+  const [galleryImages, setGalleryImages] = useState<ManagedImage[]>(() => {
+    const existing = initialData?.images;
+    if (Array.isArray(existing)) {
+      return existing
+        .map((img: { url?: string }) => ({ url: img?.url ?? "" }))
+        .filter((img: ManagedImage) => img.url);
+    }
+    return [];
+  });
 
   const {
     register,
@@ -147,10 +163,12 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
       const endpoint = initialData ? `/api/admin/properties/${initialData.id}` : "/api/admin/properties";
       const method = initialData ? "PUT" : "POST";
 
-      // Map image url to structure expected by database schema
+      // Gallery order is meaningful — the API writes array index into
+      // PropertyImage.order, and the public site reads images[0] as the
+      // cover shot.
       const payload = {
         ...data,
-        images: data.imageUrl ? [{ url: data.imageUrl }] : [],
+        images: galleryImages,
       };
 
       const res = await fetch(endpoint, {
@@ -477,21 +495,10 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                 exit={{ opacity: 0, x: -10 }}
                 className="space-y-8"
               >
-                <StepHeading title="Media & Attachments" description="Attach the primary header image URL." />
+                <StepHeading title="Media & Attachments" description="Upload photographs, or paste image URLs. The first image is used as the cover." />
 
-                <FieldGroup title="Primary Image">
-                  <Field label="Primary Image URL" span2 error={errors.imageUrl}>
-                    <input
-                      type="text"
-                      {...register("imageUrl")}
-                      className="crm-input"
-                      placeholder="e.g. /media/re.jpg or an external link"
-                    />
-                  </Field>
-
-                  <div className="md:col-span-2 p-12 text-center text-xs text-crm-text-muted border border-dashed border-crm-border bg-crm-bg/60 rounded-sm">
-                    Drag and Drop uploads will route through Cloudinary API key settings once keys are supplied in settings panel.
-                  </div>
+                <FieldGroup title="Property Images">
+                  <PropertyImageManager images={galleryImages} onChange={setGalleryImages} />
                 </FieldGroup>
               </motion.div>
             )}

@@ -14,6 +14,23 @@ Read `DESIGN_SYSTEM.md` in this repo root. It is the permanent, non-negotiable d
 - Every interactive element implements hover/active/focus/disabled states per `DESIGN_SYSTEM.md` §5.
 - Motion via Framer Motion, tuned per `DESIGN_SYSTEM.md` §6 — never over-animated.
 
+## Production database (Supabase) — hard-won operational facts
+
+The production database is **Supabase Postgres in `ap-northeast-1` (Tokyo)**. Local dev and production share it (one source of truth). Three things about it are non-obvious and have each cost real debugging time:
+
+1. **Vercel functions must run in Tokyo too.** `vercel.json` pins `"regions": ["hnd1"]`. Vercel defaults to `iad1` (Washington DC), which puts every CRM query on a ~150–200ms transpacific round trip — that alone made the dashboard feel broken. Do not remove this pin without also moving the database.
+2. **Two different poolers, for two different jobs.**
+   - App/runtime queries → **transaction pooler, port `6543`**, with `?pgbouncer=true`. This is what `DATABASE_URL` uses.
+   - `prisma db push` / `migrate` → **session pooler, port `5432`**. The transaction pooler does not support the session-level advisory locks Prisma needs for schema changes; it hangs indefinitely with zero output rather than erroring. Run schema pushes with a one-off `DATABASE_URL=...:5432/postgres npx prisma db push`.
+   - The **direct** connection (`db.<ref>.supabase.co:5432`) is IPv6-only and unreachable from this dev environment — don't use it.
+3. **`connection_limit` matters.** `DATABASE_URL` carries `connection_limit=10&pool_timeout=30`. Prisma's own client-side pool defaults to ~3 on Vercel's build machine, and `next build` generates 57 pages across 3 concurrent workers sharing one Prisma client — the default caused `P2024` connection-pool timeouts that failed the build.
+
+Required Vercel environment variables: `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`. Optional (image uploads): `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` plus a public Storage bucket named `property-images`.
+
+## Working with subagents in this repo
+
+**Never run `git stash`, `git reset`, `git checkout -- <file>`, or `git restore` here** — especially with parallel agents running. A `git stash` during one such session silently discarded the tracked-file work of three agents at once (untracked new files survived; every modification did not). Recovery is `git checkout stash@{0} -- <paths>`, but the cheaper move is not doing it. Agents should be given disjoint file ownership and told to leave git state alone.
+
 ## Known environment constraint
 
 **C: drive is at/near 0 bytes free** and cannot be reliably freed (it's a genuinely full 117GB system drive — Windows + Program Files + user profile, no single relocatable culprit; `.claude` itself is only 70MB). This project works around it entirely rather than depending on C: having space:

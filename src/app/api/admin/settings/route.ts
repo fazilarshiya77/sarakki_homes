@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { requireRole, CAN } from "@/lib/authz";
 
-export async function GET(req: Request) {
+const GENERIC_ERROR = "Something went wrong. Please try again.";
+
+export async function GET() {
+  const auth = await requireRole(CAN.MANAGE_SETTINGS);
+  if (!auth.ok) return auth.response;
+
   try {
     let setting = await prisma.setting.findFirst();
     if (!setting) {
@@ -17,14 +21,15 @@ export async function GET(req: Request) {
       });
     }
     return NextResponse.json({ setting });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[api/admin/settings] GET failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }
 
 export async function PUT(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await requireRole(CAN.MANAGE_SETTINGS);
+  if (!auth.ok) return auth.response;
 
   try {
     const body = await req.json();
@@ -78,7 +83,7 @@ export async function PUT(req: Request) {
 
     await prisma.activityLog.create({
       data: {
-        userId: (session.user as any).id,
+        userId: auth.user.id,
         action: "UPDATE_SETTINGS",
         details: "Updated global settings parameters.",
       },
@@ -91,7 +96,8 @@ export async function PUT(req: Request) {
     revalidatePath("/", "layout");
 
     return NextResponse.json({ setting });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("[api/admin/settings] PUT failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }
