@@ -4,11 +4,12 @@ import { requireRole, CAN } from "@/lib/authz";
 
 const GENERIC_ERROR = "Something went wrong. Please try again.";
 
-// Minimal staff list for agent-assignment dropdowns (CRM leads/tasks).
-// The existing /admin/users management page has its own (unrelated,
-// pre-existing) data source — this route is scoped to the CRM only.
-// Read-only and needed by every CRM role, hence CAN.ANY_STAFF; note the
-// `select` deliberately never exposes passwordHash.
+// Minimal, read-only staff list for assignment dropdowns (enquiries,
+// leads, tasks) — full staff CRUD (create/edit/delete/roles) lives at
+// /admin/staff + /api/admin/staff, which is ADMIN-only. This route stays
+// open to CAN.ANY_STAFF since any signed-in staff member needs to see
+// who they can assign work to. The `select` deliberately never exposes
+// passwordHash.
 export async function GET() {
   const auth = await requireRole(CAN.ANY_STAFF);
   if (!auth.ok) return auth.response;

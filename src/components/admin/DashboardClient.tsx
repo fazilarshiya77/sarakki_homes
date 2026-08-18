@@ -20,6 +20,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { formatMoneyLakh } from "@/lib/crm";
+import { cn } from "@/lib/utils";
 
 export interface RevenueSummary {
   totalRevenueLakh: number;
@@ -53,6 +54,8 @@ interface DashboardClientProps {
     totalEnquiries: number;
     todayEnquiries: number;
     views: number;
+    publishedProperties: number;
+    draftProperties: number;
   };
   revenue: RevenueSummary;
   monthlyRevenue: MonthlyRevenuePoint[];
@@ -63,13 +66,39 @@ interface DashboardClientProps {
     message: string;
     createdAt: string;
   }>;
+  recentProperties: Array<{
+    id: string;
+    title: string;
+    status: string;
+    price: string;
+    slug: string;
+    createdAt: string;
+  }>;
+  recentActivity: Array<{
+    id: string;
+    action: string;
+    details: string;
+    userName: string;
+    createdAt: string;
+  }>;
 }
+
+const STATUS_BADGE: Record<string, string> = {
+  PUBLISHED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  UNPUBLISHED: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+  ARCHIVED: "bg-zinc-500/10 text-zinc-500 border-zinc-500/20",
+  SOLD: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  UNDER_PROCESS: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  AUCTION_CLOSED: "bg-red-500/10 text-red-400 border-red-500/20",
+};
 
 export function DashboardClient({
   stats,
   revenue,
   monthlyRevenue,
   recentEnquiries,
+  recentProperties,
+  recentActivity,
 }: DashboardClientProps) {
   // The chart series is real, database-derived data (revenue and deals
   // closed per month over the last 6 months, by Lead.closedAt) — it
@@ -107,7 +136,7 @@ export function DashboardClient({
           {
             label: "Total Properties",
             value: stats.totalProperties,
-            desc: `${stats.featuredProperties} featured listings`,
+            desc: `${stats.publishedProperties} live · ${stats.draftProperties} draft`,
             icon: Building2,
           },
           {
@@ -411,7 +440,7 @@ export function DashboardClient({
         <div className="lg:col-span-2 crm-card p-6">
           <div className="flex items-center justify-between mb-6">
             <span className="text-sm font-semibold tracking-wide text-crm-text">
-              Recent Leads & Enquiries
+              Recent Website Enquiries
             </span>
             <Link
               href="/admin/enquiries"
@@ -493,6 +522,91 @@ export function DashboardClient({
               );
             })}
           </div>
+        </div>
+      </div>
+
+      {/* Sub-split: Recent Properties & Recent CRM Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Properties */}
+        <div className="crm-card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <span className="text-sm font-semibold tracking-wide text-crm-text">
+              Recently Added Properties
+            </span>
+            <Link
+              href="/admin/properties"
+              className="flex items-center gap-1 text-[11px] font-semibold text-crm-gold hover:text-crm-gold-bright uppercase tracking-wider transition-colors"
+            >
+              <span>View All</span>
+              <ChevronRight size={12} />
+            </Link>
+          </div>
+
+          {recentProperties.length === 0 ? (
+            <div className="py-12 text-center text-xs text-crm-text-muted border border-dashed border-crm-border rounded-sm">
+              No properties yet — add your first listing.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {recentProperties.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/admin/properties/${p.id}/edit`}
+                  className="flex items-center justify-between p-4 rounded-sm bg-crm-bg/60 border border-crm-border/70 hover:border-crm-gold/40 transition-all duration-200"
+                >
+                  <div className="min-w-0 flex-1 pr-3">
+                    <span className="block text-xs font-semibold text-crm-text truncate">{p.title}</span>
+                    <span className="text-[10px] text-crm-text-muted">{p.price}</span>
+                  </div>
+                  <span
+                    className={cn(
+                      "shrink-0 px-2 py-0.5 rounded-full border text-[8px] font-semibold uppercase tracking-wide",
+                      STATUS_BADGE[p.status] ?? STATUS_BADGE.UNPUBLISHED
+                    )}
+                  >
+                    {p.status.replace(/_/g, " ")}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Recent CRM Activity */}
+        <div className="crm-card p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <Activity size={15} className="text-crm-gold" />
+            <span className="text-sm font-semibold tracking-wide text-crm-text">
+              Recent CRM Activity
+            </span>
+          </div>
+
+          {recentActivity.length === 0 ? (
+            <div className="py-12 text-center text-xs text-crm-text-muted border border-dashed border-crm-border rounded-sm">
+              No activity logged yet.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {recentActivity.map((a) => (
+                <div key={a.id} className="flex items-start gap-3 p-3 rounded-sm bg-crm-bg/60 border border-crm-border/70">
+                  <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-crm-gold" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] text-crm-text-secondary leading-relaxed">
+                      <span className="font-semibold text-crm-text">{a.userName}</span> {a.details}
+                    </p>
+                    <span className="text-[9px] uppercase tracking-wider text-crm-text-muted">
+                      {new Date(a.createdAt).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

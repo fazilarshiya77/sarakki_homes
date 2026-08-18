@@ -21,7 +21,13 @@ export async function PUT(
       data: {
         status: body.status,
         notes: body.notes,
-        staffId: body.staffId || undefined,
+        // `body.staffId || undefined` meant sending `null` to unassign
+        // silently did nothing (undefined tells Prisma "skip this
+        // field," which null-coalescing away from `|| undefined` also
+        // produces for an explicit null). Only fall back to "don't
+        // touch this field" when the key is truly absent from the
+        // request body.
+        staffId: body.staffId !== undefined ? body.staffId : undefined,
       },
     });
 

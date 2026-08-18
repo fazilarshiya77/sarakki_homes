@@ -1,11 +1,31 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { revealItemVariants } from "@/components/ui/RevealOnScroll";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
 import { CATEGORIES } from "@/lib/data";
+
+// Card imagery, in order of preference:
+//  1. A real photo of an actual Sarakki Homes property in that category
+//     (preferred — it's genuinely ours).
+//  2. A licensed architectural photograph for categories with no real
+//     property photography yet.
+// Either way these illustrate a *category*, not a specific listing, so
+// nothing here can misrepresent a property to a buyer — individual
+// property cards elsewhere still only ever show their own real photos.
+const CATEGORY_PHOTO: Record<string, string> = {
+  // Real Sarakki Homes properties:
+  "upcoming-projects": "/media/properties/narayana-nagar/img1.jpg",
+  "ready-to-move": "/media/properties/maya-indraprastha/img1.jpg",
+  "rental-income": "/media/properties/hosa-road/img1.jpg",
+  // Licensed stock, pending real photography:
+  "bank-auctions": "/media/sections/bank-auctions.jpg",
+  "chance-deals": "/media/sections/chance-deals.jpg",
+  resale: "/media/sections/resale.jpg",
+};
 
 // A distinct, muted jewel-tone accent per category — colorful but restrained,
 // never a bright/saturated SaaS palette. Keyed by slug rather than the
@@ -34,9 +54,9 @@ const LISTING_LABELS: Record<string, string> = {
 export function ServiceCard({ slug }: { slug: string }) {
   const category = CATEGORIES.find((c) => c.slug === slug);
   if (!category) return null;
-  const Icon = category.icon;
   const accent = ACCENTS[slug] ?? "#C4A66B";
   const label = LISTING_LABELS[slug] ?? "Vetted Listings";
+  const photo = CATEGORY_PHOTO[slug];
 
   return (
     <motion.div variants={revealItemVariants} className="h-full">
@@ -49,20 +69,28 @@ export function ServiceCard({ slug }: { slug: string }) {
       >
         {/* Image */}
         <div className="relative h-52 overflow-hidden">
-          <MediaPlaceholder
-            tone={category.tone}
-            className="absolute inset-0 h-full w-full transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
-          />
-          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/45 to-transparent" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full border backdrop-blur-sm transition-all duration-500 group-hover:scale-105"
-              style={{ borderColor: `${accent}55`, backgroundColor: `${accent}1f` }}
-            >
-              <div className={`icon-${slug} transition-transform duration-500`}>
-                <Icon size={26} strokeWidth={1.5} color={accent} />
-              </div>
-            </div>
-          </div>
+          {photo ? (
+            <Image
+              src={photo}
+              alt={category.title}
+              fill
+              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              className="object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
+            />
+          ) : (
+            <MediaPlaceholder
+              tone={category.tone}
+              className="absolute inset-0 h-full w-full transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
+            />
+          )}
+          {/* The centred icon-in-a-translucent-circle that used to sit here
+              has been removed. Once each card carries a real photograph,
+              that chip stopped being a stand-in for missing art and became
+              a badge obscuring the middle of the image — the exact
+              stock-UI-kit look this page is trying to avoid. The photo
+              alone now carries the card; the category is named directly
+              underneath it. */}
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent" />
         </div>
 
         {/* Thin accent seam between image and content */}

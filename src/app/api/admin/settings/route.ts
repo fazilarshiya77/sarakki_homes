@@ -44,7 +44,7 @@ export async function PUT(req: Request) {
           companyLogo: body.companyLogo,
           favicon: body.favicon,
           smtpHost: body.smtpHost,
-          smtpPort: parseInt(body.smtpPort || "587"),
+          smtpPort: body.smtpPort !== undefined ? parseInt(body.smtpPort) : existing.smtpPort,
           smtpUser: body.smtpUser,
           smtpPassword: body.smtpPassword,
           whatsappNo: body.whatsappNo,

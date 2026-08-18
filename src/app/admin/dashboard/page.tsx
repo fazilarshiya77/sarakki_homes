@@ -47,6 +47,10 @@ export default async function DashboardPage() {
     todayEnquiries,
     viewAggregate,
     recentEnquiriesDb,
+    publishedProperties,
+    draftProperties,
+    recentPropertiesDb,
+    recentActivityDb,
     // --- revenue aggregates, all summed by the database ---
     wonAggregate,
     openPipelineAggregate,
@@ -69,6 +73,18 @@ export default async function DashboardPage() {
       take: 5,
       orderBy: { createdAt: "desc" },
       include: { customer: true, property: true },
+    }),
+    prisma.property.count({ where: { status: "PUBLISHED" } }),
+    prisma.property.count({ where: { status: "UNPUBLISHED" } }),
+    prisma.property.findMany({
+      take: 5,
+      orderBy: { createdAt: "desc" },
+      select: { id: true, title: true, status: true, price: true, createdAt: true, slug: true },
+    }),
+    prisma.activityLog.findMany({
+      take: 8,
+      orderBy: { createdAt: "desc" },
+      include: { user: { select: { name: true } } },
     }),
     // Revenue earned, deal value closed and average deal size — one pass.
     prisma.lead.aggregate({
@@ -152,6 +168,8 @@ export default async function DashboardPage() {
     totalEnquiries,
     todayEnquiries,
     views,
+    publishedProperties,
+    draftProperties,
   };
 
   const recentEnquiries = recentEnquiriesDb.map((enq) => ({
@@ -168,12 +186,31 @@ export default async function DashboardPage() {
     createdAt: enq.createdAt.toISOString(),
   }));
 
+  const recentProperties = recentPropertiesDb.map((p) => ({
+    id: p.id,
+    title: p.title,
+    status: p.status,
+    price: p.price,
+    slug: p.slug,
+    createdAt: p.createdAt.toISOString(),
+  }));
+
+  const recentActivity = recentActivityDb.map((a) => ({
+    id: a.id,
+    action: a.action,
+    details: a.details,
+    userName: a.user?.name ?? "System",
+    createdAt: a.createdAt.toISOString(),
+  }));
+
   return (
     <DashboardClient
       stats={stats}
       revenue={revenue}
       monthlyRevenue={monthlyRevenue}
       recentEnquiries={recentEnquiries}
+      recentProperties={recentProperties}
+      recentActivity={recentActivity}
     />
   );
 }

@@ -25,11 +25,19 @@ interface Enquiry {
   status: string;
   notes: string;
   createdAt: string;
-  assignedTo?: { name: string };
+  staffId?: string | null;
+  assignedTo?: { id: string; name: string } | null;
+}
+
+interface StaffOption {
+  id: string;
+  name: string;
+  role: string;
 }
 
 export default function EnquiriesPage() {
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
+  const [staff, setStaff] = useState<StaffOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEnquiry, setSelectedEnquiry] = useState<Enquiry | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -37,6 +45,7 @@ export default function EnquiriesPage() {
   // Notes and status editing state
   const [editNotes, setEditNotes] = useState("");
   const [editStatus, setEditStatus] = useState("");
+  const [editStaffId, setEditStaffId] = useState("");
 
   const fetchEnquiries = async () => {
     setLoading(true);
@@ -55,12 +64,19 @@ export default function EnquiriesPage() {
 
   useEffect(() => {
     fetchEnquiries();
+    // Staff list for the assignment dropdown below — a lightweight
+    // read of who exists, no CRUD (that's /admin/staff).
+    fetch("/api/admin/users")
+      .then((res) => res.json())
+      .then((data) => setStaff(data.users || []))
+      .catch(() => {});
   }, []);
 
   const openDetails = (enq: Enquiry) => {
     setSelectedEnquiry(enq);
     setEditNotes(enq.notes || "");
     setEditStatus(enq.status);
+    setEditStaffId(enq.staffId || "");
   };
 
   const handleUpdate = async () => {
@@ -74,16 +90,22 @@ export default function EnquiriesPage() {
         body: JSON.stringify({
           status: editStatus,
           notes: editNotes,
+          staffId: editStaffId || null,
         }),
       });
 
       if (res.ok) {
-        const data = await res.json();
-        // Update local state
+        const assignedStaff = staff.find((s) => s.id === editStaffId);
         setEnquiries(
           enquiries.map((e) =>
             e.id === selectedEnquiry.id
-              ? { ...e, status: editStatus, notes: editNotes }
+              ? {
+                  ...e,
+                  status: editStatus,
+                  notes: editNotes,
+                  staffId: editStaffId || null,
+                  assignedTo: assignedStaff ? { id: assignedStaff.id, name: assignedStaff.name } : null,
+                }
               : e
           )
         );
@@ -101,10 +123,11 @@ export default function EnquiriesPage() {
       {/* Header */}
       <div>
         <h1 className="font-display text-2xl font-bold tracking-wide text-crm-text">
-          Enquiries & Leads
+          Website Enquiries
         </h1>
         <p className="text-xs text-crm-text-secondary mt-0.5">
-          Follow up with clients, log interaction history, and update lead statuses.
+          Contact-form submissions from the public website. For actively-managed sales
+          opportunities with a pipeline stage, see Leads.
         </p>
       </div>
 
@@ -159,6 +182,12 @@ export default function EnquiriesPage() {
                     </div>
 
                     <div className="flex items-center gap-4 shrink-0">
+                      {enq.assignedTo && (
+                        <span className="flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wide text-crm-gold">
+                          <UserCheck size={11} />
+                          {enq.assignedTo.name}
+                        </span>
+                      )}
                       <span className="text-[10px] font-semibold text-crm-text-secondary/45">
                         {new Date(enq.createdAt).toLocaleDateString("en-IN", {
                           day: "numeric",
@@ -242,6 +271,24 @@ export default function EnquiriesPage() {
                     <option value="CONTACTED">Contacted</option>
                     <option value="CONVERTED">Converted Client</option>
                     <option value="CLOSED">Closed/Not Interested</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">
+                    Assigned To
+                  </label>
+                  <select
+                    value={editStaffId}
+                    onChange={(e) => setEditStaffId(e.target.value)}
+                    className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3 text-xs text-crm-text-secondary outline-none focus:border-crm-gold-bright/40 cursor-pointer"
+                  >
+                    <option value="">Unassigned</option>
+                    {staff.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} · {s.role.replace(/_/g, " ")}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

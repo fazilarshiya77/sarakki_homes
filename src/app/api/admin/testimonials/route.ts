@@ -38,6 +38,7 @@ export async function POST(req: Request) {
         quote: body.quote,
         rating: parseInt(body.rating || "5"),
         imagePublic: body.imagePublic || null,
+        published: typeof body.published === "boolean" ? body.published : true,
       },
     });
 

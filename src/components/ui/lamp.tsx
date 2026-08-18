@@ -59,17 +59,26 @@ export function Lamp({
       )}
       style={{ backgroundColor }}
     >
-      {/* Textural photo, kept to a whisper — grayscale so it never fights
-          the champagne palette, and layered under the gradients below so
-          they mute it further rather than sitting on top and washing it out. */}
+      {/* Textural photo, kept to a whisper. A flat `grayscale` strips color
+          but leaves the photo's own neutral-gray tonal balance intact, which
+          reads as a cool/muddy patch against this section's warm
+          espresso/gold palette — visibly "off," not integrated. Adding
+          `sepia` + `saturate` before regrayscaling pulls the whole image
+          into the same bronze/champagne family as `glowColor`/`backgroundColor`
+          before opacity and the gradients below mute it further, so what's
+          visible reads as "this room's own warm shadow" rather than a
+          separate photo layer sitting on top. */}
       {backgroundImage && (
         // eslint-disable-next-line @next/next/no-img-element -- decorative background photo, not a next/image candidate (arbitrary aspect, no LCP concerns this far down the page)
         <img
           src={backgroundImage}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 z-0 h-full w-full object-cover grayscale"
-          style={{ opacity: backgroundImageOpacity * intensity }}
+          className="absolute inset-0 z-0 h-full w-full object-cover"
+          style={{
+            opacity: backgroundImageOpacity * intensity,
+            filter: "grayscale(0.4) sepia(0.55) saturate(1.3) brightness(0.85) contrast(1.05)",
+          }}
         />
       )}
 

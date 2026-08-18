@@ -54,7 +54,12 @@ export function WhySarakkiHomes() {
           className="absolute inset-0 z-0"
           style={{ background: "radial-gradient(ellipse 90% 70% at 50% 0%, transparent 0%, #241E19 55%)" }}
         />
-        <Container className="relative z-10 pb-24 md:pb-36">
+        {/* pb kept small deliberately: the next section (AuctionJourney)
+            already opens with its own Section wrapper's pt-24/pt-36 — the
+            old pb-24/pb-36 here stacked on top of that and doubled the gap
+            at this one seam to ~288-384px versus every other section
+            transition on the page. */}
+        <Container className="relative z-10 pb-12 md:pb-20">
           <TrustJourney />
         </Container>
       </div>

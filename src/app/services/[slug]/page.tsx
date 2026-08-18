@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check } from "lucide-react";
 import { Header } from "@/components/sections/Header";
 import { Footer } from "@/components/sections/Footer";
 import { FinalCTA } from "@/components/sections/FinalCTA";
 import { Container, Section } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
+import Image from "next/image";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { buttonClasses } from "@/components/ui/Button";
 import { ButtonFX } from "@/components/ui/ButtonFX";
@@ -48,7 +47,10 @@ export default async function ServiceDetailPage({
   if (!category) notFound();
 
   const { contact: CONTACT } = await getSiteSettings();
-  const Icon = category.icon;
+  // Position in the canonical CATEGORIES order — drives the "01 / 02 / …"
+  // section numeral in the masthead, so the six service pages read as a
+  // numbered series rather than six unrelated pages.
+  const categoryIndex = CATEGORIES.findIndex((c) => c.slug === slug);
   const isBankAuctions = category.slug === "bank-auctions";
   // Bank auctions are a fully separate track (src/lib/auctions.ts, its own
   // listing/detail routes) — never pulled through the generic property
@@ -62,16 +64,52 @@ export default async function ServiceDetailPage({
       <Header solid />
       <main className="flex flex-1 flex-col pt-16">
         <section className="relative flex min-h-[70vh] items-end overflow-hidden bg-foreground">
-          <MediaPlaceholder tone={category.tone} className="absolute inset-0" />
-          <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/60 to-foreground/20" />
-          <Container className="relative z-10 pb-16 pt-40">
-            <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-background/10 text-accent-gold backdrop-blur-md">
-              <Icon size={22} strokeWidth={1.75} />
+          {/* Atmospheric hero photograph. Deliberately decorative — this
+              is a category/service page, not a specific listing, so a
+              licensed architectural image is appropriate here. Individual
+              property cards below still show only that property's own real
+              photos (or a placeholder), never a stock stand-in, so nothing
+              here can misrepresent an actual listing to a buyer. */}
+          {/* Pushed hard into a warm monotone rather than left as a
+              recognisable full-colour stock photograph. A neutral stock
+              image sitting at full saturation behind a headline is the
+              clearest "template" signal on a page like this; grading it
+              into the brand's own espresso/bronze range makes it read as
+              art direction — texture the page owns, not a picture
+              dropped in behind the text. */}
+          <Image
+            src={`/media/sections/${category.slug}.jpg`}
+            alt=""
+            aria-hidden="true"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+            style={{ filter: "grayscale(0.85) sepia(0.5) saturate(1.4) brightness(0.5) contrast(1.15)" }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(180deg, rgba(28,23,19,0.35) 0%, rgba(28,23,19,0.7) 60%, rgba(28,23,19,0.96) 100%)" }}
+          />
+          {/* Editorial masthead rather than the icon-badge + eyebrow +
+              headline stack this used to be. That stack — a rounded icon
+              chip floating above centred label text — is the single most
+              template-looking pattern on a page like this. A numbered
+              section marker with a hairline rule reads like a printed
+              property brochure instead, which is the register this brand
+              is going for. */}
+          <Container className="relative z-10 pb-20 pt-48">
+            <div className="flex items-center gap-5">
+              <span className="font-display text-sm tabular-nums text-accent-gold">
+                {String(categoryIndex + 1).padStart(2, "0")}
+              </span>
+              <span className="h-px w-16 bg-accent-gold/50" />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-background/70">
+                {category.title}
+              </span>
             </div>
-            <Eyebrow light className="mt-6">
-              {category.title}
-            </Eyebrow>
-            <h1 className="mt-4 max-w-2xl font-display text-4xl leading-[1.1] tracking-[-0.01em] text-background md:text-5xl">
+
+            <h1 className="mt-8 max-w-4xl font-display text-[2.75rem] leading-[0.98] tracking-[-0.02em] text-background md:text-[4.5rem]">
               {category.heroTagline}
             </h1>
           </Container>
@@ -85,14 +123,24 @@ export default async function ServiceDetailPage({
                   {category.longDescription}
                 </p>
 
-                <h2 className="mt-12 font-display text-2xl">Why this route</h2>
-                <ul className="mt-5 flex flex-col gap-4">
-                  {category.highlights.map((highlight) => (
-                    <li key={highlight} className="flex items-start gap-3 text-sm leading-relaxed text-foreground/85">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface text-accent-gold-dark">
-                        <Check size={12} strokeWidth={2.5} />
+                {/* Numbered, rule-separated rows instead of the previous
+                    circular-checkmark bullets. Check chips in grey circles
+                    are stock UI-kit furniture; hairline rules with hanging
+                    numerals read as considered editorial layout and match
+                    the numbered masthead above. */}
+                <h2 className="mt-14 font-display text-2xl">Why this route</h2>
+                <ul className="mt-6 border-t border-border/60">
+                  {category.highlights.map((highlight, i) => (
+                    <li
+                      key={highlight}
+                      className="flex items-baseline gap-6 border-b border-border/60 py-4"
+                    >
+                      <span className="shrink-0 font-display text-xs tabular-nums text-accent-gold-dark">
+                        {String(i + 1).padStart(2, "0")}
                       </span>
-                      {highlight}
+                      <span className="text-[0.95rem] leading-relaxed text-foreground/85">
+                        {highlight}
+                      </span>
                     </li>
                   ))}
                 </ul>

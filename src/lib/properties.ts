@@ -105,7 +105,25 @@ export async function getFeaturedProperties(limit = 6): Promise<Property[]> {
         orderBy: { createdAt: "desc" },
         take: limit,
       });
-      return rows.map(toPublicProperty);
+
+      // "Featured" is an admin-set flag (Property.featured toggle in the
+      // CRM) — nothing requires the admin to have set it on anything yet.
+      // Before this fallback, an empty flag set meant the homepage's
+      // entire Featured Properties section (and this data feeding the
+      // FeaturedProperties intro photo collage) rendered completely
+      // blank rather than degrading. Falling back to the most recent
+      // published listings keeps the section populated with real
+      // properties either way — the CRM toggle still fully controls
+      // curation once anything is actually flagged featured.
+      if (rows.length > 0) return rows.map(toPublicProperty);
+
+      const fallback = await prisma.property.findMany({
+        where: { status: "PUBLISHED", ...EXCLUDE_BANK_AUCTIONS },
+        include: PROPERTY_INCLUDE,
+        orderBy: { createdAt: "desc" },
+        take: limit,
+      });
+      return fallback.map(toPublicProperty);
     },
     [],
     "getFeaturedProperties"

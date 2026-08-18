@@ -13,9 +13,7 @@ import {
   MessageSquare,
   Users,
   Globe,
-  FileText,
   Quote,
-  UserCheck,
   Settings,
   LogOut,
   ChevronLeft,
@@ -26,22 +24,32 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Grouped, matching the operational shape of the CRM rather than a flat
-// alphabetical list — overview, then the CRM's own workflow, then the
-// property inventory, then the public site's content.
+/**
+ * Grouped by actual business workflow, not alphabetically — audited
+ * against real usage rather than kept as a generic CRM template. Prior
+ * structure had two real problems this fixes:
+ *
+ * - "Users" (System group) was a hardcoded fake page — three invented
+ *   names, no real data. "Staff" is the one real, working staff CRUD
+ *   over the same User table. Users is removed entirely.
+ * - "Website CMS" and "Settings" both edited company name / WhatsApp /
+ *   social links — the exact same fields on two different screens.
+ *   CMS is now scoped to homepage copy only (renamed "Website
+ *   Content"); Settings owns all business/contact/system config.
+ *
+ * Blog is intentionally left out of this nav (not deleted — the code
+ * and its CRUD still exist) because no public /blog route consumes it
+ * yet; re-add the nav entry once a real blog page ships.
+ *
+ * Enquiries/Customers are grouped separately from Leads/Tasks:
+ * different data source (auto-derived from the public contact form,
+ * not an actively-managed sales pipeline) and a different purpose,
+ * even though both ultimately represent a prospective buyer.
+ */
 const NAV_GROUPS = [
   {
     label: "Overview",
     items: [{ label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard }],
-  },
-  {
-    label: "CRM",
-    items: [
-      { label: "Leads", href: "/admin/leads", icon: Target },
-      { label: "Tasks", href: "/admin/tasks", icon: CheckSquare },
-      { label: "Enquiries", href: "/admin/enquiries", icon: MessageSquare },
-      { label: "Customers", href: "/admin/customers", icon: Users },
-    ],
   },
   {
     label: "Inventory",
@@ -52,10 +60,23 @@ const NAV_GROUPS = [
     ],
   },
   {
+    label: "Sales Pipeline",
+    items: [
+      { label: "Leads", href: "/admin/leads", icon: Target },
+      { label: "Tasks", href: "/admin/tasks", icon: CheckSquare },
+    ],
+  },
+  {
+    label: "Website Enquiries",
+    items: [
+      { label: "Enquiries", href: "/admin/enquiries", icon: MessageSquare },
+      { label: "Customers", href: "/admin/customers", icon: Users },
+    ],
+  },
+  {
     label: "Website",
     items: [
-      { label: "Website CMS", href: "/admin/cms", icon: Globe },
-      { label: "Blog", href: "/admin/blog", icon: FileText },
+      { label: "Website Content", href: "/admin/cms", icon: Globe },
       { label: "Testimonials", href: "/admin/testimonials", icon: Quote },
     ],
   },
@@ -63,7 +84,6 @@ const NAV_GROUPS = [
     label: "System",
     items: [
       { label: "Staff", href: "/admin/staff", icon: UserCog },
-      { label: "Users", href: "/admin/users", icon: UserCheck },
       { label: "Settings", href: "/admin/settings", icon: Settings },
     ],
   },

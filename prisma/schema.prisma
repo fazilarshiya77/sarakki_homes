@@ -181,7 +181,13 @@ model Testimonial {
   quote       String
   rating      Int      @default(5)
   imagePublic String?
+  // Every existing row predates this field and defaults to true, so
+  // nothing currently visible on the homepage disappears when this
+  // ships — the toggle only affects testimonials added/edited after.
+  published   Boolean  @default(true)
   createdAt   DateTime @default(now())
+
+  @@index([published])
 }
 
 model Blog {

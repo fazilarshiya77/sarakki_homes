@@ -17,6 +17,7 @@ export async function getHomepageTestimonials(): Promise<TestimonialData[]> {
   return safeDbCall(
     async () => {
       const rows = await prisma.testimonial.findMany({
+        where: { published: true },
         orderBy: { createdAt: "asc" },
         take: 4,
       });

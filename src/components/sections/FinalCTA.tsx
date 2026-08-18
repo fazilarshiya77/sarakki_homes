@@ -3,7 +3,7 @@
 import { MessageCircle, PhoneCall } from "lucide-react";
 import { Container, Section } from "@/components/ui/Container";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
-import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
+import Image from "next/image";
 import { ButtonFX } from "@/components/ui/ButtonFX";
 import { useSiteSettings } from "@/components/providers/SettingsProvider";
 
@@ -12,8 +12,19 @@ export function FinalCTA() {
 
   return (
     <Section className="relative overflow-hidden bg-foreground text-background">
-      <MediaPlaceholder tone="charcoal" className="absolute inset-0" grain />
-      <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/85 to-foreground/60" />
+      {/* Decorative closing image — licensed stock, warm-graded and heavily
+          washed so it reads as atmosphere behind the CTA rather than a
+          photo competing with it. */}
+      <Image
+        src="/media/sections/final-cta.jpg"
+        alt=""
+        aria-hidden="true"
+        fill
+        sizes="100vw"
+        className="object-cover"
+        style={{ filter: "grayscale(0.35) sepia(0.45) saturate(1.25) brightness(0.7)" }}
+      />
+      <div className="absolute inset-0 backdrop-blur-[1px] bg-gradient-to-t from-foreground via-foreground/85 to-foreground/65" />
 
       <Container className="relative z-10 flex flex-col items-center gap-8 text-center">
         <RevealOnScroll className="max-w-2xl">

@@ -14,13 +14,12 @@ const PAGE_TITLES: { prefix: string; title: string }[] = [
   { prefix: "/admin/properties", title: "Properties" },
   { prefix: "/admin/categories", title: "Categories" },
   { prefix: "/admin/builders", title: "Builders" },
-  { prefix: "/admin/enquiries", title: "Enquiries" },
+  { prefix: "/admin/enquiries", title: "Website Enquiries" },
   { prefix: "/admin/customers", title: "Customers" },
-  { prefix: "/admin/cms", title: "Website CMS" },
+  { prefix: "/admin/cms", title: "Website Content" },
   { prefix: "/admin/blog", title: "Blog" },
   { prefix: "/admin/testimonials", title: "Testimonials" },
   { prefix: "/admin/staff", title: "Staff" },
-  { prefix: "/admin/users", title: "Users" },
   { prefix: "/admin/settings", title: "Settings" },
 ];
 
