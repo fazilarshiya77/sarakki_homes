@@ -73,8 +73,18 @@ export function ServiceCard({ slug, featured = false }: { slug: string; featured
       <Link
         href={`/services/${category.slug}`}
         style={{ "--accent": accent } as React.CSSProperties}
-        className="group relative block"
+        className="group relative block transition-transform duration-500 ease-out hover:-translate-y-2"
       >
+        {/* Glow — same "light behind a luxury object" treatment as
+            PropertyCard, tinted per-category via --accent rather than a
+            fixed gold, since these cards already carry a category color. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-5 -z-10 rounded-[2rem] opacity-0 blur-2xl transition-opacity duration-700 ease-out group-hover:opacity-100"
+          style={{
+            background: "radial-gradient(60% 60% at 50% 40%, color-mix(in srgb, var(--accent) 35%, transparent) 0%, transparent 70%)",
+          }}
+        />
         <div
           className={`relative overflow-hidden ${
             featured ? "aspect-[16/11]" : "aspect-[4/5]"

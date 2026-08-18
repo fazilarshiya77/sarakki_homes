@@ -36,7 +36,21 @@ function Slide({
       className={cn("object-cover", className)}
     />
   ) : (
-    <MediaPlaceholder tone={fallbackTone} className={cn("h-full w-full", className)} />
+    <div className={cn("relative h-full w-full", className)}>
+      <MediaPlaceholder tone={fallbackTone} className="h-full w-full" />
+      {/* A bare gradient here — no photo, no text — reads as a broken
+          image on the 60vh detail-page hero (the site's most visually
+          dominant single element), not a deliberate placeholder. Every
+          other "no photo" surface on the site (NoPropertyImage, used for
+          bank auctions) carries the brand wordmark; this brings the
+          general property gallery fallback in line with that. */}
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-background/50">
+          Sarakki Homes
+        </p>
+        <p className="mt-2 font-display text-lg text-accent-gold/90">Photography Coming Soon</p>
+      </div>
+    </div>
   );
 }
 

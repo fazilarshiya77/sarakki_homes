@@ -15,8 +15,15 @@ const variantStyles: Record<ButtonVariant, string> = {
     "bg-accent-gold text-foreground shadow-soft hover:shadow-soft-lg active:shadow-soft",
     PREMIUM_INTERACTION
   ),
+  // Was `.glass` (a translucent white blur) — designed for sitting over
+  // dark hero photography, where it works, but `secondary` is also used
+  // in 6+ plain-light-background contexts (enquiry panels, empty
+  // states, "View All" links) where a translucent-white-on-white-card
+  // reads as an almost invisible ghost box. A real border works on any
+  // surface, light or dark, and `.glass-dark` remains the dedicated
+  // choice for anything that specifically needs to sit over a photo.
   secondary: cn(
-    "glass text-foreground hover:shadow-soft-lg active:shadow-soft",
+    "border border-foreground/25 bg-transparent text-foreground hover:border-accent-gold hover:bg-accent-gold/5 active:bg-accent-gold/10",
     PREMIUM_INTERACTION
   ),
   ghost: "bg-transparent text-foreground hover:text-accent-gold-dark",
