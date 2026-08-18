@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 
 /**
@@ -8,6 +9,13 @@ import { motion } from "framer-motion";
  * clear/visible, with a slow, continuous drift so it never sits static.
  * A scrim sits only under the text column itself (not over the whole
  * photo) so the heading stays readable without dulling the image.
+ *
+ * Previously used a raw <img> pointed at a 626x417px source file — small
+ * to begin with, then stretched full-bleed AND continuously scaled up
+ * to 1.07x by the animation below, both of which amplified how blurry
+ * it read. Replaced with a 3000px licensed photo through next/image,
+ * which also gets proper responsive sizing/optimization the old <img>
+ * never had.
  */
 export function FloatingHeroImage() {
   return (
@@ -22,11 +30,13 @@ export function FloatingHeroImage() {
           x: { duration: 10, repeat: Infinity, ease: "easeInOut" },
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element -- .jfif source; next/image's optimizer doesn't reliably handle this extension */}
-        <img
-          src="/property%20section.jfif"
+        <Image
+          src="/media/sections/properties-hero.jpg"
           alt=""
-          className="h-full w-full object-cover"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
         />
       </motion.div>
 
