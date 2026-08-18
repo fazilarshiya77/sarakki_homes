@@ -38,7 +38,7 @@ export function FloatingSocialDock() {
       // Raised to clear the BuilderMarquee ticker bar fixed along the
       // viewport bottom (src/components/ui/BuilderMarquee.tsx) — without
       // this, the lowest dock icon would sit under/against the ticker.
-      className="fixed bottom-[4.75rem] right-6 z-40 flex flex-col gap-4 md:bottom-20"
+      className="fixed bottom-[4.75rem] right-6 z-40 flex flex-col gap-3 md:bottom-20"
     >
       {/* href comes straight from live Settings (contact.whatsappHref /
           instagramHref — src/lib/settings.ts), so the link mechanism
@@ -53,15 +53,15 @@ export function FloatingSocialDock() {
           <motion.span
             aria-hidden="true"
             className="absolute inset-0 rounded-full"
-            style={{ backgroundColor: brand.glow, filter: "blur(6px)" }}
+            style={{ backgroundColor: brand.glow, filter: "blur(4px)" }}
             animate={{ opacity: [0.35, 0.85, 0.35], scale: [1, 1.18, 1] }}
             transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
           />
           <div
-            className="relative flex h-16 w-16 items-center justify-center rounded-full text-white shadow-[0_6px_20px_rgba(0,0,0,0.25)] transition-transform duration-300 group-hover:scale-110"
+            className="relative flex h-11 w-11 items-center justify-center rounded-full text-white shadow-[0_6px_20px_rgba(0,0,0,0.25)] transition-transform duration-300 group-hover:scale-110"
             style={{ backgroundColor: brand.solid }}
           >
-            <Icon width={28} height={28} />
+            <Icon width={18} height={18} />
           </div>
         </a>
       ))}
