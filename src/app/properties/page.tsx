@@ -5,7 +5,6 @@ import { Footer } from "@/components/sections/Footer";
 import { Container, Section } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { PropertyExplorer } from "@/components/property/PropertyExplorer";
-import { FloatingHeroImage } from "@/components/property/FloatingHeroImage";
 import { getPublishedProperties } from "@/lib/properties";
 
 // Property listings are admin-managed and can change anytime — re-fetch
@@ -25,8 +24,7 @@ export default async function PropertiesPage() {
     <>
       <Header solid />
       <main className="flex flex-1 flex-col pt-28">
-        <Section className="relative flex min-h-[420px] items-center overflow-hidden !py-14">
-          <FloatingHeroImage />
+        <Section className="relative flex min-h-[320px] items-center overflow-hidden !py-14 bg-surface">
           <Container className="relative">
             <Eyebrow>Explore Properties</Eyebrow>
             <h1 className="relative mt-4 max-w-2xl font-display text-4xl leading-[1.1] tracking-[-0.01em] md:text-5xl">
