@@ -5,13 +5,19 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Heart, ArrowUpRight } from "lucide-react";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
+import { cn } from "@/lib/utils";
 import type { Property } from "@/lib/data";
 
 /**
  * Image-first, editorial property card — the single reusable card used
  * everywhere a property renders (homepage, listing, category pages,
  * related properties, search results). Only the data changes; the
- * design language does not.
+ * design language does not — EXCEPT for `property.featured`, which gets
+ * a distinct "dark luxury card" treatment (explicit client color spec)
+ * rather than the plain content-on-page-background style every other
+ * card uses. This is a deliberate contrast, not a general recolor: it
+ * makes the client's actually-flagged premium listings visually stand
+ * apart from the rest of the grid.
  *
  * Hover interaction is deliberately layered across three separate
  * elements rather than one:
@@ -29,7 +35,24 @@ import type { Property } from "@/lib/data";
  *    reads as light bleeding out from behind the card rather than a
  *    border/ring around it.
  */
+
+// Featured-card palette — client-specified hex, not existing design
+// tokens (close to but distinct from accent-emerald/accent-gold), so
+// kept as explicit constants here rather than forced into the shared
+// token set for a one-component variant.
+const FEATURED = {
+  card: "#123F38",
+  text: "#F5F1E8",
+  secondaryText: "#C9C3B7",
+  price: "#D2B46A",
+  border: "rgba(198,161,91,0.25)",
+  glow: "rgba(198,161,91,0.20)",
+};
+const DEFAULT_GLOW = "rgba(198,161,91,0.35)";
+
 export function PropertyCard({ property }: { property: Property }) {
+  const isFeatured = property.featured;
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
@@ -41,20 +64,21 @@ export function PropertyCard({ property }: { property: Property }) {
         {/* Glow — a soft, blurred, low-opacity radial wash in the brand
             gold, sitting behind the card and bleeding slightly past its
             edges. Off by default; fades in slowly on hover. This is
-            "light reflecting behind a luxury object," not a neon ring —
-            kept subtle (18% peak opacity) and slow (700ms) on purpose. */}
+            "light reflecting behind a luxury object," not a neon ring. */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -inset-5 -z-10 rounded-[2rem] opacity-0 blur-2xl transition-opacity duration-700 ease-out group-hover:opacity-100"
           style={{
-            background:
-              "radial-gradient(60% 60% at 50% 40%, rgba(198,161,91,0.35) 0%, rgba(198,161,91,0) 70%)",
+            background: `radial-gradient(60% 60% at 50% 40%, ${isFeatured ? FEATURED.glow : DEFAULT_GLOW} 0%, rgba(198,161,91,0) 70%)`,
           }}
         />
 
         {/* Lift — CSS-only, isolated from the entrance animation above. */}
-        <div className="relative transition-transform duration-500 ease-out group-hover:-translate-y-2">
-          <div className="relative aspect-[4/5] overflow-hidden">
+        <div
+          className="relative transition-transform duration-500 ease-out group-hover:-translate-y-2"
+          style={isFeatured ? { backgroundColor: FEATURED.card, border: `1px solid ${FEATURED.border}` } : undefined}
+        >
+          <div className={cn("relative aspect-[4/5] overflow-hidden", isFeatured && "m-3 mb-0 h-[calc(100%-0.75rem)]")}>
             {property.image ? (
               <Image
                 src={property.image}
@@ -84,38 +108,71 @@ export function PropertyCard({ property }: { property: Property }) {
             </button>
           </div>
 
-          {/* Content sits directly on the page background, no card box —
-              a single hairline rule is the only separator. Price leads
-              (the number a buyer actually scans for first), title
-              second — previously title led and price was buried last,
-              same weight as the specs line beneath it. */}
-          <div className="border-t border-border pt-5">
+          {/* Content: plain cards separate from the image with a single
+              hairline rule and sit directly on the page background.
+              Featured cards get real padding since they now have their
+              own dark card fill to sit inside of. */}
+          <div
+            className={isFeatured ? "p-5 pt-4" : "border-t border-border pt-5"}
+            style={isFeatured ? { borderTop: `1px solid ${FEATURED.border}` } : undefined}
+          >
             <div className="flex items-start justify-between gap-4">
-              <p className="font-display text-2xl font-semibold text-accent-emerald">
-                {property.priceRange || property.price}
+              <p
+                className="font-display text-2xl font-semibold"
+                style={{ color: isFeatured ? FEATURED.price : undefined }}
+              >
+                <span className={cn(!isFeatured && "text-accent-emerald")}>
+                  {property.priceRange || property.price}
+                </span>
               </p>
               <ArrowUpRight
                 size={20}
-                className="mt-1.5 shrink-0 text-accent-gold-dark opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100"
+                className={cn(
+                  "mt-1.5 shrink-0 opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100",
+                  !isFeatured && "text-accent-gold-dark"
+                )}
+                style={{ color: isFeatured ? FEATURED.price : undefined }}
               />
             </div>
 
-            <h3 className="mt-2 font-display text-xl leading-snug text-foreground">{property.title}</h3>
-            <p className="mt-1 text-sm text-muted-foreground">{property.location}</p>
+            <h3
+              className={cn("mt-2 font-display text-xl leading-snug", !isFeatured && "text-foreground")}
+              style={{ color: isFeatured ? FEATURED.text : undefined }}
+            >
+              {property.title}
+            </h3>
+            <p
+              className={cn("mt-1 text-sm", !isFeatured && "text-muted-foreground")}
+              style={{ color: isFeatured ? FEATURED.secondaryText : undefined }}
+            >
+              {property.location}
+            </p>
 
             {property.subFlats && property.subFlats.length > 0 ? (
               <div className="mt-4 space-y-1.5">
                 {property.subFlats.slice(0, 3).map((flat, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-xs text-muted-foreground">
+                  <div
+                    key={idx}
+                    className={cn("flex items-center justify-between text-xs", !isFeatured && "text-muted-foreground")}
+                    style={{ color: isFeatured ? FEATURED.secondaryText : undefined }}
+                  >
                     <span>
                       {flat.beds} BHK · {flat.area}
                     </span>
-                    <span className="font-semibold text-foreground">{flat.price}</span>
+                    <span
+                      className={cn("font-semibold", !isFeatured && "text-foreground")}
+                      style={{ color: isFeatured ? FEATURED.text : undefined }}
+                    >
+                      {flat.price}
+                    </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="mt-4 text-xs uppercase tracking-[0.08em] text-muted-foreground">
+              <p
+                className={cn("mt-4 text-xs uppercase tracking-[0.08em]", !isFeatured && "text-muted-foreground")}
+                style={{ color: isFeatured ? FEATURED.secondaryText : undefined }}
+              >
                 {property.beds} Bed · {property.baths} Bath · {property.area}
               </p>
             )}
