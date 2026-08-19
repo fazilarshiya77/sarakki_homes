@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, MessageCircle, X, Phone, MapPin, Clock, Mail, Globe, Map, ChevronDown } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { ButtonFX } from "@/components/ui/ButtonFX";
 import { CATEGORIES } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
@@ -57,6 +57,7 @@ const NAV_DROPDOWNS: Record<
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 export function Header({ solid = false }: { solid?: boolean }) {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(solid);
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -118,11 +119,23 @@ export function Header({ solid = false }: { solid?: boolean }) {
       <Container>
         <header
           className={cn(
-            "mx-auto flex max-w-5xl items-center justify-between gap-8 rounded-pill border px-5 py-3 transition-all duration-500 md:px-7 md:py-3.5",
+            // Moderate radius, not the site's rounded-pill — a big pill
+            // is exactly the "generic glassmorphism component" look this
+            // pass is meant to move away from.
+            "mx-auto flex max-w-5xl items-center justify-between gap-8 rounded-2xl border px-5 py-3 transition-all duration-500 md:px-7 md:py-3.5",
             isSolid
               ? "border-border/70 bg-background/85 shadow-soft backdrop-blur-xl"
-              : "border-white/10 bg-foreground/10 shadow-none backdrop-blur-md"
+              : "shadow-none backdrop-blur-[16px]"
           )}
+          style={
+            isSolid
+              ? undefined
+              : // Warm, dark, deliberately under-opaque translucent surface
+                // (not a bright white-glass panel) — the previous
+                // `bg-foreground/10` was closer to 10% flat black, thin
+                // enough over a bright sky/photo area to nearly disappear.
+                { backgroundColor: "rgba(20,32,29,0.62)", borderColor: "rgba(255,255,255,0.14)" }
+          }
         >
           <Link
             href="/"
@@ -136,9 +149,18 @@ export function Header({ solid = false }: { solid?: boolean }) {
             Sarakki Homes
           </Link>
 
-          <nav className="hidden items-center gap-8 md:flex">
+          <nav className="hidden items-center gap-10 md:flex">
             {LINKS.map((link) => {
               const dropdown = NAV_DROPDOWNS[link.label];
+              // Hash links (Testimonials/FAQ) resolve to the homepage
+              // scrolled to a section — pathname alone can't tell us
+              // whether that section is in view, so only path-based
+              // routes (Properties/Services/Our Process) get a genuine
+              // active indicator rather than a fabricated one.
+              const isActive =
+                !link.href.startsWith("/#") &&
+                (pathname === link.href || pathname?.startsWith(`${link.href}/`));
+
               if (!dropdown) {
                 return (
                   <Link
@@ -148,12 +170,18 @@ export function Header({ solid = false }: { solid?: boolean }) {
                       "group relative py-1 text-sm font-medium tracking-wide transition-colors duration-300",
                       isSolid
                         ? "text-foreground/75 hover:text-foreground"
-                        : "text-background/90 hover:text-background"
+                        : "text-background/90 hover:text-background",
+                      isActive && (isSolid ? "text-foreground" : "text-background")
                     )}
                     style={isSolid ? undefined : { textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}
                   >
                     {link.label}
-                    <span className="absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 bg-accent-gold transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100" />
+                    <span
+                      className={cn(
+                        "absolute inset-x-0 -bottom-0.5 h-px origin-left bg-accent-gold transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100",
+                        isActive ? "scale-x-100" : "scale-x-0"
+                      )}
+                    />
                   </Link>
                 );
               }
@@ -166,7 +194,8 @@ export function Header({ solid = false }: { solid?: boolean }) {
                       "group relative flex items-center gap-1 py-1 text-sm font-medium tracking-wide transition-colors duration-300",
                       isSolid
                         ? "text-foreground/75 hover:text-foreground"
-                        : "text-background/90 hover:text-background"
+                        : "text-background/90 hover:text-background",
+                      isActive && (isSolid ? "text-foreground" : "text-background")
                     )}
                     style={isSolid ? undefined : { textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}
                   >
@@ -175,7 +204,12 @@ export function Header({ solid = false }: { solid?: boolean }) {
                       size={13}
                       className="transition-transform duration-300 group-hover/nav:rotate-180"
                     />
-                    <span className="absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 bg-accent-gold transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100" />
+                    <span
+                      className={cn(
+                        "absolute inset-x-0 -bottom-0.5 h-px origin-left bg-accent-gold transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100",
+                        isActive ? "scale-x-100" : "scale-x-0"
+                      )}
+                    />
                   </Link>
 
                   {/* Dropdown panel — no gap between trigger and panel so
@@ -210,15 +244,19 @@ export function Header({ solid = false }: { solid?: boolean }) {
           </nav>
 
           <div className="flex shrink-0 items-center gap-2">
+            {/* Deep Forest in both scroll states (not "solid = dark
+                foreground, transparent = frosted glass") — the two
+                previously used unrelated treatments, which is exactly
+                why it read as disconnected from the rest of the navbar.
+                A consistent forest fill also reads as "part of the
+                navbar" against both the transparent dark-glass state and
+                the solid ivory state. */}
             <button
               onClick={() => setModalOpen(true)}
-              className={cn(
-                "btn-fx hidden items-center gap-2 rounded-pill px-5 py-2.5 text-sm font-semibold transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:scale-[1.02] hover:shadow-soft active:translate-y-0 active:scale-[0.98] active:duration-150 sm:inline-flex",
-                isSolid ? "bg-foreground text-background" : "border border-white/15 bg-foreground/20 text-background backdrop-blur-md"
-              )}
+              className="group hidden items-center gap-2 rounded-lg px-4.5 py-2.5 text-sm font-semibold text-[#F5F1E8] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] active:translate-y-0 sm:inline-flex"
+              style={{ backgroundColor: "#083C35" }}
             >
-              <ButtonFX />
-              <MessageCircle size={15} />
+              <MessageCircle size={15} className="transition-transform duration-300 group-hover:scale-110" />
               Consult Us
             </button>
 
@@ -318,7 +356,8 @@ export function Header({ solid = false }: { solid?: boolean }) {
                   setMenuOpen(false);
                   setModalOpen(true);
                 }}
-                className="mt-2 inline-flex items-center justify-center gap-2 rounded-pill bg-foreground px-5 py-3 text-sm font-semibold text-background w-full"
+                className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold text-[#F5F1E8]"
+                style={{ backgroundColor: "#083C35" }}
               >
                 <MessageCircle size={15} />
                 Consult Us

@@ -6,7 +6,7 @@ import { ArrowUpRight, ChevronDown, MapPin, MessageCircle, Search } from "lucide
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Counter } from "@/components/ui/Counter";
-import { ButtonFX } from "@/components/ui/ButtonFX";
+import { HeroButton } from "@/components/ui/HeroButton";
 import { STATS } from "@/lib/data";
 import { useSiteSettings } from "@/components/providers/SettingsProvider";
 import { heroDelayMs } from "@/lib/heroTiming";
@@ -89,64 +89,65 @@ export function Hero() {
 
         <div className="flex flex-col gap-16">
           <div className="flex flex-wrap items-center gap-4">
-            <a
-              href="#properties"
-              className="btn-fx group inline-flex items-center gap-2 rounded-pill bg-accent-gold px-7 py-3.5 text-sm font-semibold text-foreground shadow-soft transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-soft-lg active:translate-y-0 active:scale-[0.98] active:duration-150"
-            >
-              <ButtonFX />
+            <HeroButton variant="primary" href="#properties">
               Explore Properties
-              <ArrowUpRight
-                size={16}
-                className="transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
-              />
-            </a>
-            <a
-              href={CONTACT.whatsappHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-fx glass-dark inline-flex items-center gap-2 rounded-pill px-7 py-3.5 text-sm font-semibold text-background transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-soft-lg active:translate-y-0 active:scale-[0.98] active:duration-150"
-            >
-              <ButtonFX />
-              <MessageCircle size={16} />
+              <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-0.5" />
+            </HeroButton>
+            <HeroButton variant="secondary" href={CONTACT.whatsappHref} target="_blank" rel="noopener noreferrer">
+              <MessageCircle size={16} className="transition-transform duration-300 group-hover:scale-110" />
               WhatsApp Consultation
-            </a>
+            </HeroButton>
           </div>
 
+          {/* One cohesive search object — previously three independently
+              bordered boxes loosely bagged inside an outer glass panel,
+              which read as unrelated components pasted onto the hero
+              rather than one module. Fields now share a single surface,
+              separated by hairline dividers (not borders), with the
+              search button integrated at a slightly smaller radius than
+              the outer container. */}
           <motion.div
-            className="glass-dark w-full max-w-4xl rounded-md border border-white/10 p-4"
+            className="w-full max-w-4xl rounded-xl border p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.25)]"
+            style={{ backgroundColor: "rgba(250,247,240,0.94)", borderColor: "rgba(255,255,255,0.45)" }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: heroDelayMs(150), ease: EASE }}
           >
-            <form className="flex flex-col gap-3.5 md:flex-row md:items-center">
-              <div className="flex flex-1 items-center gap-3 rounded-md border border-white/10 bg-background/5 px-4.5 py-3 transition-all duration-300 focus-within:border-accent-gold focus-within:bg-background/10">
-                <MapPin size={17} className="shrink-0 text-accent-gold" />
-                <input
-                  type="text"
-                  placeholder="Location — e.g. Whitefield, Sarjapur Road"
-                  className="w-full bg-transparent text-sm text-background placeholder:text-background/40 focus:outline-none"
-                />
+            <form className="flex flex-col gap-1.5 md:flex-row md:items-stretch md:gap-0">
+              <div className="flex flex-col divide-y divide-[#17231F]/8 md:flex-1 md:flex-row md:divide-x md:divide-y-0">
+                <div className="flex flex-1 items-center gap-3 px-4.5 py-3.5">
+                  <MapPin size={17} className="shrink-0 text-accent-gold-dark" />
+                  <input
+                    type="text"
+                    placeholder="Location — e.g. Whitefield, Sarjapur Road"
+                    className="w-full bg-transparent text-sm text-[#17231F] placeholder:text-[#6F756F] focus:outline-none"
+                  />
+                </div>
+                <div className="relative flex items-center px-4.5 py-3.5 md:w-52">
+                  <select
+                    className="w-full appearance-none bg-transparent pr-6 text-sm text-[#17231F] focus:outline-none cursor-pointer"
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      Property Type
+                    </option>
+                    <option>Bank Auction</option>
+                    <option>Rental Income</option>
+                    <option>Chance Deal</option>
+                    <option>Resale</option>
+                    <option>Upcoming Project</option>
+                    <option>Ready To Move</option>
+                  </select>
+                  <ChevronDown size={14} className="pointer-events-none absolute right-4.5 text-[#6F756F]" />
+                </div>
               </div>
-              <select
-                className="rounded-md border border-white/10 bg-background/5 px-4.5 py-3 text-sm text-background/90 transition-all duration-300 focus:outline-none focus:border-accent-gold focus:bg-background/10 md:w-56 cursor-pointer"
-                defaultValue=""
-              >
-                <option value="" disabled className="bg-foreground text-background">
-                  Property Type
-                </option>
-                <option className="bg-foreground text-background">Bank Auction</option>
-                <option className="bg-foreground text-background">Rental Income</option>
-                <option className="bg-foreground text-background">Chance Deal</option>
-                <option className="bg-foreground text-background">Resale</option>
-                <option className="bg-foreground text-background">Upcoming Project</option>
-                <option className="bg-foreground text-background">Ready To Move</option>
-              </select>
+
               <button
                 type="submit"
-                className="btn-fx inline-flex items-center justify-center gap-2 rounded-md bg-accent-gold px-6 py-3 text-sm font-semibold text-foreground transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:scale-[1.02] hover:bg-accent-gold-dark hover:shadow-soft-lg active:translate-y-0 active:scale-[0.98] active:duration-150"
+                className="group m-0 flex items-center justify-center gap-2 rounded-lg px-6 py-3.5 text-sm font-semibold transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] active:translate-y-0 md:ml-1"
+                style={{ backgroundColor: "#083C35", color: "#F5F1E8" }}
               >
-                <ButtonFX />
-                <Search size={16} className="text-foreground" />
+                <Search size={16} className="transition-transform duration-300 group-hover:scale-110" />
                 Search
               </button>
             </form>
