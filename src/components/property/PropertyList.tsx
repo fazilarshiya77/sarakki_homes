@@ -50,7 +50,7 @@ export function PropertyList({
 
   return (
     <div>
-      <div className="border-t border-border">
+      <div className="flex flex-col gap-4">
         {visible.map((property) => (
           <PropertyListItem key={property.id} property={property} />
         ))}
