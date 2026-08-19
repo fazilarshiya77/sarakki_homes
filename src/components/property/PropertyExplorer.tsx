@@ -8,6 +8,7 @@ import {
   type FilterState,
 } from "@/components/property/PropertyFilters";
 import { PropertyGrid } from "@/components/property/PropertyGrid";
+import { PropertyList } from "@/components/property/PropertyList";
 import { BUDGET_RANGES, type Property } from "@/lib/data";
 
 export function PropertyExplorer({ properties }: { properties: Property[] }) {
@@ -52,7 +53,11 @@ export function PropertyExplorer({ properties }: { properties: Property[] }) {
         resultCount={filtered.length}
         locations={locations}
       />
-      <PropertyGrid properties={filtered} onReset={() => setFilters(DEFAULT_FILTERS)} />
+      {filters.view === "list" ? (
+        <PropertyList properties={filtered} onReset={() => setFilters(DEFAULT_FILTERS)} />
+      ) : (
+        <PropertyGrid properties={filtered} onReset={() => setFilters(DEFAULT_FILTERS)} />
+      )}
     </div>
   );
 }

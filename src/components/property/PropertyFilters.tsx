@@ -1,6 +1,6 @@
 "use client";
 
-import { SlidersHorizontal, X } from "lucide-react";
+import { LayoutGrid, List, SlidersHorizontal, X } from "lucide-react";
 import { CATEGORIES, BUDGET_RANGES } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
@@ -9,12 +9,14 @@ import { cn } from "@/lib/utils";
 const FILTERABLE_CATEGORIES = CATEGORIES.filter((c) => c.slug !== "bank-auctions");
 
 export type SortOption = "relevant" | "price-asc" | "price-desc";
+export type PropertyView = "grid" | "list";
 
 export interface FilterState {
   location: string;
   category: string;
   budgetIndex: number;
   sort: SortOption;
+  view: PropertyView;
 }
 
 export const DEFAULT_FILTERS: FilterState = {
@@ -22,6 +24,7 @@ export const DEFAULT_FILTERS: FilterState = {
   category: "",
   budgetIndex: 0,
   sort: "relevant",
+  view: "grid",
 };
 
 export function PropertyFilters({
@@ -116,14 +119,34 @@ export function PropertyFilters({
         </div>
       </div>
 
-      <p
-        className={cn(
-          "mt-4 text-xs uppercase tracking-[0.1em] text-muted-foreground",
-          "md:mt-3"
-        )}
-      >
-        {resultCount} {resultCount === 1 ? "Property" : "Properties"} Found
-      </p>
+      <div className="mt-4 flex items-center justify-between md:mt-3">
+        <p className="text-xs uppercase tracking-[0.1em] text-muted-foreground">
+          {resultCount} {resultCount === 1 ? "Property" : "Properties"} Found
+        </p>
+
+        <div className="flex items-center gap-1 rounded-sm border border-border p-1">
+          <button
+            onClick={() => onChange({ ...filters, view: "grid" })}
+            aria-label="Grid view"
+            className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-sm transition-colors",
+              filters.view === "grid" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <LayoutGrid size={15} />
+          </button>
+          <button
+            onClick={() => onChange({ ...filters, view: "list" })}
+            aria-label="List view"
+            className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-sm transition-colors",
+              filters.view === "list" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <List size={15} />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
