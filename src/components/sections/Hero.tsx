@@ -4,7 +4,6 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowUpRight, ChevronDown, MapPin, MessageCircle, Search } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Counter } from "@/components/ui/Counter";
 import { HeroButton } from "@/components/ui/HeroButton";
 import { STATS } from "@/lib/data";
@@ -17,7 +16,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
  *  and stats are all in place immediately. No scroll-linked expansion or
  *  crossfade; the only motion is a one-time staggered fade-in on load. */
 export function Hero() {
-  const { contact: CONTACT, heroTitle, heroDescription } = useSiteSettings();
+  const { contact: CONTACT, heroTitle } = useSiteSettings();
 
   return (
     <section
@@ -64,26 +63,12 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: heroDelayMs(0), ease: EASE }}
           >
-            <Eyebrow light>Bengaluru&rsquo;s Trusted Property Consultancy</Eyebrow>
             <h1
-              className="mt-7 font-display text-7xl font-medium leading-[0.98] tracking-[-0.02em] text-background sm:text-8xl md:text-[7.5rem]"
+              className="font-display text-7xl font-medium leading-[0.98] tracking-[-0.02em] text-background sm:text-8xl md:text-[7.5rem]"
               style={{ textShadow: "0 2px 16px rgba(0,0,0,0.3)" }}
             >
               {heroTitle}
             </h1>
-          </motion.div>
-
-          <motion.div
-            className="flex items-end md:col-span-3 lg:col-span-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: heroDelayMs(80), ease: EASE }}
-          >
-            <div className="border-l border-accent-gold/40 pl-6">
-              <p className="max-w-xs text-lg leading-relaxed text-background/85 md:text-xl">
-                {heroDescription}
-              </p>
-            </div>
           </motion.div>
         </div>
 
