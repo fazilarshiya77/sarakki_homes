@@ -120,6 +120,30 @@ export function AuctionJourney() {
                       )}
                     </AnimatePresence>
 
+                    {/* Shimmer — a single restrained light streak sweeping
+                        across each completed/active plate, not a
+                        constant glint. Clipped to the circle via
+                        overflow-hidden, sits above the fill but below
+                        the text label in paint order (DOM position,
+                        no z-index needed). */}
+                    {i <= active && !reduceMotion && (
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 overflow-hidden rounded-full"
+                      >
+                        <motion.span
+                          className="absolute inset-y-0 left-0 w-1/3"
+                          style={{
+                            background:
+                              "linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.4) 50%, transparent 80%)",
+                          }}
+                          initial={{ x: "-160%" }}
+                          animate={{ x: "260%" }}
+                          transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3.5, ease: "easeInOut" }}
+                        />
+                      </span>
+                    )}
+
                     <span
                       className={cn(
                         "relative flex h-24 w-24 items-center justify-center rounded-full px-3 text-center transition-all duration-300 group-hover:-translate-y-1 md:h-28 md:w-28",
