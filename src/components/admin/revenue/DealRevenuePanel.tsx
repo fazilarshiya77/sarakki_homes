@@ -222,6 +222,7 @@ export function DealRevenuePanel({
             <>
               Closed{" "}
               {new Date(values.closedAt).toLocaleDateString("en-IN", {
+                timeZone: "Asia/Kolkata",
                 day: "numeric",
                 month: "short",
                 year: "numeric",

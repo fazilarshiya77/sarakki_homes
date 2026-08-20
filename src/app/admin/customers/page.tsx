@@ -124,6 +124,7 @@ export default function CustomersPage() {
                             day: "numeric",
                             month: "short",
                             year: "numeric",
+                            timeZone: "Asia/Kolkata",
                           })}
                         </td>
                       </tr>
@@ -145,7 +146,7 @@ export default function CustomersPage() {
                                         <Building size={10} /> {enq.property.title} ({enq.property.price})
                                       </span>
                                       <span className="text-crm-text-secondary/60 flex items-center gap-1">
-                                        <Calendar size={10} /> {new Date(enq.createdAt).toLocaleDateString()}
+                                        <Calendar size={10} /> {new Date(enq.createdAt).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}
                                       </span>
                                     </div>
                                     <p className="text-crm-text-secondary text-xs italic">&ldquo;{enq.message}&rdquo;</p>

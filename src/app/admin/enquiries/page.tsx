@@ -190,6 +190,7 @@ export default function EnquiriesPage() {
                       )}
                       <span className="text-[10px] font-semibold text-crm-text-secondary/45">
                         {new Date(enq.createdAt).toLocaleDateString("en-IN", {
+                          timeZone: "Asia/Kolkata",
                           day: "numeric",
                           month: "short",
                         })}

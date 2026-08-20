@@ -474,9 +474,26 @@ export function DashboardClient({
                     </p>
                   </div>
                   <span className="text-[9px] uppercase tracking-wider font-semibold text-crm-text-muted shrink-0 pl-4">
+                    {/* Explicit timeZone is required, not cosmetic: this
+                        component receives fully-loaded data as props from a
+                        force-dynamic Server Component (no useEffect/fetch
+                        gate), so this exact call runs once during SSR and
+                        again during hydration. Without a pinned timeZone,
+                        toLocaleDateString uses each machine's own local
+                        system timezone -- the server process's timezone vs
+                        the visitor's browser -- so a timestamp near a local
+                        midnight boundary could render a different calendar
+                        day on each pass, which is a real "text content does
+                        not match server-rendered HTML" hydration error, not
+                        a hypothetical one. Pinned to Asia/Kolkata since this
+                        is an India-only CRM -- en-IN formatting already
+                        implied IST, this just makes it actually IST on
+                        every machine instead of accidentally correct only
+                        when the server happens to run in UTC. */}
                     {new Date(enq.createdAt).toLocaleDateString("en-IN", {
                       day: "numeric",
                       month: "short",
+                      timeZone: "Asia/Kolkata",
                     })}
                   </span>
                 </div>
@@ -600,6 +617,7 @@ export function DashboardClient({
                         month: "short",
                         hour: "2-digit",
                         minute: "2-digit",
+                        timeZone: "Asia/Kolkata",
                       })}
                     </span>
                   </div>

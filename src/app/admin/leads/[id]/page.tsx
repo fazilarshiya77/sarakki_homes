@@ -240,7 +240,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
               {lead.priority} Priority
             </span>
             <span className="text-[10px] text-crm-text-secondary">
-              Added {new Date(lead.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+              Added {new Date(lead.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" })}
             </span>
           </div>
         </div>
@@ -293,7 +293,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
             </div>
             {lead.lastContact && (
               <p className="text-[10px] text-crm-text-secondary/70">
-                Last contacted {new Date(lead.lastContact).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                Last contacted {new Date(lead.lastContact).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}
               </p>
             )}
           </div>
@@ -346,6 +346,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                         day: "numeric",
                         month: "short",
                         year: "numeric",
+                        timeZone: "Asia/Kolkata",
                       })
                     : "Open"
                 }
@@ -413,7 +414,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                         {note.author}
                       </span>
                       <span className="text-[10px] text-crm-text-secondary/60">
-                        {new Date(note.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        {new Date(note.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" })}
                       </span>
                     </div>
                     <p className="mt-2 text-xs text-crm-text-secondary leading-relaxed">{note.content}</p>
@@ -479,7 +480,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                       <div className="mt-1 flex items-center gap-3 text-[10px] text-crm-text-secondary">
                         {task.assignedTo && <span>{task.assignedTo}</span>}
                         {task.dueDate && (
-                          <span>Due {new Date(task.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>
+                          <span>Due {new Date(task.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}</span>
                         )}
                       </div>
                     </div>
@@ -514,7 +515,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-crm-text">{entry.title}</span>
                         <span className="text-[10px] text-crm-text-secondary/60">
-                          {new Date(entry.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                          {new Date(entry.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" })}
                         </span>
                       </div>
                       {entry.description && (

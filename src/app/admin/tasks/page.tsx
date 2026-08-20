@@ -144,7 +144,7 @@ export default function TasksPage() {
                   {task.dueDate && (
                     <span className="flex items-center gap-1.5">
                       <Calendar size={11} />
-                      {new Date(task.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                      {new Date(task.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}
                     </span>
                   )}
                 </div>

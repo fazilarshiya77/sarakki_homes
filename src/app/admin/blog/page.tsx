@@ -119,7 +119,7 @@ export default function BlogManagerPage() {
                   </div>
                   <div className="flex items-center gap-2 text-[10px] text-crm-text-secondary/60">
                     <Calendar size={10} />
-                    <span>{new Date(b.createdAt).toLocaleDateString()}</span>
+                    <span>{new Date(b.createdAt).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}</span>
                   </div>
                 </div>
               ))}

@@ -13,7 +13,7 @@ function lastSixMonths(now: Date) {
     const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
     months.push({
-      label: start.toLocaleDateString("en-IN", { month: "short" }),
+      label: start.toLocaleDateString("en-IN", { month: "short", timeZone: "Asia/Kolkata" }),
       start,
       end,
     });

@@ -290,7 +290,7 @@ export default function LeadsPage() {
               </div>
               <div className="flex items-center gap-4 shrink-0">
                 <span className="text-[10px] font-semibold text-crm-text-secondary/45">
-                  {new Date(lead.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                  {new Date(lead.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}
                 </span>
                 <ChevronRight size={14} className="text-crm-text-secondary/40" />
               </div>

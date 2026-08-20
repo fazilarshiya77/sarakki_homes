@@ -55,7 +55,17 @@ const PROPERTY_LIST_SELECT = {
 
 type DbPropertyListItem = Prisma.PropertyGetPayload<{ select: typeof PROPERTY_LIST_SELECT }>;
 
-const DATE_FORMAT: Intl.DateTimeFormatOptions = { day: "numeric", month: "long", year: "numeric" };
+const DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  // Server-only formatting (this module imports prisma), so this can't
+  // cause a hydration mismatch by itself -- the resulting string is
+  // baked in once here and passed down as plain data. Pinned anyway so
+  // the date is actually IST rather than whatever timezone the Node
+  // process happens to be running in ("en-IN" already implied IST).
+  timeZone: "Asia/Kolkata",
+};
 
 function toPublicProperty(p: DbProperty): Property {
   return {

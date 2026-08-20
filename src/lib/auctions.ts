@@ -37,7 +37,16 @@ const AUCTION_LIST_INCLUDE = {
 
 type DbAuctionListProperty = Prisma.PropertyGetPayload<{ include: typeof AUCTION_LIST_INCLUDE }>;
 
-const DATE_FORMAT: Intl.DateTimeFormatOptions = { day: "numeric", month: "long", year: "numeric" };
+// Server-only formatting (this module imports prisma) -- can't cause a
+// hydration mismatch by itself, but pinned to Asia/Kolkata so the date is
+// actually IST rather than whatever timezone the Node process happens to
+// run in ("en-IN" already implied IST).
+const DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "Asia/Kolkata",
+};
 
 function toAuctionProperty(p: DbAuctionProperty): AuctionProperty {
   const auctionDateISO = p.auctionInfo?.auctionDate.toISOString();
