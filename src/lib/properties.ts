@@ -22,6 +22,39 @@ const PROPERTY_INCLUDE = {
 
 type DbProperty = Prisma.PropertyGetPayload<{ include: typeof PROPERTY_INCLUDE }>;
 
+// Every card/list view (homepage featured grid, /properties, related
+// properties) only ever reads title/location/price/beds/baths/area/the
+// cover photo/the category tone from a Property — never gallery,
+// auctionInfo, loanEligibility, or documents (confirmed: PropertyCard and
+// PropertyListItem only touch `.image` and `.gallery[0]`, and
+// auctionInfo is structurally impossible here anyway since these
+// functions all exclude the bank-auctions category). The old
+// PROPERTY_INCLUDE pulled every relation — the full image gallery, both
+// optional 1:1 relations, every document row — for every property on
+// every listing page regardless. This trims each list query to exactly
+// what a card renders: one cover photo instead of the whole gallery, and
+// none of the three detail-only relations at all.
+const PROPERTY_LIST_SELECT = {
+  id: true,
+  slug: true,
+  title: true,
+  location: true,
+  price: true,
+  priceValueLakh: true,
+  type: true,
+  beds: true,
+  baths: true,
+  area: true,
+  areaSqft: true,
+  featured: true,
+  description: true,
+  mapQuery: true,
+  category: { select: { slug: true, tone: true } },
+  images: { select: { url: true }, orderBy: { order: "asc" as const }, take: 1 },
+} satisfies Prisma.PropertySelect;
+
+type DbPropertyListItem = Prisma.PropertyGetPayload<{ select: typeof PROPERTY_LIST_SELECT }>;
+
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { day: "numeric", month: "long", year: "numeric" };
 
 function toPublicProperty(p: DbProperty): Property {
@@ -74,6 +107,38 @@ export function getGalleryImages(p: DbProperty): string[] {
   return p.images.map((img) => img.url);
 }
 
+// Card/list counterpart of toPublicProperty — same output shape (still a
+// full `Property`), but the detail-only fields it can't know without the
+// relations this query never fetched are filled with the same constant
+// fallback toPublicProperty already uses when a property genuinely has no
+// loan/document data, rather than left to query for it.
+function toPublicPropertyListItem(p: DbPropertyListItem): Property {
+  return {
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    location: p.location,
+    price: p.price,
+    priceValueLakh: p.priceValueLakh,
+    type: p.type,
+    categorySlug: p.category.slug as PropertyCategorySlug,
+    beds: p.beds,
+    baths: p.baths,
+    area: p.area,
+    areaSqft: p.areaSqft,
+    featured: p.featured === "true",
+    description: p.description,
+    image: p.images[0]?.url,
+    gallery: [(p.category.tone as MediaTone) || "warm"],
+    amenities: [],
+    investmentHighlights: [],
+    auctionInfo: undefined,
+    loanEligibility: { maxLoanAmount: "Contact us for details", indicativeEmi: "Contact us for details", partnerBanks: [] },
+    documents: [],
+    mapQuery: p.mapQuery,
+  };
+}
+
 // Bank auction properties have their own dedicated section
 // (/properties/bank-auctions) with its own data layer (src/lib/auctions.ts)
 // and never appear in the general property listing, homepage featured
@@ -86,10 +151,10 @@ export async function getPublishedProperties(): Promise<Property[]> {
     async () => {
       const rows = await prisma.property.findMany({
         where: { status: "PUBLISHED", ...EXCLUDE_BANK_AUCTIONS },
-        include: PROPERTY_INCLUDE,
+        select: PROPERTY_LIST_SELECT,
         orderBy: { createdAt: "desc" },
       });
-      return rows.map(toPublicProperty);
+      return rows.map(toPublicPropertyListItem);
     },
     [],
     "getPublishedProperties"
@@ -101,7 +166,7 @@ export async function getFeaturedProperties(limit = 6): Promise<Property[]> {
     async () => {
       const rows = await prisma.property.findMany({
         where: { status: "PUBLISHED", featured: "true", ...EXCLUDE_BANK_AUCTIONS },
-        include: PROPERTY_INCLUDE,
+        select: PROPERTY_LIST_SELECT,
         orderBy: { createdAt: "desc" },
         take: limit,
       });
@@ -115,15 +180,15 @@ export async function getFeaturedProperties(limit = 6): Promise<Property[]> {
       // published listings keeps the section populated with real
       // properties either way — the CRM toggle still fully controls
       // curation once anything is actually flagged featured.
-      if (rows.length > 0) return rows.map(toPublicProperty);
+      if (rows.length > 0) return rows.map(toPublicPropertyListItem);
 
       const fallback = await prisma.property.findMany({
         where: { status: "PUBLISHED", ...EXCLUDE_BANK_AUCTIONS },
-        include: PROPERTY_INCLUDE,
+        select: PROPERTY_LIST_SELECT,
         orderBy: { createdAt: "desc" },
         take: limit,
       });
-      return fallback.map(toPublicProperty);
+      return fallback.map(toPublicPropertyListItem);
     },
     [],
     "getFeaturedProperties"
@@ -138,11 +203,11 @@ export async function getPropertiesByCategory(categorySlug: string, limit = 6): 
     async () => {
       const rows = await prisma.property.findMany({
         where: { status: "PUBLISHED", category: { slug: categorySlug } },
-        include: PROPERTY_INCLUDE,
+        select: PROPERTY_LIST_SELECT,
         orderBy: { createdAt: "desc" },
         take: limit,
       });
-      return rows.map(toPublicProperty);
+      return rows.map(toPublicPropertyListItem);
     },
     [],
     "getPropertiesByCategory"
@@ -178,11 +243,11 @@ export async function getRelatedProperties(property: Property, limit = 3): Promi
           id: { not: property.id },
           category: { slug: property.categorySlug },
         },
-        include: PROPERTY_INCLUDE,
+        select: PROPERTY_LIST_SELECT,
         orderBy: { createdAt: "desc" },
         take: limit,
       });
-      return rows.map(toPublicProperty);
+      return rows.map(toPublicPropertyListItem);
     },
     [],
     "getRelatedProperties"

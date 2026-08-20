@@ -24,6 +24,19 @@ const AUCTION_INCLUDE = {
 
 type DbAuctionProperty = Prisma.PropertyGetPayload<{ include: typeof AUCTION_INCLUDE }>;
 
+// BankAuctionCard/BankAuctionListItem (the only consumers of
+// getBankAuctionProperties) only ever render `images[0]` despite the type
+// carrying the full array — confirmed by inspection, not assumption. The
+// list query doesn't need every gallery photo for every auction listing,
+// only the detail page (getBankAuctionByPropertyId) does.
+const AUCTION_LIST_INCLUDE = {
+  category: true,
+  images: { orderBy: { order: "asc" as const }, take: 1 },
+  auctionInfo: true,
+} satisfies Prisma.PropertyInclude;
+
+type DbAuctionListProperty = Prisma.PropertyGetPayload<{ include: typeof AUCTION_LIST_INCLUDE }>;
+
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { day: "numeric", month: "long", year: "numeric" };
 
 function toAuctionProperty(p: DbAuctionProperty): AuctionProperty {
@@ -60,7 +73,7 @@ export async function getBankAuctionProperties(): Promise<AuctionProperty[]> {
     async () => {
       const rows = await prisma.property.findMany({
         where: { status: "PUBLISHED", category: { slug: "bank-auctions" } },
-        include: AUCTION_INCLUDE,
+        include: AUCTION_LIST_INCLUDE,
         orderBy: { createdAt: "desc" },
       });
       return rows.map(toAuctionProperty);
