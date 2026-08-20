@@ -33,7 +33,13 @@ export function FeaturedCategories() {
           </RevealOnScroll>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-12">
+        {/* items-start: grid cells default to align-items:stretch, so the
+            shorter featured card (16:11 image) was being stretched to
+            match its taller row-mate (4:5 image) — its own box didn't
+            grow to fill that stretched cell, leaving a visible empty gap
+            beneath it. Aligning to the top lets each card sit at its own
+            natural height instead. */}
+        <div className="mt-16 grid grid-cols-1 items-start gap-x-8 gap-y-12 md:grid-cols-12">
           {CATEGORIES.map((category, i) => (
             <div key={category.slug} className={SPAN[i] ?? "md:col-span-4"}>
               <ServiceCard slug={category.slug} featured={i === 0} />

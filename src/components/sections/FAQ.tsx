@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { Container, Section } from "@/components/ui/Container";
@@ -13,8 +14,23 @@ export function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <Section id="faq" className="bg-surface !pt-12 md:!pt-16">
-      <Container className="max-w-4xl">
+    <Section id="faq" className="relative overflow-hidden bg-surface !pt-12 md:!pt-16">
+      {/* Was a completely flat bg-surface fill — read as plain/empty next
+          to every other section's photography. A quiet architectural photo
+          sits behind the copy, heavily washed toward the section's own
+          ivory tone so the dark question/answer text stays fully readable;
+          it's texture and atmosphere, not a competing visual. */}
+      <Image
+        src="/media/sections/ready-to-move.jpg"
+        alt=""
+        aria-hidden="true"
+        fill
+        sizes="100vw"
+        className="object-cover opacity-[0.14]"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-surface via-surface/92 to-surface" />
+
+      <Container className="relative z-10 max-w-4xl">
         <RevealOnScroll className="text-center">
           <Eyebrow className="justify-center">Frequently Asked</Eyebrow>
           <h2 className="mt-5 font-display text-4xl font-medium leading-[1.08] tracking-[-0.01em] text-foreground md:text-5xl">
