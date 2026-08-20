@@ -79,8 +79,18 @@ export async function POST(req: Request) {
       }
     }
 
-    // Generate slug from title if not provided
-    const slug = body.slug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    // Generate slug from title if not provided. The wizard's "Slug (URL
+    // endpoint)" field is free text, so a stray paste (e.g. a Google Maps
+    // link meant for the mapQuery field) can land here — a slug like
+    // "https://maps.app.goo.gl/..." doesn't just look wrong, it breaks
+    // the property's own /properties/[slug] page (colons and slashes
+    // don't match the dynamic segment). Only accept a hand-entered slug
+    // if it's actually URL-safe; anything else falls back to the
+    // auto-generated one instead of silently breaking the route.
+    const safeCustomSlug =
+      typeof body.slug === "string" && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(body.slug) ? body.slug : "";
+    const slug =
+      safeCustomSlug || body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
     // Create property in transaction
     const property = await prisma.property.create({

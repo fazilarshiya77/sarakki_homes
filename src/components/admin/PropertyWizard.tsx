@@ -215,9 +215,21 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
       // Gallery order is meaningful — the API writes array index into
       // PropertyImage.order, and the public site reads images[0] as the
       // cover shot.
+      //
+      // status: the create route (POST /api/admin/properties) defaults a
+      // property to UNPUBLISHED whenever the request omits `status` --
+      // and this form never registered a status field, so every listing
+      // created here silently saved as a hidden draft no matter what,
+      // even though the button is literally labelled "Publish Property".
+      // Only set it on create: the PUT route already treats a missing
+      // `status` as "leave it alone" (Prisma skips undefined fields), so
+      // editing an existing property must NOT force it back to
+      // PUBLISHED here -- that would undo a deliberate unpublish done
+      // from the properties list.
       const payload = {
         ...data,
         images: galleryImages,
+        ...(initialData ? {} : { status: "PUBLISHED" }),
       };
 
       const res = await fetch(endpoint, {

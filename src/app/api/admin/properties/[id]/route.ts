@@ -60,12 +60,20 @@ export async function PUT(
       return NextResponse.json({ error: "Property not found" }, { status: 404 });
     }
 
+    // Same guard as the create route: only accept a hand-entered slug if
+    // it's actually URL-safe (a stray paste like a Google Maps link would
+    // otherwise silently break this property's own /properties/[slug]
+    // page). Falls back to the existing slug rather than the blank/
+    // invalid value so an edit can never wipe or corrupt it by accident.
+    const safeCustomSlug =
+      typeof body.slug === "string" && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(body.slug) ? body.slug : existing.slug;
+
     // Update property details in transaction
     const property = await prisma.property.update({
       where: { id },
       data: {
         title: body.title,
-        slug: body.slug,
+        slug: safeCustomSlug,
         location: body.location,
         price: body.price,
         priceValueLakh: parseFloat(body.priceValueLakh || "0"),
