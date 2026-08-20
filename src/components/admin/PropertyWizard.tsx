@@ -139,15 +139,64 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
   const formValues = watch();
 
   const handleNext = () => {
-    // Basic step validation before moving forward
+    // Basic step validation before moving forward. This used to only
+    // check title/categoryId/builderId/location, letting a user sail
+    // past step 0 with address/mapQuery/description still blank (all
+    // three are required by propertySchema) all the way to Review &
+    // Publish -- where zodResolver would silently block the submit with
+    // no error ever shown (nothing here rendered formState.errors except
+    // the Property Name field), so clicking Publish just appeared to do
+    // nothing. Checking the full set of step-0-required fields here
+    // catches that early, and the onInvalid handler on the form below is
+    // the backstop for anything that still slips through.
     if (currentStep === 0) {
-      if (!formValues.title || !formValues.categoryId || !formValues.builderId || !formValues.location) {
-        setErrorMessage("Please fill in all required Basic Info fields.");
+      if (
+        !formValues.title ||
+        !formValues.categoryId ||
+        !formValues.builderId ||
+        !formValues.location ||
+        !formValues.address ||
+        !formValues.mapQuery ||
+        !formValues.description ||
+        formValues.description.trim().length < 10
+      ) {
+        setErrorMessage(
+          "Please fill in all required Basic Info fields (including Address, Google Maps query, and a Description of at least 10 characters)."
+        );
         return;
       }
     }
     setErrorMessage("");
     setCurrentStep((prev) => Math.min(prev + 1, STEPS.length - 1));
+  };
+
+  // Every currently-required field (see propertySchema) lives on step 0 —
+  // if validation fails at submit time for any reason, jumping back
+  // there and naming the fields is always the right, visible fix rather
+  // than a submit button that quietly does nothing.
+  const onInvalid = (formErrors: Record<string, any>) => {
+    const labels: Record<string, string> = {
+      title: "Property Name",
+      categoryId: "Category",
+      builderId: "Builder",
+      type: "Property Type",
+      price: "Price (Display Text)",
+      priceValueLakh: "Price Value in Lakhs",
+      location: "Location",
+      address: "Address",
+      mapQuery: "Google Maps Location Query",
+      description: "Description",
+      area: "Area Display Text",
+    };
+    const names = Object.keys(formErrors)
+      .map((key) => labels[key] || key)
+      .join(", ");
+    setErrorMessage(
+      names
+        ? `Please fix the following before publishing: ${names}.`
+        : "Please review the highlighted fields before publishing."
+    );
+    setCurrentStep(0);
   };
 
   const handleBack = () => {
@@ -258,7 +307,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-8">
           <AnimatePresence mode="wait">
             {/* Step 1: Basic Information */}
             {currentStep === 0 && (
@@ -291,7 +340,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     </select>
                   </Field>
 
-                  <Field label="Category">
+                  <Field label="Category" error={errors.categoryId}>
                     <select {...register("categoryId")} className="crm-select">
                       <option value="">Select Category</option>
                       {categories.map((cat) => (
@@ -300,7 +349,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     </select>
                   </Field>
 
-                  <Field label="Builder">
+                  <Field label="Builder" error={errors.builderId}>
                     <select {...register("builderId")} className="crm-select">
                       <option value="">Select Builder</option>
                       {builders.map((b) => (
@@ -311,7 +360,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                 </FieldGroup>
 
                 <FieldGroup title="Pricing">
-                  <Field label="Price (Display Text)">
+                  <Field label="Price (Display Text)" error={errors.price}>
                     <input
                       type="text"
                       {...register("price")}
@@ -320,7 +369,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     />
                   </Field>
 
-                  <Field label="Price Value in Lakhs">
+                  <Field label="Price Value in Lakhs" error={errors.priceValueLakh}>
                     <input
                       type="number"
                       {...register("priceValueLakh")}
@@ -331,7 +380,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                 </FieldGroup>
 
                 <FieldGroup title="Location">
-                  <Field label="Location (Short Address)" span2>
+                  <Field label="Location (Short Address)" span2 error={errors.location}>
                     <input
                       type="text"
                       {...register("location")}
@@ -340,7 +389,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     />
                   </Field>
 
-                  <Field label="Address (Full Details)" span2>
+                  <Field label="Address (Full Details)" span2 error={errors.address}>
                     <input
                       type="text"
                       {...register("address")}
@@ -349,7 +398,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     />
                   </Field>
 
-                  <Field label="Google Maps Location Query" span2>
+                  <Field label="Google Maps Location Query" span2 error={errors.mapQuery}>
                     <input
                       type="text"
                       {...register("mapQuery")}
@@ -360,7 +409,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                 </FieldGroup>
 
                 <FieldGroup title="Description">
-                  <Field label="Overview" span2>
+                  <Field label="Overview" span2 error={errors.description}>
                     <textarea
                       rows={5}
                       {...register("description")}
@@ -465,7 +514,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     <input type="number" {...register("baths")} className="crm-input" />
                   </Field>
 
-                  <Field label="Area Display Text">
+                  <Field label="Area Display Text" error={errors.area}>
                     <input
                       type="text"
                       {...register("area")}
