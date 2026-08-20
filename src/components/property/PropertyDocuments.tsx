@@ -16,7 +16,7 @@ export function PropertyDocuments({ documents }: { documents: string[] }) {
       <ul className="mt-5 flex flex-col divide-y divide-border rounded-md border border-border">
         {documents.map((doc) => (
           <li key={doc} className="flex items-center justify-between px-5 py-4 text-sm">
-            <span className="text-foreground/85">{doc}</span>
+            <span className="text-[#4F5752]">{doc}</span>
             <span className="flex items-center gap-1.5 text-xs font-semibold text-success">
               <FileCheck2 size={14} />
               Verified

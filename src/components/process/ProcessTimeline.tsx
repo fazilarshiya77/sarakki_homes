@@ -29,7 +29,7 @@ export function ProcessTimeline() {
                   Step {String(i + 1).padStart(2, "0")}
                 </p>
                 <h3 className="mt-2 font-display text-2xl">{step.title}</h3>
-                <p className="mt-2 text-base leading-relaxed text-foreground/85">
+                <p className="mt-2 text-base leading-relaxed text-[#4F5752]">
                   {step.description}
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">

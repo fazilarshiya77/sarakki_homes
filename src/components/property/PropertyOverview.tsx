@@ -31,7 +31,7 @@ export function PropertyOverview({ property }: { property: Property }) {
         </div>
       ) : null}
 
-      <p className="max-w-2xl text-base leading-relaxed text-foreground/85">
+      <p className="max-w-2xl text-base leading-relaxed text-[#4F5752]">
         {property.description}
       </p>
 

@@ -162,7 +162,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
               <div
                 onClick={flipForward}
                 style={{ pointerEvents: frontFacePointerEvents(0) }}
-                className="page-face-right absolute inset-0 bg-[#052C27] border border-[#C6A15B]/30 shadow-[inset_-2px_0_10px_rgba(0,0,0,0.4)] p-12 flex flex-col justify-between items-center text-center backface-hidden rounded-r-md"
+                className="page-face-right absolute inset-0 bg-[#083C35] border border-[#C6A15B]/30 shadow-[inset_-2px_0_10px_rgba(0,0,0,0.4)] p-12 flex flex-col justify-between items-center text-center backface-hidden rounded-r-md"
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,rgba(0,0,0,0.15)_100%)] mix-blend-overlay pointer-events-none" />
                 <div className="absolute inset-4 border border-[#C6A15B]/20 pointer-events-none rounded-sm" />
@@ -175,7 +175,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                 <span className="text-xs uppercase tracking-[0.2em] text-[#C6A15B]/60 font-semibold mt-8">Exclusive Portfolio</span>
 
                 <div className="flex flex-col items-center">
-                  <h3 className="font-display text-4xl text-[#F0E3C3] tracking-wider font-bold">
+                  <h3 className="font-display text-4xl text-[#F7F3EA] tracking-wider font-bold">
                     SARAKKI HOMES
                   </h3>
                   <div className="w-12 h-[1px] bg-[#C6A15B]/40 my-6" />
@@ -184,7 +184,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                   </p>
                 </div>
 
-                <span className="text-[10px] uppercase tracking-[0.15em] text-[#F0E3C3]/40 mb-8 hover:text-[#C6A15B] transition-colors">
+                <span className="text-[10px] uppercase tracking-[0.15em] text-[#F7F3EA]/40 mb-8 hover:text-[#C6A15B] transition-colors">
                   Click to Open Portfolio →
                 </span>
               </div>
@@ -193,7 +193,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
               <div
                 onClick={flipBackward}
                 style={{ pointerEvents: backFacePointerEvents(0) }}
-                className="page-face-left absolute inset-0 bg-[#F0E3C3] p-12 pr-16 flex flex-col justify-between backface-hidden rotate-y-180 rounded-l-md shadow-[inset_10px_0_20px_rgba(0,0,0,0.03)] border-r border-black/5"
+                className="page-face-left absolute inset-0 bg-[#F7F3EA] p-12 pr-16 flex flex-col justify-between backface-hidden rotate-y-180 rounded-l-md shadow-[inset_10px_0_20px_rgba(0,0,0,0.03)] border-r border-black/5"
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8)_0%,rgba(248,246,240,0.2)_100%)] pointer-events-none" />
 
@@ -210,9 +210,9 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                             e.stopPropagation();
                             goToLeaf(Math.floor(idx / 2) + 1);
                           }}
-                          className="flex items-center gap-4 p-3 rounded-sm hover:bg-[#E9D9AE] transition-colors cursor-pointer group border border-transparent hover:border-border/40"
+                          className="flex items-center gap-4 p-3 rounded-sm hover:bg-[#EEE0C8] transition-colors cursor-pointer group border border-transparent hover:border-border/40"
                         >
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#C6A15B]/40 bg-[#F0E3C3] text-xs font-semibold font-display text-[#C6A15B] shadow-sm">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#C6A15B]/40 bg-[#F7F3EA] text-xs font-semibold font-display text-[#C6A15B] shadow-sm">
                             {t.initials}
                           </div>
                           <div className="flex flex-col">
@@ -243,7 +243,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
               <div
                 onClick={flipForward}
                 style={{ pointerEvents: frontFacePointerEvents(1) }}
-                className="page-face-right absolute inset-0 bg-[#F0E3C3] p-12 pl-16 flex flex-col justify-between backface-hidden rounded-r-md shadow-[inset_-10px_0_20px_rgba(0,0,0,0.03)] border-l border-black/5"
+                className="page-face-right absolute inset-0 bg-[#F7F3EA] p-12 pl-16 flex flex-col justify-between backface-hidden rounded-r-md shadow-[inset_-10px_0_20px_rgba(0,0,0,0.03)] border-l border-black/5"
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8)_0%,rgba(248,246,240,0.2)_100%)] pointer-events-none" />
                 <TestimonialPage testimonial={CLIENT_TESTIMONIALS[0]} pageNum={2} />
@@ -253,7 +253,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
               <div
                 onClick={flipBackward}
                 style={{ pointerEvents: backFacePointerEvents(1) }}
-                className="page-face-left absolute inset-0 bg-[#F0E3C3] p-12 pr-16 flex flex-col justify-between backface-hidden rotate-y-180 rounded-l-md shadow-[inset_10px_0_20px_rgba(0,0,0,0.03)] border-r border-black/5"
+                className="page-face-left absolute inset-0 bg-[#F7F3EA] p-12 pr-16 flex flex-col justify-between backface-hidden rotate-y-180 rounded-l-md shadow-[inset_10px_0_20px_rgba(0,0,0,0.03)] border-r border-black/5"
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8)_0%,rgba(248,246,240,0.2)_100%)] pointer-events-none" />
                 <TestimonialPage testimonial={CLIENT_TESTIMONIALS[1]} pageNum={3} />
@@ -270,7 +270,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
               <div
                 onClick={flipForward}
                 style={{ pointerEvents: frontFacePointerEvents(2) }}
-                className="page-face-right absolute inset-0 bg-[#F0E3C3] p-12 pl-16 flex flex-col justify-between backface-hidden rounded-r-md shadow-[inset_-10px_0_20px_rgba(0,0,0,0.03)] border-l border-black/5"
+                className="page-face-right absolute inset-0 bg-[#F7F3EA] p-12 pl-16 flex flex-col justify-between backface-hidden rounded-r-md shadow-[inset_-10px_0_20px_rgba(0,0,0,0.03)] border-l border-black/5"
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8)_0%,rgba(248,246,240,0.2)_100%)] pointer-events-none" />
                 <TestimonialPage testimonial={CLIENT_TESTIMONIALS[2]} pageNum={4} />
@@ -280,7 +280,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
               <div
                 onClick={flipBackward}
                 style={{ pointerEvents: backFacePointerEvents(2) }}
-                className="page-face-left absolute inset-0 bg-[#F0E3C3] p-12 pr-16 flex flex-col justify-between backface-hidden rotate-y-180 rounded-l-md shadow-[inset_10px_0_20px_rgba(0,0,0,0.03)] border-r border-black/5"
+                className="page-face-left absolute inset-0 bg-[#F7F3EA] p-12 pr-16 flex flex-col justify-between backface-hidden rotate-y-180 rounded-l-md shadow-[inset_10px_0_20px_rgba(0,0,0,0.03)] border-r border-black/5"
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8)_0%,rgba(248,246,240,0.2)_100%)] pointer-events-none" />
                 <TestimonialPage testimonial={CLIENT_TESTIMONIALS[3]} pageNum={5} />
@@ -297,7 +297,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
               <div
                 onClick={flipForward}
                 style={{ pointerEvents: frontFacePointerEvents(3) }}
-                className="page-face-right absolute inset-0 bg-[#F0E3C3] p-12 pl-16 flex flex-col justify-between backface-hidden rounded-r-md shadow-[inset_-10px_0_20px_rgba(0,0,0,0.03)] border-l border-black/5"
+                className="page-face-right absolute inset-0 bg-[#F7F3EA] p-12 pl-16 flex flex-col justify-between backface-hidden rounded-r-md shadow-[inset_-10px_0_20px_rgba(0,0,0,0.03)] border-l border-black/5"
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8)_0%,rgba(248,246,240,0.2)_100%)] pointer-events-none" />
 
@@ -316,7 +316,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                           e.stopPropagation();
                           flipForward();
                         }}
-                        className="inline-flex items-center justify-center rounded-sm bg-[#C6A15B] px-8 py-3.5 text-xs font-semibold uppercase tracking-[0.1em] text-[#F0E3C3] transition-all hover:bg-[#B3955A] hover:shadow-md"
+                        className="inline-flex items-center justify-center rounded-sm bg-[#C6A15B] px-8 py-3.5 text-xs font-semibold uppercase tracking-[0.1em] text-[#F7F3EA] transition-all hover:bg-[#9A7638] hover:shadow-md"
                       >
                         Contact & Location Details
                       </button>
@@ -331,7 +331,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
               <div
                 onClick={flipBackward}
                 style={{ pointerEvents: backFacePointerEvents(3) }}
-                className="page-face-left absolute inset-0 bg-[#F0E3C3] p-12 pr-16 flex flex-col justify-between backface-hidden rotate-y-180 rounded-l-md shadow-[inset_10px_0_20px_rgba(0,0,0,0.03)] border-r border-black/5 text-xs"
+                className="page-face-left absolute inset-0 bg-[#F7F3EA] p-12 pr-16 flex flex-col justify-between backface-hidden rotate-y-180 rounded-l-md shadow-[inset_10px_0_20px_rgba(0,0,0,0.03)] border-r border-black/5 text-xs"
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8)_0%,rgba(248,246,240,0.2)_100%)] pointer-events-none" />
                 
@@ -387,7 +387,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-2 border border-[#C6A15B]/50 rounded-sm px-4 py-2 hover:bg-[#E9D9AE] transition-colors font-semibold text-[10px] uppercase tracking-wider text-[#C6A15B]"
+                      className="inline-flex items-center gap-2 border border-[#C6A15B]/50 rounded-sm px-4 py-2 hover:bg-[#EEE0C8] transition-colors font-semibold text-[10px] uppercase tracking-wider text-[#C6A15B]"
                     >
                       <Map size={12} /> View Location Map
                     </a>
@@ -406,7 +406,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
               <div
                 onClick={flipForward}
                 style={{ pointerEvents: frontFacePointerEvents(4) }}
-                className="page-face-right absolute inset-0 bg-[#F0E3C3] p-12 pl-16 flex flex-col justify-between backface-hidden rounded-r-md shadow-[inset_-10px_0_20px_rgba(0,0,0,0.03)] border-l border-black/5"
+                className="page-face-right absolute inset-0 bg-[#F7F3EA] p-12 pl-16 flex flex-col justify-between backface-hidden rounded-r-md shadow-[inset_-10px_0_20px_rgba(0,0,0,0.03)] border-l border-black/5"
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8)_0%,rgba(248,246,240,0.2)_100%)] pointer-events-none" />
 
@@ -425,7 +425,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center justify-center rounded-sm bg-[#C6A15B] px-6 py-2.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#F0E3C3] transition-all hover:bg-[#B3955A]"
+                        className="inline-flex items-center justify-center rounded-sm bg-[#C6A15B] px-6 py-2.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#F7F3EA] transition-all hover:bg-[#9A7638]"
                       >
                         Book a Consultation
                       </a>
@@ -439,7 +439,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
               <div
                 onClick={flipBackward}
                 style={{ pointerEvents: backFacePointerEvents(4) }}
-                className="page-face-left absolute inset-0 bg-[#052C27] border border-[#C6A15B]/30 shadow-[inset_2px_0_10px_rgba(0,0,0,0.4)] p-12 flex flex-col justify-between items-center text-center backface-hidden rotate-y-180 rounded-l-md"
+                className="page-face-left absolute inset-0 bg-[#083C35] border border-[#C6A15B]/30 shadow-[inset_2px_0_10px_rgba(0,0,0,0.4)] p-12 flex flex-col justify-between items-center text-center backface-hidden rotate-y-180 rounded-l-md"
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,rgba(0,0,0,0.15)_100%)] mix-blend-overlay pointer-events-none" />
                 <div className="absolute inset-4 border border-[#C6A15B]/20 pointer-events-none rounded-sm" />
@@ -453,13 +453,13 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
 
                 <div className="flex flex-col items-center">
                   <span className="h-6 w-6 rounded-full border border-[#C6A15B]/40 flex items-center justify-center text-[#C6A15B] font-display text-xs mb-4">S</span>
-                  <p className="font-display text-base tracking-[0.1em] text-[#F0E3C3]/80 font-bold uppercase">
+                  <p className="font-display text-base tracking-[0.1em] text-[#F7F3EA]/80 font-bold uppercase">
                     Sarakki Homes
                   </p>
                   <p className="text-[10px] text-muted-foreground mt-2">© 2026 All Rights Reserved.</p>
                 </div>
 
-                <span className="text-[10px] uppercase tracking-[0.15em] text-[#F0E3C3]/40 mb-8 hover:text-[#C6A15B] transition-colors">
+                <span className="text-[10px] uppercase tracking-[0.15em] text-[#F7F3EA]/40 mb-8 hover:text-[#C6A15B] transition-colors">
                   ← Go Back
                 </span>
               </div>
@@ -469,7 +469,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
             {currentLeaf > 0 && (
               <button
                 onClick={flipBackward}
-                className="absolute left-[-60px] top-[calc(50%-22px)] h-11 w-11 rounded-full border border-border bg-[#F0E3C3] shadow-soft flex items-center justify-center hover:bg-[#E9D9AE] hover:-translate-x-0.5 transition-all text-[#171715] z-40"
+                className="absolute left-[-60px] top-[calc(50%-22px)] h-11 w-11 rounded-full border border-border bg-[#F7F3EA] shadow-soft flex items-center justify-center hover:bg-[#EEE0C8] hover:-translate-x-0.5 transition-all text-[#171715] z-40"
                 aria-label="Previous Page"
               >
                 <ChevronLeft size={20} />
@@ -478,7 +478,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
             {currentLeaf < 5 && (
               <button
                 onClick={flipForward}
-                className="absolute right-[-60px] top-[calc(50%-22px)] h-11 w-11 rounded-full border border-border bg-[#F0E3C3] shadow-soft flex items-center justify-center hover:bg-[#E9D9AE] hover:translate-x-0.5 transition-all text-[#171715] z-40"
+                className="absolute right-[-60px] top-[calc(50%-22px)] h-11 w-11 rounded-full border border-border bg-[#F7F3EA] shadow-soft flex items-center justify-center hover:bg-[#EEE0C8] hover:translate-x-0.5 transition-all text-[#171715] z-40"
                 aria-label="Next Page"
               >
                 <ChevronRight size={20} />
@@ -505,14 +505,14 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
             MOBILE VIEW (Swipe/Touch single page helper - 9 states)
             ======================================================== */}
         <div className="flex md:hidden flex-col items-center w-full max-w-sm">
-          <div className="relative w-full aspect-[4/5] rounded-md border border-black/10 bg-[#F0E3C3] shadow-[0_20px_50px_rgba(0,0,0,0.12)] overflow-hidden p-8 flex flex-col justify-between select-none">
+          <div className="relative w-full aspect-[4/5] rounded-md border border-black/10 bg-[#F7F3EA] shadow-[0_20px_50px_rgba(0,0,0,0.12)] overflow-hidden p-8 flex flex-col justify-between select-none">
             
             {mobilePage === 0 && (
-              <div className="absolute inset-0 bg-[#052C27] p-8 flex flex-col justify-between items-center text-center">
+              <div className="absolute inset-0 bg-[#083C35] p-8 flex flex-col justify-between items-center text-center">
                 <div className="absolute inset-4 border border-[#C6A15B]/20 pointer-events-none rounded-sm" />
                 <span className="text-[10px] uppercase tracking-[0.15em] text-[#C6A15B]/60 font-semibold mt-4">Exclusive Portfolio</span>
                 <div className="flex flex-col items-center">
-                  <h3 className="font-display text-3xl text-[#F0E3C3] tracking-wider font-bold">
+                  <h3 className="font-display text-3xl text-[#F7F3EA] tracking-wider font-bold">
                     SARAKKI HOMES
                   </h3>
                   <div className="w-10 h-[1px] bg-[#C6A15B]/40 my-4" />
@@ -520,7 +520,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                     Trusted Property Stories
                   </p>
                 </div>
-                <span className="text-[9px] uppercase tracking-[0.12em] text-[#F0E3C3]/40 mb-4" onClick={nextMobile}>
+                <span className="text-[9px] uppercase tracking-[0.12em] text-[#F7F3EA]/40 mb-4" onClick={nextMobile}>
                   Tap Next to Open Portfolio →
                 </span>
               </div>
@@ -537,9 +537,9 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                       <div
                         key={t.name}
                         onClick={() => setMobilePage(idx + 2)}
-                        className="flex items-center gap-3 p-2.5 rounded-sm bg-[#E9D9AE]/40 border border-border/20 cursor-pointer"
+                        className="flex items-center gap-3 p-2.5 rounded-sm bg-[#EEE0C8]/40 border border-border/20 cursor-pointer"
                       >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#C6A15B]/40 bg-[#F0E3C3] text-[10px] font-semibold font-display text-[#C6A15B]">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#C6A15B]/40 bg-[#F7F3EA] text-[10px] font-semibold font-display text-[#C6A15B]">
                           {t.initials}
                         </div>
                         <div className="flex flex-col">
@@ -577,7 +577,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                   <div className="pt-2">
                     <button
                       onClick={nextMobile}
-                      className="inline-flex items-center justify-center rounded-sm bg-[#C6A15B] px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#F0E3C3]"
+                      className="inline-flex items-center justify-center rounded-sm bg-[#C6A15B] px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#F7F3EA]"
                     >
                       Contact & Locations
                     </button>
@@ -624,17 +624,17 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
             )}
 
             {mobilePage === 8 && (
-              <div className="absolute inset-0 bg-[#052C27] p-8 flex flex-col justify-between items-center text-center">
+              <div className="absolute inset-0 bg-[#083C35] p-8 flex flex-col justify-between items-center text-center">
                 <div className="absolute inset-4 border border-[#C6A15B]/20 pointer-events-none rounded-sm" />
                 <span className="text-[#C6A15B]/40 text-[9px] uppercase tracking-[0.15em] font-semibold mt-4">End of Portfolio</span>
                 <div className="flex flex-col items-center">
                   <span className="h-5 w-5 rounded-full border border-[#C6A15B]/40 flex items-center justify-center text-[#C6A15B] font-display text-[10px] mb-3">S</span>
-                  <p className="font-display text-sm tracking-[0.1em] text-[#F0E3C3]/80 font-bold uppercase">
+                  <p className="font-display text-sm tracking-[0.1em] text-[#F7F3EA]/80 font-bold uppercase">
                     Sarakki Homes
                   </p>
                   <p className="text-[9px] text-muted-foreground mt-1">© 2026 All Rights Reserved.</p>
                 </div>
-                <span className="text-[9px] uppercase tracking-[0.12em] text-[#F0E3C3]/40 mb-4" onClick={() => setMobilePage(0)}>
+                <span className="text-[9px] uppercase tracking-[0.12em] text-[#F7F3EA]/40 mb-4" onClick={() => setMobilePage(0)}>
                   ← Restart Portfolio
                 </span>
               </div>
@@ -682,7 +682,7 @@ function TestimonialPage({ testimonial, pageNum }: { testimonial: TestimonialDat
       <div className="relative z-10 space-y-6">
         {/* Customer Monogram Badge Ring */}
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#C6A15B]/40 bg-[#F0E3C3] text-lg font-semibold font-display text-[#C6A15B] shadow-sm select-none">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#C6A15B]/40 bg-[#F7F3EA] text-lg font-semibold font-display text-[#C6A15B] shadow-sm select-none">
             {testimonial.initials}
           </div>
           <div className="flex flex-col">
@@ -742,7 +742,7 @@ function MobileTestimonialPage({ testimonial, pageNum }: { testimonial: Testimon
       <div className="relative z-10 space-y-4">
         {/* Customer Badge */}
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#C6A15B]/40 bg-[#F0E3C3] text-sm font-semibold font-display text-[#C6A15B] shadow-sm">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#C6A15B]/40 bg-[#F7F3EA] text-sm font-semibold font-display text-[#C6A15B] shadow-sm">
             {testimonial.initials}
           </div>
           <div className="flex flex-col">
