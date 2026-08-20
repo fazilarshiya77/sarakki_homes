@@ -46,15 +46,6 @@ export function Hero() {
         }}
       />
 
-      {/* Architectural grid lines — quiet structural motif. */}
-      <div className="pointer-events-none absolute inset-0 z-[1] hidden md:block">
-        <Container className="relative h-full">
-          <div className="absolute inset-y-0 left-1/4 w-px bg-background/10" />
-          <div className="absolute inset-y-0 left-1/2 w-px bg-background/10" />
-          <div className="absolute inset-y-0 left-3/4 w-px bg-background/10" />
-        </Container>
-      </div>
-
       <Container className="relative z-10 flex flex-1 flex-col justify-between gap-16 pb-28 pt-44">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
           <motion.div

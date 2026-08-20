@@ -46,7 +46,7 @@ export function PropertyExplorer({ properties }: { properties: Property[] }) {
   );
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-8">
       <PropertyFilters
         filters={filters}
         onChange={setFilters}

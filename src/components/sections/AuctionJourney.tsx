@@ -180,7 +180,19 @@ export function AuctionJourney() {
             </div>
           </div>
 
-          <div className="relative mt-16 overflow-hidden rounded-md bg-surface">
+          {/* Was a flat bg-surface fill with no border/shadow at all,
+              sitting on this section's near-identical-toned bg-background
+              — the two tones were close enough that the panel had no
+              visible edge, reading as "blends into the background."
+              Explicit border + shadow now give it a real edge. */}
+          <div
+            className="relative mt-16 overflow-hidden rounded-md"
+            style={{
+              backgroundColor: "#EEE7DA",
+              border: "1px solid #DDD5C5",
+              boxShadow: "0 1px 2px rgba(23,35,31,0.04), 0 16px 32px rgba(23,35,31,0.07)",
+            }}
+          >
             {/* Oversized ghost numeral — a restrained, premium watermark
                 that reinforces "which step" without adding new copy. */}
             <span

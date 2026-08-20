@@ -23,11 +23,17 @@ export default async function PropertiesPage() {
   return (
     <>
       <Header solid />
-      <main className="flex flex-1 flex-col pt-28">
-        <Section className="relative flex min-h-[320px] items-center overflow-hidden !py-14 bg-surface">
+      {/* pt-28 (112px) previously stacked on top of the hero section's OWN
+          py-14, and that section's default Section wrapper padding again
+          stacked on top of the property grid below it — three separate
+          vertical paddings compounding into the "excessive whitespace"
+          this page was flagged for. Tightened throughout; still generous,
+          just not tripled. */}
+      <main className="flex flex-1 flex-col pt-20">
+        <Section className="relative flex min-h-[220px] items-center overflow-hidden !py-10 bg-surface">
           <Container className="relative">
             <Eyebrow>Explore Properties</Eyebrow>
-            <h1 className="relative mt-4 max-w-2xl font-display text-4xl leading-[1.1] tracking-[-0.01em] md:text-5xl">
+            <h1 className="relative mt-3 max-w-2xl font-display text-4xl leading-[1.1] tracking-[-0.01em] md:text-5xl">
               Every property here has already been through our scrutiny.
             </h1>
           </Container>
@@ -36,7 +42,7 @@ export default async function PropertiesPage() {
         {/* Deeper than the standard bg-surface token — white cards need a
             more contrasted backdrop to read as distinct tiles rather than
             blending into the section behind them. */}
-        <Section className="bg-[#EDE6D6]">
+        <Section className="bg-[#EDE6D6] !py-12 md:!py-16">
           <Container>
             <Suspense fallback={null}>
               <PropertyExplorer properties={properties} />
