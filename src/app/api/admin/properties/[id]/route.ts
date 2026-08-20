@@ -92,76 +92,95 @@ export async function PUT(
       },
     });
 
-    // Handle AuctionInfo
+    // AuctionInfo, LoanEligibility, Images, and the activity log entry
+    // are all independent of each other (each only needs the property id
+    // already in hand) but were previously awaited one after another --
+    // up to 5 sequential round trips. This dev environment's round trip
+    // to Supabase (Tokyo) runs ~600ms+ per query right now, so that
+    // chain alone could add 3+ seconds to every save. Running them
+    // concurrently costs roughly one round trip's worth of latency
+    // instead of the sum of all of them. The images delete-then-create
+    // pair must stay sequential relative to each other (can't insert
+    // before the old rows are gone), so that pair is wrapped as one
+    // promise in the batch rather than two separate entries.
+    const followUpWrites: Promise<unknown>[] = [];
+
     if (body.type === "Bank Auction" && body.auctionInfo) {
-      await prisma.auctionInfo.upsert({
-        where: { propertyId: id },
-        update: {
-          bankName: body.auctionInfo.bankName,
-          auctionDate: new Date(body.auctionInfo.auctionDate),
-          emd: body.auctionInfo.emd,
-          reservePrice: body.auctionInfo.reservePrice,
-          physicalPossession: body.auctionInfo.physicalPossession === true,
-          legalStatus: body.auctionInfo.legalStatus,
-        },
-        create: {
-          propertyId: id,
-          bankName: body.auctionInfo.bankName,
-          auctionDate: new Date(body.auctionInfo.auctionDate),
-          emd: body.auctionInfo.emd,
-          reservePrice: body.auctionInfo.reservePrice,
-          physicalPossession: body.auctionInfo.physicalPossession === true,
-          legalStatus: body.auctionInfo.legalStatus,
-        },
-      });
+      followUpWrites.push(
+        prisma.auctionInfo.upsert({
+          where: { propertyId: id },
+          update: {
+            bankName: body.auctionInfo.bankName,
+            auctionDate: new Date(body.auctionInfo.auctionDate),
+            emd: body.auctionInfo.emd,
+            reservePrice: body.auctionInfo.reservePrice,
+            physicalPossession: body.auctionInfo.physicalPossession === true,
+            legalStatus: body.auctionInfo.legalStatus,
+          },
+          create: {
+            propertyId: id,
+            bankName: body.auctionInfo.bankName,
+            auctionDate: new Date(body.auctionInfo.auctionDate),
+            emd: body.auctionInfo.emd,
+            reservePrice: body.auctionInfo.reservePrice,
+            physicalPossession: body.auctionInfo.physicalPossession === true,
+            legalStatus: body.auctionInfo.legalStatus,
+          },
+        })
+      );
     } else {
       // If type changed from Bank Auction, clean it up
-      await prisma.auctionInfo.deleteMany({ where: { propertyId: id } });
+      followUpWrites.push(prisma.auctionInfo.deleteMany({ where: { propertyId: id } }));
     }
 
-    // Handle LoanEligibility
     if (body.loanEligibility) {
-      await prisma.loanEligibility.upsert({
-        where: { propertyId: id },
-        update: {
-          maxLoanAmount: body.loanEligibility.maxLoanAmount,
-          indicativeEmi: body.loanEligibility.indicativeEmi,
-          partnerBanks: JSON.stringify(body.loanEligibility.partnerBanks || []),
-        },
-        create: {
-          propertyId: id,
-          maxLoanAmount: body.loanEligibility.maxLoanAmount,
-          indicativeEmi: body.loanEligibility.indicativeEmi,
-          partnerBanks: JSON.stringify(body.loanEligibility.partnerBanks || []),
-        },
-      });
-    }
-
-    // Handle Images updates (replace all or update)
-    if (body.images) {
-      // Clean old images
-      await prisma.propertyImage.deleteMany({ where: { propertyId: id } });
-      // Create new ones
-      if (body.images.length > 0) {
-        await prisma.propertyImage.createMany({
-          data: body.images.map((img: { url: string; publicId?: string }, idx: number) => ({
-            url: img.url,
-            publicId: img.publicId || `manual_${property.slug}_${idx}`,
-            order: idx,
+      followUpWrites.push(
+        prisma.loanEligibility.upsert({
+          where: { propertyId: id },
+          update: {
+            maxLoanAmount: body.loanEligibility.maxLoanAmount,
+            indicativeEmi: body.loanEligibility.indicativeEmi,
+            partnerBanks: JSON.stringify(body.loanEligibility.partnerBanks || []),
+          },
+          create: {
             propertyId: id,
-          })),
-        });
-      }
+            maxLoanAmount: body.loanEligibility.maxLoanAmount,
+            indicativeEmi: body.loanEligibility.indicativeEmi,
+            partnerBanks: JSON.stringify(body.loanEligibility.partnerBanks || []),
+          },
+        })
+      );
     }
 
-    // Log activity
-    await prisma.activityLog.create({
-      data: {
-        userId: auth.user.id,
-        action: "UPDATE_PROPERTY",
-        details: `Updated property ${property.title} (${property.propertyId})`,
-      },
-    });
+    if (body.images) {
+      followUpWrites.push(
+        (async () => {
+          await prisma.propertyImage.deleteMany({ where: { propertyId: id } });
+          if (body.images.length > 0) {
+            await prisma.propertyImage.createMany({
+              data: body.images.map((img: { url: string; publicId?: string }, idx: number) => ({
+                url: img.url,
+                publicId: img.publicId || `manual_${property.slug}_${idx}`,
+                order: idx,
+                propertyId: id,
+              })),
+            });
+          }
+        })()
+      );
+    }
+
+    followUpWrites.push(
+      prisma.activityLog.create({
+        data: {
+          userId: auth.user.id,
+          action: "UPDATE_PROPERTY",
+          details: `Updated property ${property.title} (${property.propertyId})`,
+        },
+      })
+    );
+
+    await Promise.all(followUpWrites);
 
     revalidatePath("/");
     revalidatePath("/properties");

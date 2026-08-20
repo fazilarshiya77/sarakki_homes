@@ -116,53 +116,68 @@ export async function POST(req: Request) {
       },
     });
 
-    // Create auction details if provided
+    // These four writes are all independent of each other (each only
+    // needs property.id, already in hand) but were previously awaited
+    // one after another. This dev environment's round trip to Supabase
+    // (Tokyo) runs ~600ms+ per query right now, so four sequential
+    // awaits here alone added 2+ seconds to every publish. Running them
+    // concurrently costs roughly one round trip's worth of latency
+    // instead of the sum of four.
+    const followUpWrites: Promise<unknown>[] = [];
+
     if (body.type === "Bank Auction" && body.auctionInfo) {
-      await prisma.auctionInfo.create({
-        data: {
-          propertyId: property.id,
-          bankName: body.auctionInfo.bankName,
-          auctionDate: new Date(body.auctionInfo.auctionDate),
-          emd: body.auctionInfo.emd,
-          reservePrice: body.auctionInfo.reservePrice,
-          physicalPossession: body.auctionInfo.physicalPossession === true,
-          legalStatus: body.auctionInfo.legalStatus,
-        },
-      });
+      followUpWrites.push(
+        prisma.auctionInfo.create({
+          data: {
+            propertyId: property.id,
+            bankName: body.auctionInfo.bankName,
+            auctionDate: new Date(body.auctionInfo.auctionDate),
+            emd: body.auctionInfo.emd,
+            reservePrice: body.auctionInfo.reservePrice,
+            physicalPossession: body.auctionInfo.physicalPossession === true,
+            legalStatus: body.auctionInfo.legalStatus,
+          },
+        })
+      );
     }
 
-    // Create loan eligibility if provided
     if (body.loanEligibility) {
-      await prisma.loanEligibility.create({
-        data: {
-          propertyId: property.id,
-          maxLoanAmount: body.loanEligibility.maxLoanAmount,
-          indicativeEmi: body.loanEligibility.indicativeEmi,
-          partnerBanks: JSON.stringify(body.loanEligibility.partnerBanks || []),
-        },
-      });
+      followUpWrites.push(
+        prisma.loanEligibility.create({
+          data: {
+            propertyId: property.id,
+            maxLoanAmount: body.loanEligibility.maxLoanAmount,
+            indicativeEmi: body.loanEligibility.indicativeEmi,
+            partnerBanks: JSON.stringify(body.loanEligibility.partnerBanks || []),
+          },
+        })
+      );
     }
 
-    // Create image attachments
     if (body.images && body.images.length > 0) {
-      await prisma.propertyImage.createMany({
-        data: body.images.map((img: { url: string; publicId?: string }, idx: number) => ({
-          url: img.url,
-          publicId: img.publicId || `manual_${property.slug}_${idx}`,
-          order: idx,
-          propertyId: property.id,
-        })),
-      });
+      followUpWrites.push(
+        prisma.propertyImage.createMany({
+          data: body.images.map((img: { url: string; publicId?: string }, idx: number) => ({
+            url: img.url,
+            publicId: img.publicId || `manual_${property.slug}_${idx}`,
+            order: idx,
+            propertyId: property.id,
+          })),
+        })
+      );
     }
 
-    // Log activity
-    await prisma.activityLog.create({
-      data: {
-        userId: auth.user.id,
-        action: "CREATE_PROPERTY",
-        details: `Created property ${property.title} (${property.propertyId})`,
-      },
-    });
+    followUpWrites.push(
+      prisma.activityLog.create({
+        data: {
+          userId: auth.user.id,
+          action: "CREATE_PROPERTY",
+          details: `Created property ${property.title} (${property.propertyId})`,
+        },
+      })
+    );
+
+    await Promise.all(followUpWrites);
 
     // Public listings/detail pages are ISR-cached (revalidate = 60) —
     // bust that so a newly published property shows up immediately.

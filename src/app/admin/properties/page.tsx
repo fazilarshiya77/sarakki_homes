@@ -58,7 +58,23 @@ export default function PropertiesListPage() {
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [publishToast, setPublishToast] = useState<string | null>(null);
   const limit = PAGE_SIZE;
+
+  // The wizard has no other page to hand a confirmation to -- it
+  // navigates here right after a successful publish/save. It stores a
+  // one-shot flag in sessionStorage before navigating; this reads and
+  // clears it on mount so the banner shows exactly once, even on a
+  // manual refresh of this page afterwards.
+  useEffect(() => {
+    const raw = sessionStorage.getItem("sh_crm_publish_toast");
+    if (raw) {
+      sessionStorage.removeItem("sh_crm_publish_toast");
+      setPublishToast(raw);
+      const timer = setTimeout(() => setPublishToast(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // Fetch properties from API
   const fetchProperties = async () => {
@@ -177,6 +193,32 @@ export default function PropertiesListPage() {
 
   return (
     <div className="space-y-6 relative pb-20">
+      {/* Publish/save confirmation toast — see the sessionStorage effect
+          above for why this lives here rather than in the wizard itself
+          (the wizard navigates away before the user could read it). */}
+      <AnimatePresence>
+        {publishToast && (
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed right-6 top-6 z-50 flex items-center gap-3 rounded-sm border border-emerald-500/25 bg-crm-card px-5 py-3.5 shadow-[0_12px_32px_rgba(0,0,0,0.18)]"
+          >
+            <CheckCircle2 size={18} className="shrink-0 text-emerald-500" />
+            <span className="text-sm font-semibold text-crm-text">{publishToast}</span>
+            <button
+              type="button"
+              onClick={() => setPublishToast(null)}
+              aria-label="Dismiss"
+              className="ml-2 text-crm-text-muted transition-colors hover:text-crm-text"
+            >
+              <XCircle size={15} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* List Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>

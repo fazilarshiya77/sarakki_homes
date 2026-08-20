@@ -239,6 +239,15 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
       });
 
       if (res.ok) {
+        // The wizard navigates away immediately, so it can't show its own
+        // confirmation -- the properties list picks this up on mount and
+        // shows it as a dismissing toast (see sh_crm_publish_toast there).
+        sessionStorage.setItem(
+          "sh_crm_publish_toast",
+          initialData
+            ? `"${data.title}" was updated successfully.`
+            : `"${data.title}" was published successfully.`
+        );
         router.push("/admin/properties");
         router.refresh();
       } else {
