@@ -1,6 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // lucide-react (imported in 40+ components, individual icons named from
+  // its barrel file) and framer-motion (used on nearly every section) are
+  // both large packages that are NOT in Next.js's own default
+  // auto-optimized list for this version — every route that imports even
+  // one icon was pulling in more of the package graph than it needed to,
+  // which costs both dev-mode compile time per route (the "Compiling…"
+  // delay on first visit) and production bundle size. This makes Next
+  // trace through the barrel and include only the specific
+  // icons/exports each file actually imports.
+  experimental: {
+    optimizePackageImports: ["lucide-react", "framer-motion"],
+  },
   images: {
     // The admin property wizard accepts any pasted image URL (Cloudinary
     // upload isn't wired yet — see PropertyWizard.tsx), so next/image can't
