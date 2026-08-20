@@ -74,7 +74,14 @@ export async function POST(req: Request) {
       {
         method: "POST",
         headers: {
+          // Both headers are required — Supabase's newer `sb_secret_...`
+          // project API keys (as opposed to legacy service_role JWTs) are
+          // rejected with 403 "Invalid Compact JWS" if `apikey` is
+          // missing, even though `Authorization: Bearer` alone used to be
+          // enough for JWT-style keys. Sending both is correct/harmless
+          // for either key format.
           Authorization: `Bearer ${serviceKey}`,
+          apikey: serviceKey,
           "Content-Type": file.type,
           "cache-control": "public, max-age=31536000, immutable",
         },
