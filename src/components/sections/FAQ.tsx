@@ -26,14 +26,13 @@ export function FAQ() {
         aria-hidden="true"
         fill
         sizes="100vw"
-        className="object-cover opacity-[0.12] blur-md scale-105"
+        className="object-cover opacity-[0.14] blur-sm scale-105"
       />
-      {/* scale-105 hides the soft blurred edge blur-md would otherwise
-          reveal at the image's boundary. Wash strengthened (was via-92%)
-          since a blurred photo still reads brighter/busier at full detail
-          removed — this keeps the question/answer text unambiguously
-          sharp on top. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-surface via-surface/96 to-surface" />
+      {/* scale-105 hides the soft blurred edge blur-sm would otherwise
+          reveal at the image's boundary. Wash back to the original
+          strength — just a light blur to soften the photo's detail, not
+          a heavier wash on top of it. */}
+      <div className="absolute inset-0 bg-gradient-to-b from-surface via-surface/92 to-surface" />
 
       <Container className="relative z-10 max-w-4xl">
         <RevealOnScroll className="text-center">
