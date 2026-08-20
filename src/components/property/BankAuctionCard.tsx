@@ -89,7 +89,7 @@ export function BankAuctionCard({ property }: { property: AuctionProperty }) {
         <div className="mt-5 flex items-end justify-between gap-4 border-t border-border pt-5">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">Reserve Price</p>
-            <p className="mt-1 font-display text-2xl font-bold text-foreground">
+            <p className="mt-1 font-body text-2xl font-bold tracking-tight text-foreground">
               {property.reservePrice || "Not specified"}
             </p>
           </div>

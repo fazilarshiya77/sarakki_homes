@@ -90,7 +90,7 @@ export function PropertyListItem({ property }: { property: Property }) {
             className="flex shrink-0 items-center gap-6 border-t pt-4 sm:border-t-0 sm:border-l sm:pl-6 sm:pt-0"
             style={{ borderColor: CARD.border }}
           >
-            <p className="font-display text-xl font-semibold" style={{ color: CARD.brand }}>
+            <p className="font-body text-xl font-bold tracking-tight" style={{ color: CARD.brand }}>
               {property.priceRange || property.price}
             </p>
             <span

@@ -179,8 +179,11 @@ export function PropertyCard({ property }: { property: Property }) {
               className="mt-4 flex items-center justify-between border-t pt-4"
               style={{ borderColor: isFeatured ? FEATURED.border : CARD.border }}
             >
+              {/* Prices are UI/metadata, not editorial content — Manrope
+                  per the typography spec, kept bold/tight-tracked so it
+                  still reads as the strongest thing on the card. */}
               <p
-                className="font-display text-xl font-semibold"
+                className="font-body text-xl font-bold tracking-tight"
                 style={{ color: isFeatured ? FEATURED.price : CARD.brand }}
               >
                 {property.subFlats && property.subFlats.length > 0

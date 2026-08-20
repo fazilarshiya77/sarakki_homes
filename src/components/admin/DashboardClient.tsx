@@ -116,7 +116,7 @@ export function DashboardClient({
       {/* Header section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-semibold tracking-wide text-crm-text">
+          <h1 className="font-body text-3xl font-semibold tracking-wide text-crm-text">
             Overview
           </h1>
           <p className="text-sm text-crm-text-secondary mt-1">
@@ -176,7 +176,7 @@ export function DashboardClient({
                 </div>
               </div>
               <div className="mt-4 flex items-baseline gap-2">
-                <span className="font-display text-3xl font-bold tracking-tight text-crm-text">{card.value}</span>
+                <span className="font-body text-3xl font-bold tracking-tight text-crm-text">{card.value}</span>
               </div>
               <p className="text-[11px] text-crm-text-secondary mt-2 font-medium">
                 {card.desc}
@@ -190,7 +190,7 @@ export function DashboardClient({
       <div className="space-y-5">
         <div className="flex items-end justify-between">
           <div>
-            <h2 className="font-display text-2xl font-bold tracking-wide text-crm-text">
+            <h2 className="font-body text-2xl font-bold tracking-wide text-crm-text">
               Revenue &amp; Deals
             </h2>
             <p className="text-sm text-crm-text-secondary mt-1">
@@ -262,7 +262,7 @@ export function DashboardClient({
                   </div>
                 </div>
                 <div className="mt-4 flex items-baseline gap-2">
-                  <span className="font-display text-3xl font-bold tracking-tight text-crm-text">
+                  <span className="font-body text-3xl font-bold tracking-tight text-crm-text">
                     {card.value}
                   </span>
                 </div>
@@ -388,7 +388,7 @@ export function DashboardClient({
                 <span className="text-[10px] uppercase tracking-wider font-semibold text-crm-text-muted">
                   {item.label}
                 </span>
-                <p className="font-display text-2xl font-bold tracking-tight text-crm-text mt-2">
+                <p className="font-body text-2xl font-bold tracking-tight text-crm-text mt-2">
                   {item.value}
                 </p>
                 <p className="text-[11px] text-crm-text-secondary mt-1 font-medium">{item.desc}</p>

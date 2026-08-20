@@ -413,7 +413,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                 <div className="flex flex-col h-full justify-between items-center text-center relative z-10">
                   <div className="my-auto max-w-xs space-y-6">
                     <span className="h-10 w-10 rounded-full border border-[#C6A15B]/30 flex items-center justify-center text-[#C6A15B] font-display text-sm mx-auto">S</span>
-                    <h4 className="font-display text-xl tracking-widest text-[#171715] uppercase font-bold">
+                    <h4 className="font-display text-xl tracking-[0.08em] text-[#171715] uppercase font-bold">
                       Sarakki Homes
                     </h4>
                     <p className="text-xs leading-relaxed text-muted-foreground">
@@ -701,7 +701,7 @@ function TestimonialPage({ testimonial, pageNum }: { testimonial: TestimonialDat
         </div>
 
         {/* Large Quote */}
-        <p className="font-display text-2xl italic leading-relaxed text-[#171715]/90 font-light pr-2">
+        <p className="font-display text-2xl leading-relaxed text-[#17231F] pr-2">
           &ldquo;{testimonial.quote}&rdquo;
         </p>
 
@@ -761,7 +761,7 @@ function MobileTestimonialPage({ testimonial, pageNum }: { testimonial: Testimon
         </div>
 
         {/* Quote */}
-        <p className="font-display text-lg italic leading-relaxed text-[#171715]/90 font-light">
+        <p className="font-display text-lg leading-relaxed text-[#17231F]">
           &ldquo;{testimonial.quote}&rdquo;
         </p>
 

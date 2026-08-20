@@ -100,7 +100,7 @@ export function AddLeadModal({
           >
             <div className="flex items-center justify-between border-b border-crm-border/20 pb-4">
               <div>
-                <h3 className="font-display text-lg font-semibold text-crm-text">Add New Lead</h3>
+                <h3 className="font-body text-lg font-semibold text-crm-text">Add New Lead</h3>
                 <p className="text-[11px] text-crm-text-secondary mt-0.5">
                   Capture a walk-in, call, or referral straight into the pipeline.
                 </p>

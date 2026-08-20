@@ -68,7 +68,7 @@ export function BankAuctionListItem({ property }: { property: AuctionProperty })
       <div className="flex shrink-0 items-center gap-6 border-t border-border pt-4 sm:border-t-0 sm:border-l sm:pl-6 sm:pt-0">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">Reserve Price</p>
-          <p className="mt-0.5 font-display text-xl font-bold text-foreground">{property.reservePrice || "Not specified"}</p>
+          <p className="mt-0.5 font-body text-xl font-bold tracking-tight text-foreground">{property.reservePrice || "Not specified"}</p>
         </div>
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">Auction Date</p>

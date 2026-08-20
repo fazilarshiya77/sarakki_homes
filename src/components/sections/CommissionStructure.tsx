@@ -66,7 +66,7 @@ export function CommissionStructure() {
                     </div>
 
                     <div className="flex items-end gap-3 pl-10 sm:flex-col sm:items-end sm:gap-1 sm:pl-0 sm:text-right">
-                      <span className="font-display text-4xl leading-none tabular-nums text-accent-emerald transition-transform duration-500 group-hover:scale-[1.03] md:text-5xl">
+                      <span className="font-body text-4xl font-bold leading-none tracking-tight tabular-nums text-accent-emerald transition-transform duration-500 group-hover:scale-[1.03] md:text-5xl">
                         {entry.figure}
                       </span>
                       {entry.basis && (

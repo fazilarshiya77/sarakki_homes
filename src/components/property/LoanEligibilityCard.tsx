@@ -19,13 +19,13 @@ export async function LoanEligibilityCard({ loan }: { loan: LoanEligibility }) {
           <p className="text-xs uppercase tracking-[0.1em] text-muted-foreground">
             Estimated Max Loan
           </p>
-          <p className="mt-1.5 font-display text-xl">{loan.maxLoanAmount}</p>
+          <p className="mt-1.5 font-body text-xl font-bold tracking-tight">{loan.maxLoanAmount}</p>
         </div>
         <div>
           <p className="text-xs uppercase tracking-[0.1em] text-muted-foreground">
             Indicative EMI
           </p>
-          <p className="mt-1.5 font-display text-xl">{loan.indicativeEmi}</p>
+          <p className="mt-1.5 font-body text-xl font-bold tracking-tight">{loan.indicativeEmi}</p>
         </div>
       </div>
 

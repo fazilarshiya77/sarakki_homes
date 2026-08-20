@@ -560,12 +560,12 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                   <div className="flex flex-wrap items-start justify-between gap-6">
                     <div>
                       <span className="crm-label">Property Name</span>
-                      <p className="mt-1.5 font-display text-xl text-crm-text">{formValues.title || "N/A"}</p>
+                      <p className="mt-1.5 font-body text-xl text-crm-text">{formValues.title || "N/A"}</p>
                       <p className="mt-1 text-xs text-crm-text-secondary">{formValues.location || "N/A"}</p>
                     </div>
                     <div className="text-right">
                       <span className="crm-label">Price</span>
-                      <p className="mt-1.5 font-display text-2xl font-semibold text-crm-gold">{formValues.price || "N/A"}</p>
+                      <p className="mt-1.5 font-body text-2xl font-semibold text-crm-gold">{formValues.price || "N/A"}</p>
                     </div>
                   </div>
 
@@ -616,7 +616,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
 function StepHeading({ title, description }: { title: string; description: string }) {
   return (
     <div>
-      <h3 className="font-display text-xl font-semibold text-crm-text">{title}</h3>
+      <h3 className="font-body text-xl font-semibold text-crm-text">{title}</h3>
       <p className="text-xs text-crm-text-secondary mt-1">{description}</p>
     </div>
   );
