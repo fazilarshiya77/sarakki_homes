@@ -32,20 +32,28 @@ function formatPriceDisplay(valueLakh: number): string {
 
 // Form validation schema with Zod
 const propertySchema = z.object({
-  title: z.string().min(3, "Property name must be at least 3 characters"),
-  categoryId: z.string().min(1, "Please select a category"),
+  // .min(1, "...is required.") fires on a genuinely empty field; a
+  // separate .refine adds the quality-of-data length check without
+  // stealing that message when the field is simply blank (an empty
+  // title used to report "must be at least 3 characters", which reads
+  // like a length complaint rather than "you skipped this").
+  title: z
+    .string()
+    .min(1, "Property name is required.")
+    .refine((v) => v.trim().length >= 3, "Property name must be at least 3 characters."),
+  categoryId: z.string().min(1, "Category is required."),
   builderId: z.string().min(1, "Please select a builder"),
-  type: z.string().min(1, "Please select a type (e.g. Bank Auction, Resale)"),
+  type: z.string().min(1, "Property type is required."),
   // Was two separate fields (a free-text display string + this numeric
   // value) that both had to be filled in sync by hand -- collapsed into
   // this single required field per the client's request. The display
   // string (e.g. "₹ 85 Lakh" / "₹ 2.40 Cr") is now derived automatically
   // from this number in onSubmit below, so there's nothing left to type
   // twice and nothing that can drift out of sync between the two.
-  priceValueLakh: z.string().min(1, "Price is required"),
+  priceValueLakh: z.string().min(1, "Price is required."),
   location: z.string().min(1, "Location is required (e.g. Whitefield, Bengaluru)"),
   address: z.string().min(1, "Address is required"),
-  mapQuery: z.string().min(1, "Google Maps query is required"),
+  mapQuery: z.string().min(1, "Google Maps Location is required."),
   description: z.string().min(10, "Description must be at least 10 characters"),
 
   // Auction Info (optional)
@@ -116,6 +124,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
     handleSubmit,
     watch,
     setValue,
+    trigger,
     formState: { errors },
   } = useForm<any>({
     resolver: zodResolver(propertySchema),
@@ -123,7 +132,12 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
       title: "",
       categoryId: "",
       builderId: "",
-      type: "Bank Auction",
+      // Was defaulted to "Bank Auction" -- meant the select was always
+      // "filled" from the moment the wizard opened, so a user could never
+      // actually leave Property Type unselected and the "required" check
+      // was unenforceable. Starts blank now so the compulsory-fields
+      // validation has something real to check.
+      type: "",
       priceValueLakh: "",
       location: "",
       address: "",
@@ -151,32 +165,37 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
   const propertyType = watch("type");
   const formValues = watch();
 
-  const handleNext = () => {
-    // Basic step validation before moving forward. This used to only
-    // check title/categoryId/builderId/location, letting a user sail
-    // past step 0 with address/mapQuery/description still blank (all
-    // three are required by propertySchema) all the way to Review &
-    // Publish -- where zodResolver would silently block the submit with
-    // no error ever shown (nothing here rendered formState.errors except
-    // the Property Name field), so clicking Publish just appeared to do
-    // nothing. Checking the full set of step-0-required fields here
-    // catches that early, and the onInvalid handler on the form below is
-    // the backstop for anything that still slips through.
+  const STEP_0_FIELDS = [
+    "title",
+    "type",
+    "categoryId",
+    "priceValueLakh",
+    "builderId",
+    "location",
+    "address",
+    "mapQuery",
+    "description",
+  ] as const;
+
+  const handleNext = async () => {
+    // Basic step validation before moving forward. This used to do its
+    // own manual `!formValues.x` checks and only ever show one generic
+    // banner -- which meant a user got told *something* was missing but
+    // never which field, and the per-field red text under each input
+    // (via the Field component's `error` prop) never lit up because
+    // nothing had actually run react-hook-form's own validation yet.
+    // `trigger()` runs the real zodResolver validation for exactly the
+    // step-0 fields and populates `formState.errors` for each one that
+    // fails, so the same inline messages the final submit already shows
+    // (Property Name, Property Type, Category, Price, etc.) now appear
+    // immediately when Next is clicked too -- the field itself is
+    // highlighted, not just a top-of-page banner. onInvalid (wired to
+    // handleSubmit below) remains the backstop for the Review & Publish
+    // step, in case a step gets reached some other way.
     if (currentStep === 0) {
-      if (
-        !formValues.title ||
-        !formValues.categoryId ||
-        !formValues.priceValueLakh ||
-        !formValues.builderId ||
-        !formValues.location ||
-        !formValues.address ||
-        !formValues.mapQuery ||
-        !formValues.description ||
-        formValues.description.trim().length < 10
-      ) {
-        setErrorMessage(
-          "Please fill in all required Basic Info fields (Property Name, Category, and Price are compulsory, along with Address, Google maps location, and a Description of at least 10 characters)."
-        );
+      const isValid = await trigger(STEP_0_FIELDS);
+      if (!isValid) {
+        setErrorMessage("Please fix the highlighted fields before continuing.");
         return;
       }
     }
@@ -197,7 +216,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
       priceValueLakh: "Price",
       location: "Location",
       address: "Address",
-      mapQuery: "Google maps location",
+      mapQuery: "Google Maps Location",
       description: "Description",
       area: "Area Display Text",
     };
@@ -370,8 +389,9 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     />
                   </Field>
 
-                  <Field label="Property Type" required>
-                    <select {...register("type")} className="crm-select">
+                  <Field label="Property Type" required error={errors.type}>
+                    <select {...register("type")} className="crm-select" defaultValue="">
+                      <option value="" disabled>Select Property Type</option>
                       <option value="Bank Auction">Bank Auction</option>
                       <option value="Resale">Resale</option>
                       <option value="Ready To Move">Ready To Move</option>
@@ -434,7 +454,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     />
                   </Field>
 
-                  <Field label="Google maps location" span2 error={errors.mapQuery}>
+                  <Field label="Google Maps Location" span2 error={errors.mapQuery}>
                     <input
                       type="text"
                       {...register("mapQuery")}
