@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { InstagramIcon, WhatsappIcon } from "@/components/ui/SocialIcons";
 import { useSiteSettings } from "@/components/providers/SettingsProvider";
@@ -14,7 +15,15 @@ const BRAND = {
 } as const;
 
 export function FloatingSocialDock() {
+  const pathname = usePathname();
   const { contact } = useSiteSettings();
+
+  // Same pattern as BuilderMarquee: this is a public-marketing-site
+  // affordance (WhatsApp/Instagram for site visitors), rendered from the
+  // root layout so it's unintentionally showing on every /admin CRM
+  // page too, floating over staff-only screens where it has no purpose.
+  if (pathname?.startsWith("/admin")) return null;
+
   const LINKS = [
     {
       label: "Chat on WhatsApp",
