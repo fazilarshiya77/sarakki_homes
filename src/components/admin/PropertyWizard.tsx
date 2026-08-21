@@ -21,14 +21,28 @@ import {
 } from "lucide-react";
 import { PropertyImageManager, type ManagedImage } from "@/components/admin/PropertyImageManager";
 
+/** Turns the single "Price (in Lakhs)" number into the display string a
+ *  property card actually shows -- e.g. 85 -> "₹85 Lakh", 240 -> "₹2.40 Cr".
+ *  Matches the "₹X.XX Cr" convention already used by existing listings. */
+function formatPriceDisplay(valueLakh: number): string {
+  if (!Number.isFinite(valueLakh) || valueLakh <= 0) return "Price on request";
+  if (valueLakh >= 100) return `₹${(valueLakh / 100).toFixed(2)} Cr`;
+  return `₹${valueLakh % 1 === 0 ? valueLakh : valueLakh.toFixed(1)} Lakh`;
+}
+
 // Form validation schema with Zod
 const propertySchema = z.object({
   title: z.string().min(3, "Property name must be at least 3 characters"),
   categoryId: z.string().min(1, "Please select a category"),
   builderId: z.string().min(1, "Please select a builder"),
   type: z.string().min(1, "Please select a type (e.g. Bank Auction, Resale)"),
-  price: z.string().min(1, "Price description is required (e.g. ₹ 2.4 Cr)"),
-  priceValueLakh: z.string().min(1, "Price value in lakhs is required"),
+  // Was two separate fields (a free-text display string + this numeric
+  // value) that both had to be filled in sync by hand -- collapsed into
+  // this single required field per the client's request. The display
+  // string (e.g. "₹ 85 Lakh" / "₹ 2.40 Cr") is now derived automatically
+  // from this number in onSubmit below, so there's nothing left to type
+  // twice and nothing that can drift out of sync between the two.
+  priceValueLakh: z.string().min(1, "Price is required"),
   location: z.string().min(1, "Location is required (e.g. Whitefield, Bengaluru)"),
   address: z.string().min(1, "Address is required"),
   mapQuery: z.string().min(1, "Google Maps query is required"),
@@ -110,8 +124,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
       categoryId: "",
       builderId: "",
       type: "Bank Auction",
-      price: "",
-      priceValueLakh: "0",
+      priceValueLakh: "",
       location: "",
       address: "",
       mapQuery: "",
@@ -153,6 +166,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
       if (
         !formValues.title ||
         !formValues.categoryId ||
+        !formValues.priceValueLakh ||
         !formValues.builderId ||
         !formValues.location ||
         !formValues.address ||
@@ -161,7 +175,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
         formValues.description.trim().length < 10
       ) {
         setErrorMessage(
-          "Please fill in all required Basic Info fields (including Address, Google Maps query, and a Description of at least 10 characters)."
+          "Please fill in all required Basic Info fields (Property Name, Category, and Price are compulsory, along with Address, Google maps location, and a Description of at least 10 characters)."
         );
         return;
       }
@@ -180,11 +194,10 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
       categoryId: "Category",
       builderId: "Builder",
       type: "Property Type",
-      price: "Price (Display Text)",
-      priceValueLakh: "Price Value in Lakhs",
+      priceValueLakh: "Price",
       location: "Location",
       address: "Address",
-      mapQuery: "Google Maps Location Query",
+      mapQuery: "Google maps location",
       description: "Description",
       area: "Area Display Text",
     };
@@ -228,6 +241,12 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
       // from the properties list.
       const payload = {
         ...data,
+        // The DB still stores both a numeric priceValueLakh (used for
+        // budget-range filtering/sorting on the public site) and a
+        // display string (what a property card actually shows) -- the
+        // form only collects the number now, so the string is generated
+        // here rather than typed by hand.
+        price: formatPriceDisplay(Number(data.priceValueLakh)),
         images: galleryImages,
         ...(initialData ? {} : { status: "PUBLISHED" }),
       };
@@ -342,7 +361,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                 <StepHeading title="Basic Information" description="Core listing parameters for buyers." />
 
                 <FieldGroup title="Property Basics">
-                  <Field label="Property Name" error={errors.title}>
+                  <Field label="Property Name" required error={errors.title}>
                     <input
                       type="text"
                       {...register("title")}
@@ -351,7 +370,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     />
                   </Field>
 
-                  <Field label="Property Type">
+                  <Field label="Property Type" required>
                     <select {...register("type")} className="crm-select">
                       <option value="Bank Auction">Bank Auction</option>
                       <option value="Resale">Resale</option>
@@ -361,7 +380,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     </select>
                   </Field>
 
-                  <Field label="Category" error={errors.categoryId}>
+                  <Field label="Category" required error={errors.categoryId}>
                     <select {...register("categoryId")} className="crm-select">
                       <option value="">Select Category</option>
                       {categories.map((cat) => (
@@ -381,21 +400,17 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                 </FieldGroup>
 
                 <FieldGroup title="Pricing">
-                  <Field label="Price (Display Text)" error={errors.price}>
-                    <input
-                      type="text"
-                      {...register("price")}
-                      className="crm-input"
-                      placeholder="e.g. ₹ 2.4 Cr or ₹ 85 Lakh"
-                    />
-                  </Field>
-
-                  <Field label="Price Value in Lakhs" error={errors.priceValueLakh}>
+                  {/* Was two fields (a free-text display string + this
+                      number) that had to be kept in sync by hand -- a
+                      single required value now, with the display string
+                      ("₹ 85 Lakh" / "₹ 2.40 Cr") generated automatically
+                      from it in onSubmit below. */}
+                  <Field label="Price (in Lakhs)" required error={errors.priceValueLakh}>
                     <input
                       type="number"
                       {...register("priceValueLakh")}
                       className="crm-input"
-                      placeholder="e.g. 240 or 85"
+                      placeholder="e.g. 85 for ₹85 Lakh, 240 for ₹2.4 Cr"
                     />
                   </Field>
                 </FieldGroup>
@@ -419,7 +434,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     />
                   </Field>
 
-                  <Field label="Google Maps Location Query" span2 error={errors.mapQuery}>
+                  <Field label="Google maps location" span2 error={errors.mapQuery}>
                     <input
                       type="text"
                       {...register("mapQuery")}
@@ -635,7 +650,9 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     </div>
                     <div className="text-right">
                       <span className="crm-label">Price</span>
-                      <p className="mt-1.5 font-body text-2xl font-semibold text-crm-gold">{formValues.price || "N/A"}</p>
+                      <p className="mt-1.5 font-body text-2xl font-semibold text-crm-gold">
+                        {formValues.priceValueLakh ? formatPriceDisplay(Number(formValues.priceValueLakh)) : "N/A"}
+                      </p>
                     </div>
                   </div>
 
@@ -708,15 +725,24 @@ function Field({
   children,
   span2,
   error,
+  required,
 }: {
   label: string;
   children: React.ReactNode;
   span2?: boolean;
   error?: any;
+  required?: boolean;
 }) {
   return (
     <div className={cn("space-y-1.5", span2 && "md:col-span-2")}>
-      <label className="crm-label">{label}</label>
+      <label className="crm-label">
+        {label}
+        {required && (
+          <span className="ml-0.5 text-red-500" aria-hidden="true">
+            *
+          </span>
+        )}
+      </label>
       {children}
       {error && <span className="block text-[10px] text-red-600">{String(error.message)}</span>}
     </div>
