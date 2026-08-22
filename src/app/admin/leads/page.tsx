@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Target,
@@ -46,6 +47,17 @@ interface LeadRow {
 type ViewMode = "list" | "kanban";
 
 export default function LeadsPage() {
+  return (
+    <Suspense fallback={null}>
+      <LeadsPageInner />
+    </Suspense>
+  );
+}
+
+// The `?new=1` deep-link (see the useSearchParams effect below) requires
+// this to sit under a Suspense boundary — useSearchParams opts a page out
+// of static rendering unless wrapped, and Next fails the build otherwise.
+function LeadsPageInner() {
   const [leads, setLeads] = useState<LeadRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>("kanban");
@@ -54,6 +66,14 @@ export default function LeadsPage() {
   const [stageFilter, setStageFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
   const [dragOverStage, setDragOverStage] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+
+  // Lets the Dashboard's "+ Add Lead" quick action deep-link straight
+  // into this page with the modal already open, instead of landing on
+  // the list and making the admin find + click Add Lead themselves.
+  useEffect(() => {
+    if (searchParams.get("new") === "1") setModalOpen(true);
+  }, [searchParams]);
 
   const fetchLeads = async () => {
     setLoading(true);
@@ -112,11 +132,11 @@ export default function LeadsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold tracking-wide text-crm-text flex items-center gap-2.5">
+          <h1 className="crm-page-title flex items-center gap-2.5">
             <Target size={22} className="text-crm-gold" />
             Leads Pipeline
           </h1>
-          <p className="text-xs text-crm-text-secondary mt-0.5">
+          <p className="text-sm text-crm-text-secondary mt-0.5">
             Track every enquiry from first contact through to a closed deal.
           </p>
         </div>
@@ -136,7 +156,7 @@ export default function LeadsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, phone, email, location..."
-            className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 pl-9 pr-3 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
+            className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 pl-9 pr-3 text-sm text-crm-text outline-none focus:border-crm-gold-bright/40"
           />
         </div>
 
@@ -144,7 +164,7 @@ export default function LeadsPage() {
           <select
             value={stageFilter}
             onChange={(e) => setStageFilter(e.target.value)}
-            className="rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3 text-xs text-crm-text-secondary outline-none focus:border-crm-gold-bright/40 cursor-pointer"
+            className="rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3 text-sm text-crm-text-secondary outline-none focus:border-crm-gold-bright/40 cursor-pointer"
           >
             <option value="">All Stages</option>
             {STAGES.map((s) => (
@@ -156,7 +176,7 @@ export default function LeadsPage() {
         <select
           value={priorityFilter}
           onChange={(e) => setPriorityFilter(e.target.value)}
-          className="rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3 text-xs text-crm-text-secondary outline-none focus:border-crm-gold-bright/40 cursor-pointer"
+          className="rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3 text-sm text-crm-text-secondary outline-none focus:border-crm-gold-bright/40 cursor-pointer"
         >
           <option value="">All Priorities</option>
           <option value="HIGH">High</option>
@@ -189,12 +209,12 @@ export default function LeadsPage() {
       </div>
 
       {loading ? (
-        <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary text-xs font-semibold bg-crm-card/25 border border-crm-border/20 rounded-sm">
+        <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary text-sm font-semibold bg-crm-card/25 border border-crm-border/20 rounded-sm">
           <Loader2 size={24} className="animate-spin text-crm-gold-bright" />
           <span>Loading leads...</span>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="py-24 text-center text-xs text-crm-text-secondary bg-crm-card/25 border border-dashed border-crm-border/20 rounded-sm">
+        <div className="py-24 text-center text-sm text-crm-text-secondary bg-crm-card/25 border border-dashed border-crm-border/20 rounded-sm">
           No leads match those filters yet.
         </div>
       ) : view === "kanban" ? (
@@ -219,8 +239,8 @@ export default function LeadsPage() {
               )}
             >
               <div className="flex items-center justify-between border-b border-crm-border/20 px-4 py-3">
-                <span className="text-xs font-semibold text-crm-text">{STAGE_LABELS[stage]}</span>
-                <span className="text-[10px] font-semibold text-crm-text-secondary/60">
+                <span className="text-sm font-semibold text-crm-text">{STAGE_LABELS[stage]}</span>
+                <span className="text-xs font-semibold text-crm-text-secondary">
                   {grouped[stage]?.length ?? 0}
                 </span>
               </div>
@@ -235,24 +255,24 @@ export default function LeadsPage() {
                   >
                     <Link href={`/admin/leads/${lead.id}`} className="block">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-semibold text-crm-text truncate">{lead.name}</span>
+                        <span className="text-sm font-semibold text-crm-text truncate">{lead.name}</span>
                         {lead.favorite && <Star size={12} className="shrink-0 fill-crm-gold-bright text-crm-gold-bright" />}
                       </div>
-                      <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-crm-text-secondary">
+                      <div className="mt-1.5 flex items-center gap-1.5 text-xs text-crm-text-secondary">
                         <Phone size={10} className="shrink-0" />
                         <span className="truncate">{lead.phone}</span>
                       </div>
                       {lead.location && (
-                        <div className="mt-1 flex items-center gap-1.5 text-[10px] text-crm-text-secondary">
+                        <div className="mt-1 flex items-center gap-1.5 text-xs text-crm-text-secondary">
                           <MapPin size={10} className="shrink-0" />
                           <span className="truncate">{lead.location}</span>
                         </div>
                       )}
                       <div className="mt-2.5 flex items-center justify-between">
-                        <span className={cn("px-2 py-0.5 rounded-full border text-[8px] font-semibold uppercase", PRIORITY_BADGE_CLASS[lead.priority])}>
+                        <span className={cn("px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase", PRIORITY_BADGE_CLASS[lead.priority])}>
                           {lead.priority}
                         </span>
-                        <span className="text-[9px] text-crm-text-secondary/60">{budgetRangeLabel(lead.budgetMinLakh, lead.budgetMaxLakh)}</span>
+                        <span className="text-xs text-crm-text-secondary">{budgetRangeLabel(lead.budgetMinLakh, lead.budgetMaxLakh)}</span>
                       </div>
                     </Link>
                   </motion.div>
@@ -271,16 +291,16 @@ export default function LeadsPage() {
             >
               <div className="space-y-1.5 flex-1 min-w-0 pr-4">
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-semibold text-crm-text truncate">{lead.name}</span>
+                  <span className="text-sm font-semibold text-crm-text truncate">{lead.name}</span>
                   {lead.favorite && <Star size={12} className="fill-crm-gold-bright text-crm-gold-bright shrink-0" />}
-                  <span className={cn("px-2 py-0.5 rounded-full border text-[8px] font-semibold uppercase", STAGE_BADGE_CLASS[lead.stage as keyof typeof STAGE_BADGE_CLASS])}>
+                  <span className={cn("px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase", STAGE_BADGE_CLASS[lead.stage as keyof typeof STAGE_BADGE_CLASS])}>
                     {STAGE_LABELS[lead.stage as keyof typeof STAGE_LABELS] ?? lead.stage}
                   </span>
-                  <span className={cn("px-2 py-0.5 rounded-full border text-[8px] font-semibold uppercase", PRIORITY_BADGE_CLASS[lead.priority])}>
+                  <span className={cn("px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase", PRIORITY_BADGE_CLASS[lead.priority])}>
                     {lead.priority}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-crm-text-secondary">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-crm-text-secondary">
                   <span className="flex items-center gap-1.5"><Phone size={11} />{lead.phone}</span>
                   {lead.location && <span className="flex items-center gap-1.5"><MapPin size={11} />{lead.location}</span>}
                   <span>{budgetRangeLabel(lead.budgetMinLakh, lead.budgetMaxLakh)}</span>
@@ -289,10 +309,10 @@ export default function LeadsPage() {
                 </div>
               </div>
               <div className="flex items-center gap-4 shrink-0">
-                <span className="text-[10px] font-semibold text-crm-text-secondary/45">
+                <span className="text-xs font-semibold text-crm-text-secondary">
                   {new Date(lead.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}
                 </span>
-                <ChevronRight size={14} className="text-crm-text-secondary/40" />
+                <ChevronRight size={14} className="text-crm-text-secondary/60" />
               </div>
             </Link>
           ))}

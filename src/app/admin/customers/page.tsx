@@ -61,10 +61,10 @@ export default function CustomersPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="font-display text-2xl font-bold tracking-wide text-crm-text">
+        <h1 className="crm-page-title tracking-wide">
           Customer Database
         </h1>
-        <p className="text-xs text-crm-text-secondary mt-0.5">
+        <p className="crm-body-text mt-0.5">
           Review customer contact cards, their historical inquiries, and note summaries.
         </p>
       </div>
@@ -72,19 +72,19 @@ export default function CustomersPage() {
       {/* Main Table card */}
       <div className="border border-crm-border/20 bg-crm-card/10 rounded-sm overflow-hidden backdrop-blur-sm">
         {loading ? (
-          <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary text-xs font-semibold">
+          <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary crm-body-text font-semibold">
             <Loader2 size={24} className="animate-spin text-crm-gold-bright" />
             <span>Loading customer list...</span>
           </div>
         ) : customers.length === 0 ? (
-          <div className="py-24 text-center text-xs text-crm-text-secondary">
+          <div className="py-24 text-center crm-body-text">
             No customer profiles registered.
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+            <table className="w-full text-left border-collapse crm-table-text">
               <thead>
-                <tr className="border-b border-crm-border/20 bg-foreground/[0.02] text-crm-text-secondary font-semibold">
+                <tr className="border-b border-crm-border/20 bg-foreground/[0.02] text-crm-text-secondary font-semibold text-xs">
                   <th className="p-4 w-8"></th>
                   <th className="p-4 uppercase tracking-wider font-semibold">Customer Name</th>
                   <th className="p-4 uppercase tracking-wider font-semibold">Phone</th>
@@ -116,10 +116,10 @@ export default function CustomersPage() {
                         <td className="p-4 text-crm-text-secondary">
                           {cust.email}
                         </td>
-                        <td className="p-4 font-semibold text-crm-gold-bright">
+                        <td className="p-4 crm-value">
                           {cust.enquiries.length}
                         </td>
-                        <td className="p-4 text-crm-text-secondary/60">
+                        <td className="p-4 text-crm-text-secondary">
                           {new Date(cust.createdAt).toLocaleDateString("en-IN", {
                             day: "numeric",
                             month: "short",
@@ -135,23 +135,23 @@ export default function CustomersPage() {
                           <tr className="bg-foreground/[0.01]">
                             <td colSpan={6} className="p-6 border-b border-crm-border/10">
                               <div className="space-y-4 max-w-4xl ml-8">
-                                <h4 className="text-[10px] font-bold uppercase tracking-wider text-crm-text-secondary">Enquiry History</h4>
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-crm-text-secondary">Enquiry History</h4>
                                 {cust.enquiries.map((enq) => (
                                   <div
                                     key={enq.id}
                                     className="p-4 rounded-sm border border-crm-border/10 bg-crm-bg/50 space-y-2"
                                   >
-                                    <div className="flex items-center justify-between text-[10px]">
+                                    <div className="flex items-center justify-between crm-table-text">
                                       <span className="font-semibold text-crm-gold-bright flex items-center gap-1.5">
                                         <Building size={10} /> {enq.property.title} ({enq.property.price})
                                       </span>
-                                      <span className="text-crm-text-secondary/60 flex items-center gap-1">
+                                      <span className="text-crm-text-secondary flex items-center gap-1">
                                         <Calendar size={10} /> {new Date(enq.createdAt).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}
                                       </span>
                                     </div>
                                     <p className="text-crm-text-secondary text-xs italic">&ldquo;{enq.message}&rdquo;</p>
                                     {enq.notes && (
-                                      <div className="pt-2 border-t border-crm-border/10 text-[10px] text-crm-text-secondary">
+                                      <div className="pt-2 border-t border-crm-border/10 text-xs text-crm-text-secondary">
                                         <strong>Staff Note: </strong> {enq.notes}
                                       </div>
                                     )}

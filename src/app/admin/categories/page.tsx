@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Tags, Loader2 } from "lucide-react";
+import { Plus, Tags, Loader2, Trash2 } from "lucide-react";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 
 interface Category {
   id: string;
@@ -20,6 +21,9 @@ export default function CategoriesPage() {
   const [heroTagline, setHeroTagline] = useState("");
   const [longDescription, setLongDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
+  const [deleteError, setDeleteError] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -70,13 +74,36 @@ export default function CategoriesPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      const res = await fetch(`/api/admin/categories/${deleteTarget.id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (res.ok) {
+        setDeleteTarget(null);
+        fetchCategories();
+      } else {
+        // Keep the dialog open and show the server's actual reason (e.g.
+        // "still has 7 properties assigned") rather than closing it and
+        // leaving the admin to guess why nothing happened.
+        setDeleteError(data.error || "Couldn't delete this category. Please try again.");
+      }
+    } catch (err) {
+      setDeleteError("Couldn't delete this category. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-bold tracking-wide text-crm-text">
+        <h1 className="crm-page-title tracking-wide">
           Category Configuration
         </h1>
-        <p className="text-xs text-crm-text-secondary mt-0.5">
+        <p className="crm-body-text mt-0.5">
           Organize property segments, taglines, and marketing descriptions.
         </p>
       </div>
@@ -85,28 +112,42 @@ export default function CategoriesPage() {
         {/* Categories list */}
         <div className="lg:col-span-2 border border-crm-border/20 bg-crm-card/10 rounded-sm overflow-hidden backdrop-blur-sm">
           {loading ? (
-            <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary text-xs font-semibold">
+            <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary crm-body-text font-semibold">
               <Loader2 size={24} className="animate-spin text-crm-gold-bright" />
               <span>Loading categories...</span>
             </div>
           ) : categories.length === 0 ? (
-            <div className="py-24 text-center text-xs text-crm-text-secondary">
+            <div className="py-24 text-center crm-body-text">
               No categories registered in database.
             </div>
           ) : (
             <div className="divide-y divide-border/10">
               {categories.map((c) => (
-                <div key={c.id} className="p-4 text-xs space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-crm-text flex items-center gap-2">
-                      <Tags size={12} className="text-crm-gold" />
-                      {c.title}
+                <div key={c.id} className="p-4 crm-table-text space-y-1 group">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-semibold text-crm-text flex items-center gap-2 min-w-0">
+                      <Tags size={12} className="text-crm-gold shrink-0" />
+                      <span className="truncate">{c.title}</span>
                     </span>
-                    <span className="text-crm-text-secondary font-mono text-[10px]">
-                      {c._count.properties} properties
-                    </span>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-crm-text-secondary font-mono text-xs">
+                        {c._count.properties} properties
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDeleteError("");
+                          setDeleteTarget(c);
+                        }}
+                        title="Delete category"
+                        aria-label={`Delete ${c.title}`}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-sm border border-crm-border text-crm-text-muted hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-[10px] text-crm-text-secondary line-clamp-1">
+                  <p className="text-xs text-crm-text-secondary line-clamp-1">
                     {c.description || "No description set"}
                   </p>
                 </div>
@@ -118,53 +159,53 @@ export default function CategoriesPage() {
         {/* Add Category form */}
         <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-6 backdrop-blur-md space-y-4">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-crm-text-secondary">Add Category</span>
-            <p className="text-[10px] text-crm-text-secondary mt-0.5">Define a new property segment classification.</p>
+            <span className="crm-section-heading uppercase tracking-wider">Add Category</span>
+            <p className="text-xs text-crm-text-secondary mt-0.5">Define a new property segment classification.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">Category Title</label>
+              <label className="crm-label">Category Title</label>
               <input
                 type="text"
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Luxury Penthouses"
-                className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
+                className="crm-input"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">Summary Description</label>
+              <label className="crm-label">Summary Description</label>
               <input
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Sourced properties built for..."
-                className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
+                className="crm-input"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">Hero Tagline</label>
+              <label className="crm-label">Hero Tagline</label>
               <input
                 type="text"
                 value={heroTagline}
                 onChange={(e) => setHeroTagline(e.target.value)}
                 placeholder="A penthouse view over Bengaluru."
-                className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
+                className="crm-input"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">Long Description</label>
+              <label className="crm-label">Long Description</label>
               <textarea
                 rows={3}
                 value={longDescription}
                 onChange={(e) => setLongDescription(e.target.value)}
                 placeholder="Full marketing text explaining details..."
-                className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40 resize-none"
+                className="crm-textarea resize-none"
               />
             </div>
 
@@ -178,6 +219,23 @@ export default function CategoriesPage() {
           </form>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title={`Delete "${deleteTarget?.title}"?`}
+        message={
+          deleteError ||
+          "This removes the category permanently. It only works if no properties are assigned to it — move or delete those first."
+        }
+        confirmLabel="Delete"
+        tone="danger"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => {
+          setDeleteTarget(null);
+          setDeleteError("");
+        }}
+      />
     </div>
   );
 }

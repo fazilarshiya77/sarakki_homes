@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -12,13 +13,18 @@ import {
   Star,
   StarOff,
   Filter,
+  ArrowUpDown,
   ChevronLeft,
   ChevronRight,
   Eye,
+  Copy,
+  Archive,
   Loader2,
   CheckCircle2,
   XCircle,
 } from "lucide-react";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { useDebounce } from "@/lib/useDebounce";
 
 interface Property {
   id: string;
@@ -49,17 +55,39 @@ interface CategoryOption {
 const PAGE_SIZE = 25;
 
 export default function PropertiesListPage() {
+  return (
+    <Suspense fallback={null}>
+      <PropertiesListPageInner />
+    </Suspense>
+  );
+}
+
+// Reads an initial `?status=` deep-link (e.g. from the Dashboard's
+// "Draft Properties" attention card) — under Suspense because
+// useSearchParams opts the page out of static rendering otherwise.
+function PropertiesListPageInner() {
+  const searchParams = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const debouncedSearch = useDebounce(search, 350);
+  const [statusFilter, setStatusFilter] = useState(() => searchParams.get("status") || "");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [sort, setSort] = useState("newest");
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [publishToast, setPublishToast] = useState<string | null>(null);
+  const [confirmState, setConfirmState] = useState<{
+    kind: "delete" | "bulkDelete" | "archive" | "bulkArchive";
+    id?: string;
+    name?: string;
+  } | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
   const limit = PAGE_SIZE;
+  const hasActiveFilters = Boolean(search || statusFilter || categoryFilter);
 
   // The wizard has no other page to hand a confirmation to -- it
   // navigates here right after a successful publish/save. It stores a
@@ -71,10 +99,17 @@ export default function PropertiesListPage() {
     if (raw) {
       sessionStorage.removeItem("sh_crm_publish_toast");
       setPublishToast(raw);
-      const timer = setTimeout(() => setPublishToast(null), 5000);
-      return () => clearTimeout(timer);
     }
   }, []);
+
+  // Generic auto-dismiss for every toast this page shows — not just the
+  // sessionStorage-sourced one above, also the ones set directly after
+  // delete/archive/duplicate actions below.
+  useEffect(() => {
+    if (!publishToast) return;
+    const timer = setTimeout(() => setPublishToast(null), 5000);
+    return () => clearTimeout(timer);
+  }, [publishToast]);
 
   // Fetch properties from API
   const fetchProperties = async () => {
@@ -82,8 +117,8 @@ export default function PropertiesListPage() {
     try {
       const res = await fetch(
         `/api/admin/properties?search=${encodeURIComponent(
-          search
-        )}&status=${statusFilter}&category=${categoryFilter}&page=${page}&limit=${limit}`
+          debouncedSearch
+        )}&status=${statusFilter}&category=${categoryFilter}&sort=${sort}&page=${page}&limit=${limit}`
       );
       const data = await res.json();
       if (data.properties) {
@@ -99,7 +134,7 @@ export default function PropertiesListPage() {
 
   useEffect(() => {
     fetchProperties();
-  }, [search, statusFilter, categoryFilter, page]);
+  }, [debouncedSearch, statusFilter, categoryFilter, sort, page]);
 
   useEffect(() => {
     fetch("/api/admin/categories")
@@ -110,20 +145,54 @@ export default function PropertiesListPage() {
       .catch((err) => console.error(err));
   }, []);
 
-  // Handle individual delete
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete property "${name}"?`)) return;
+  // Individual delete — permanent, so it's gated behind the styled
+  // confirm dialog (see confirmState) rather than firing straight away.
+  const requestDelete = (id: string, name: string) => setConfirmState({ kind: "delete", id, name });
 
+  const requestArchive = (id: string, name: string) => setConfirmState({ kind: "archive", id, name });
+
+  const runConfirmedAction = async () => {
+    if (!confirmState) return;
+    setConfirmLoading(true);
     try {
-      const res = await fetch(`/api/admin/properties/${id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        fetchProperties();
-        setSelectedIds(selectedIds.filter((x) => x !== id));
+      if (confirmState.kind === "delete" && confirmState.id) {
+        const res = await fetch(`/api/admin/properties/${confirmState.id}`, { method: "DELETE" });
+        if (res.ok) {
+          setSelectedIds((prev) => prev.filter((x) => x !== confirmState.id));
+          setPublishToast(`"${confirmState.name}" was deleted.`);
+        }
+      } else if (confirmState.kind === "bulkDelete") {
+        for (const id of selectedIds) {
+          await fetch(`/api/admin/properties/${id}`, { method: "DELETE" });
+        }
+        setPublishToast(`${selectedIds.length} properties deleted.`);
+        setSelectedIds([]);
+      } else if (confirmState.kind === "archive" && confirmState.id) {
+        const prop = properties.find((p) => p.id === confirmState.id);
+        if (prop) {
+          await fetch(`/api/admin/properties/${confirmState.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...prop,
+              categoryId: (prop as any).categoryId,
+              builderId: (prop as any).builderId,
+              status: "ARCHIVED",
+            }),
+          });
+        }
+        setPublishToast(`"${confirmState.name}" was archived. It's hidden from the website but not deleted.`);
+      } else if (confirmState.kind === "bulkArchive") {
+        await handleBulkStatus("ARCHIVED", false);
+        setPublishToast(`${selectedIds.length} properties archived.`);
+        setSelectedIds([]);
       }
+      fetchProperties();
     } catch (err) {
       console.error(err);
+    } finally {
+      setConfirmLoading(false);
+      setConfirmState(null);
     }
   };
 
@@ -149,22 +218,44 @@ export default function PropertiesListPage() {
     }
   };
 
-  // Bulk actions handlers
-  const handleBulkDelete = async () => {
-    if (!confirm(`Are you sure you want to delete ${selectedIds.length} properties?`)) return;
-
+  // Duplicate — clones a listing as a new DRAFT so the admin can reuse a
+  // similar property (e.g. another unit in the same project) without
+  // retyping every field, and can't accidentally publish two identical
+  // listings (the copy always lands as UNPUBLISHED regardless of the
+  // source's status).
+  const handleDuplicate = async (id: string) => {
+    setDuplicatingId(id);
     try {
-      for (const id of selectedIds) {
-        await fetch(`/api/admin/properties/${id}`, { method: "DELETE" });
+      const getRes = await fetch(`/api/admin/properties/${id}`);
+      const { property } = await getRes.json();
+      if (!property) return;
+
+      const res = await fetch("/api/admin/properties", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...property,
+          title: `${property.title} (Copy)`,
+          slug: undefined,
+          status: "UNPUBLISHED",
+          featured: "false",
+          images: property.images?.map((img: { url: string }) => ({ url: img.url })) ?? [],
+          auctionInfo: property.auctionInfo ?? undefined,
+          loanEligibility: property.loanEligibility ?? undefined,
+        }),
+      });
+      if (res.ok) {
+        setPublishToast(`"${property.title}" duplicated as a new draft.`);
+        fetchProperties();
       }
-      setSelectedIds([]);
-      fetchProperties();
     } catch (err) {
       console.error(err);
+    } finally {
+      setDuplicatingId(null);
     }
   };
 
-  const handleBulkStatus = async (newStatus: string) => {
+  const handleBulkStatus = async (newStatus: string, andClose = true) => {
     try {
       for (const id of selectedIds) {
         // Find property
@@ -182,8 +273,15 @@ export default function PropertiesListPage() {
           });
         }
       }
-      setSelectedIds([]);
-      fetchProperties();
+      if (andClose) {
+        setPublishToast(
+          `${selectedIds.length} propert${selectedIds.length === 1 ? "y" : "ies"} ${
+            newStatus === "PUBLISHED" ? "published" : "unpublished"
+          }.`
+        );
+        setSelectedIds([]);
+        fetchProperties();
+      }
     } catch (err) {
       console.error(err);
     }
@@ -219,13 +317,38 @@ export default function PropertiesListPage() {
         )}
       </AnimatePresence>
 
+      <ConfirmDialog
+        open={confirmState !== null}
+        title={
+          confirmState?.kind === "delete"
+            ? `Delete "${confirmState.name}"?`
+            : confirmState?.kind === "bulkDelete"
+              ? `Delete ${selectedIds.length} properties?`
+              : confirmState?.kind === "archive"
+                ? `Archive "${confirmState.name}"?`
+                : `Archive ${selectedIds.length} properties?`
+        }
+        message={
+          confirmState?.kind === "delete" || confirmState?.kind === "bulkDelete"
+            ? "This permanently removes the listing and its photos — this can't be undone. If you might need it again, Archive instead."
+            : "The listing comes off the live website immediately but stays in the CRM, so you can restore or edit it later."
+        }
+        confirmLabel={
+          confirmState?.kind === "delete" || confirmState?.kind === "bulkDelete" ? "Delete" : "Archive"
+        }
+        tone={confirmState?.kind === "delete" || confirmState?.kind === "bulkDelete" ? "danger" : "default"}
+        loading={confirmLoading}
+        onConfirm={runConfirmedAction}
+        onCancel={() => setConfirmState(null)}
+      />
+
       {/* List Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold tracking-wide text-crm-text">
+          <h1 className="crm-page-title tracking-wide">
             Properties Portfolio
           </h1>
-          <p className="text-xs text-crm-text-secondary mt-0.5">
+          <p className="text-sm text-crm-text-secondary mt-1">
             Manage listings, change statuses, and adjust featured properties.
           </p>
         </div>
@@ -284,33 +407,82 @@ export default function PropertiesListPage() {
             className="crm-select"
           >
             <option value="">All Statuses</option>
-            <option value="PUBLISHED">Published</option>
-            <option value="UNPUBLISHED">Unpublished</option>
+            <option value="PUBLISHED">Published (live on website)</option>
+            <option value="UNPUBLISHED">Draft (not on website yet)</option>
+            <option value="ARCHIVED">Archived</option>
             <option value="SOLD">Sold</option>
             <option value="UNDER_PROCESS">Under Process</option>
             <option value="AUCTION_CLOSED">Auction Closed</option>
           </select>
+          <div className="flex items-center gap-1.5">
+            <ArrowUpDown size={14} className="text-crm-text-muted shrink-0" />
+            <select
+              value={sort}
+              onChange={(e) => {
+                setSort(e.target.value);
+                setPage(1);
+              }}
+              className="crm-select"
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="name_asc">Name: A–Z</option>
+              <option value="name_desc">Name: Z–A</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <p className="text-xs text-crm-text-secondary">
+      <p className="text-sm text-crm-text-secondary">
         {total} propert{total === 1 ? "y" : "ies"} total across every category — this is the same inventory the public website reads from.
       </p>
 
       {/* Main Grid Table */}
       <div className="crm-card overflow-hidden">
         {loading ? (
-          <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-muted text-xs font-semibold">
-            <Loader2 size={24} className="animate-spin text-crm-gold" />
-            <span>Retrieving portfolio data...</span>
+          <div className="divide-y divide-crm-border/70 animate-pulse">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4 p-4">
+                <div className="h-10 w-14 shrink-0 rounded-sm bg-crm-border/50" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3.5 w-2/5 rounded-full bg-crm-border/50" />
+                  <div className="h-3 w-1/4 rounded-full bg-crm-border/30" />
+                </div>
+                <div className="h-3.5 w-20 rounded-full bg-crm-border/40" />
+                <div className="h-6 w-20 rounded-full bg-crm-border/40" />
+              </div>
+            ))}
           </div>
         ) : properties.length === 0 ? (
-          <div className="py-24 text-center text-xs text-crm-text-muted">
-            No properties found matching criteria.
+          <div className="py-20 flex flex-col items-center justify-center gap-3 text-center px-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-crm-bg text-crm-text-muted">
+              <Search size={20} />
+            </div>
+            {hasActiveFilters ? (
+              <>
+                <p className="crm-section-heading !text-base">No properties found</p>
+                <p className="crm-body-text max-w-sm">
+                  Try changing your search or filters — nothing in the portfolio matches those criteria right now.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="crm-section-heading !text-base">No properties yet</p>
+                <p className="crm-body-text max-w-sm">
+                  Add your first listing to start building the portfolio — it'll appear here and can be published to the website whenever you're ready.
+                </p>
+              </>
+            )}
+            <Link href="/admin/properties/create" className="crm-btn-gold mt-2">
+              <Plus size={14} />
+              <span>Add Property</span>
+            </Link>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+            <table className="w-full text-left border-collapse crm-table-text">
               <thead>
                 <tr className="border-b border-crm-border bg-crm-bg/70 text-crm-text-muted font-semibold">
                   <th className="p-4 w-12">
@@ -327,16 +499,16 @@ export default function PropertiesListPage() {
                       className="h-3.5 w-3.5 accent-crm-gold cursor-pointer"
                     />
                   </th>
-                  <th className="p-4 uppercase tracking-wider text-[10px] font-bold">Thumbnail</th>
-                  <th className="p-4 uppercase tracking-wider text-[10px] font-bold">ID</th>
-                  <th className="p-4 uppercase tracking-wider text-[10px] font-bold">Name</th>
-                  <th className="p-4 uppercase tracking-wider text-[10px] font-bold">Category</th>
-                  <th className="p-4 uppercase tracking-wider text-[10px] font-bold">Location</th>
-                  <th className="p-4 uppercase tracking-wider text-[10px] font-bold">Price</th>
-                  <th className="p-4 uppercase tracking-wider text-[10px] font-bold">Status</th>
-                  <th className="p-4 uppercase tracking-wider text-[10px] font-bold text-center">Featured</th>
-                  <th className="p-4 uppercase tracking-wider text-[10px] font-bold text-center">Views</th>
-                  <th className="p-4 uppercase tracking-wider text-[10px] font-bold text-right">Actions</th>
+                  <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Thumbnail</th>
+                  <th className="p-4 uppercase tracking-wider text-[11px] font-bold">ID</th>
+                  <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Name</th>
+                  <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Category</th>
+                  <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Location</th>
+                  <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Price</th>
+                  <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Status</th>
+                  <th className="p-4 uppercase tracking-wider text-[11px] font-bold text-center">Featured</th>
+                  <th className="p-4 uppercase tracking-wider text-[11px] font-bold text-center">Views</th>
+                  <th className="p-4 uppercase tracking-wider text-[11px] font-bold text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -379,7 +551,7 @@ export default function PropertiesListPage() {
                           )}
                         </div>
                       </td>
-                      <td className="p-4 font-mono text-[11px] text-crm-text-muted">
+                      <td className="p-4 font-mono text-[13px] text-crm-text-muted">
                         {prop.propertyId}
                       </td>
                       <td className="p-4 font-semibold text-crm-text">
@@ -391,7 +563,7 @@ export default function PropertiesListPage() {
                       <td className="p-4 text-crm-text-secondary">
                         {prop.location}
                       </td>
-                      <td className="p-4 font-semibold text-crm-text">
+                      <td className="p-4 crm-value">
                         {prop.price}
                       </td>
                       <td className="p-4">
@@ -412,14 +584,53 @@ export default function PropertiesListPage() {
                         {prop.views}
                       </td>
                       <td className="p-4 text-right space-x-1 whitespace-nowrap">
+                        {prop.status === "PUBLISHED" && (
+                          <a
+                            href={publicUrlFor(prop)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="View on Website"
+                            aria-label="View on Website"
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-sm border border-crm-border hover:border-crm-gold/50 hover:bg-crm-gold/5 text-crm-text-secondary hover:text-crm-text transition-all duration-200"
+                          >
+                            <ExternalLink size={12} />
+                          </a>
+                        )}
                         <Link
                           href={`/admin/properties/${prop.id}/edit`}
+                          title="Edit"
+                          aria-label="Edit"
                           className="inline-flex h-7 w-7 items-center justify-center rounded-sm border border-crm-border hover:border-crm-gold/50 hover:bg-crm-gold/5 text-crm-text-secondary hover:text-crm-text transition-all duration-200"
                         >
                           <Edit2 size={12} />
                         </Link>
                         <button
-                          onClick={() => handleDelete(prop.id, prop.title)}
+                          onClick={() => handleDuplicate(prop.id)}
+                          disabled={duplicatingId === prop.id}
+                          title="Duplicate"
+                          aria-label="Duplicate"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-sm border border-crm-border hover:border-crm-gold/50 hover:bg-crm-gold/5 text-crm-text-secondary hover:text-crm-text transition-all duration-200 disabled:opacity-40"
+                        >
+                          {duplicatingId === prop.id ? (
+                            <Loader2 size={12} className="animate-spin" />
+                          ) : (
+                            <Copy size={12} />
+                          )}
+                        </button>
+                        {prop.status !== "ARCHIVED" && (
+                          <button
+                            onClick={() => requestArchive(prop.id, prop.title)}
+                            title="Archive"
+                            aria-label="Archive"
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-sm border border-crm-border hover:border-amber-300 hover:bg-amber-50 text-crm-text-secondary hover:text-amber-600 transition-all duration-200"
+                          >
+                            <Archive size={12} />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => requestDelete(prop.id, prop.title)}
+                          title="Delete"
+                          aria-label="Delete"
                           className="inline-flex h-7 w-7 items-center justify-center rounded-sm border border-red-200 hover:bg-red-50 text-red-500/80 hover:text-red-600 transition-all duration-200"
                         >
                           <Trash2 size={12} />
@@ -437,7 +648,7 @@ export default function PropertiesListPage() {
       {/* Pagination Controls */}
       {!loading && totalPages > 1 && (
         <div className="flex items-center justify-between border-t border-crm-border pt-6">
-          <span className="text-xs text-crm-text-secondary font-medium">
+          <span className="text-sm text-crm-text-secondary font-medium">
             Showing {(page - 1) * limit + 1} - {Math.min(page * limit, total)} of {total} properties
           </span>
 
@@ -449,7 +660,7 @@ export default function PropertiesListPage() {
             >
               <ChevronLeft size={16} />
             </button>
-            <span className="text-xs font-semibold px-2 text-crm-text">{page}</span>
+            <span className="text-sm font-semibold px-2 text-crm-text">{page}</span>
             <button
               disabled={page === totalPages}
               onClick={() => setPage(page + 1)}
@@ -468,7 +679,7 @@ export default function PropertiesListPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 30 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-6 rounded-lg bg-crm-espresso px-6 py-4.5 shadow-[0_20px_50px_rgba(36,30,25,0.45)] text-xs font-medium text-crm-ivory"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-6 rounded-lg bg-crm-espresso px-6 py-4.5 shadow-[0_20px_50px_rgba(36,30,25,0.45)] text-sm font-medium text-crm-ivory"
           >
             <div className="flex items-center gap-2 pr-4 border-r border-white/10">
               <span className="h-2 w-2 rounded-full bg-crm-gold" />
@@ -488,10 +699,17 @@ export default function PropertiesListPage() {
                 className="flex items-center gap-1.5 px-3 py-2 border border-white/10 hover:bg-white/5 rounded-sm text-white/70 hover:text-white transition-all duration-200"
               >
                 <XCircle size={12} className="text-amber-400" />
-                <span>Unpublish</span>
+                <span>Move to Draft</span>
               </button>
               <button
-                onClick={handleBulkDelete}
+                onClick={() => setConfirmState({ kind: "bulkArchive" })}
+                className="flex items-center gap-1.5 px-3 py-2 border border-white/10 hover:bg-white/5 rounded-sm text-white/70 hover:text-white transition-all duration-200"
+              >
+                <Archive size={12} className="text-amber-400" />
+                <span>Archive</span>
+              </button>
+              <button
+                onClick={() => setConfirmState({ kind: "bulkDelete" })}
                 className="flex items-center gap-1.5 px-3 py-2 border border-red-400/20 hover:bg-red-500/10 text-red-300 hover:text-red-200 rounded-sm transition-all duration-200"
               >
                 <Trash2 size={12} />
@@ -521,13 +739,23 @@ const STATUS_BADGE_STYLES: Record<string, string> = {
 function PropertyStatusBadge({ status }: { status: string }) {
   const style = STATUS_BADGE_STYLES[status] ?? "bg-crm-bg text-crm-text-secondary border-crm-border";
   return (
-    <span className={cn("px-2.5 py-1 rounded-full border text-[9px] font-bold tracking-wide uppercase", style)}>
+    <span className={cn("px-2.5 py-1 rounded-full border text-[11px] font-bold tracking-wide uppercase", style)}>
       {status.replace(/_/g, " ")}
     </span>
   );
 }
 
 // Simple Helper function
+// Bank-auction listings live at a different public route (keyed by the
+// short propertyId, not the slug) than every other category — mirrors
+// the routing in src/app/properties/bank-auctions/[propertyId] vs
+// src/app/properties/[slug].
+function publicUrlFor(prop: Property): string {
+  return prop.category.slug === "bank-auctions"
+    ? `/properties/bank-auctions/${prop.propertyId}`
+    : `/properties/${prop.slug}`;
+}
+
 function cn(...classes: any[]) {
   return classes.filter(Boolean).join(" ");
 }

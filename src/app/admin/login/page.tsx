@@ -55,13 +55,13 @@ export default function LoginPage() {
       >
         {/* Header/Logo */}
         <div className="flex flex-col items-center text-center">
-          <span className="font-display text-2xl tracking-[0.2em] uppercase text-crm-gold font-medium">
+          <span className="font-crm-display text-2xl tracking-[0.15em] uppercase text-crm-gold font-bold">
             Sarakki Homes
           </span>
-          <span className="text-[10px] uppercase tracking-[0.3em] text-white/50 mt-2">
+          <span className="text-[10px] uppercase tracking-[0.3em] text-white/50 mt-2 font-crm-body">
             Enterprise CRM Login
           </span>
-          <p className="mt-4 text-xs text-white/60 leading-relaxed max-w-[280px]">
+          <p className="mt-4 text-sm font-crm-body text-white/60 leading-relaxed max-w-[280px]">
             Please sign in using your staff credentials to access the console.
           </p>
         </div>
@@ -71,7 +71,7 @@ export default function LoginPage() {
           <motion.div
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-6 rounded-sm border border-red-500/10 bg-red-500/5 px-4 py-3 text-xs text-red-400"
+            className="mt-6 rounded-sm border border-red-500/10 bg-red-500/5 px-4 py-3 font-crm-body text-sm text-red-400"
           >
             {error}
           </motion.div>
@@ -81,8 +81,8 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-4">
             {/* Email Field */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-white/50">
+            <div className="space-y-2">
+              <label className="font-crm-body text-[13px] font-semibold uppercase tracking-wider text-white/50">
                 Email Address
               </label>
               <div className="relative">
@@ -94,15 +94,15 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-sm border border-white/10 bg-white/[0.02] py-3 pl-10 pr-4 text-sm text-crm-gold-bright placeholder:text-white/25 outline-none transition-all duration-300 focus:border-crm-gold-bright/40 focus:bg-white/[0.04]"
+                  className="w-full rounded-sm border border-white/10 bg-white/[0.02] py-3.5 pl-10 pr-4 font-crm-body text-[15px] text-crm-gold-bright placeholder:text-white/25 outline-none transition-all duration-300 focus:border-crm-gold-bright/40 focus:bg-white/[0.04]"
                   placeholder="name@sarakkihomes.com"
                 />
               </div>
             </div>
 
             {/* Password Field */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-white/50">
+            <div className="space-y-2">
+              <label className="font-crm-body text-[13px] font-semibold uppercase tracking-wider text-white/50">
                 Password
               </label>
               <div className="relative">
@@ -114,7 +114,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-sm border border-white/10 bg-white/[0.02] py-3 pl-10 pr-4 text-sm text-crm-gold-bright placeholder:text-white/25 outline-none transition-all duration-300 focus:border-crm-gold-bright/40 focus:bg-white/[0.04]"
+                  className="w-full rounded-sm border border-white/10 bg-white/[0.02] py-3.5 pl-10 pr-4 font-crm-body text-[15px] text-crm-gold-bright placeholder:text-white/25 outline-none transition-all duration-300 focus:border-crm-gold-bright/40 focus:bg-white/[0.04]"
                   placeholder="••••••••"
                 />
               </div>
@@ -122,7 +122,7 @@ export default function LoginPage() {
           </div>
 
           {/* Action Row */}
-          <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center justify-between font-crm-body text-sm">
             <label className="flex items-center gap-2 cursor-pointer text-white/50 hover:text-white transition-colors select-none">
               <input
                 type="checkbox"
@@ -145,7 +145,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="group flex w-full items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-crm-gold to-crm-gold-bright/90 hover:from-crm-gold-bright hover:to-crm-gold py-3.5 text-xs font-semibold uppercase tracking-wider text-crm-espresso transition-all duration-300 disabled:opacity-50"
+            className="group flex w-full items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-crm-gold to-crm-gold-bright/90 hover:from-crm-gold-bright hover:to-crm-gold py-3.5 font-crm-body text-sm font-semibold uppercase tracking-wider text-crm-espresso transition-all duration-300 disabled:opacity-50"
           >
             {loading ? (
               <Loader2 size={14} className="animate-spin" />

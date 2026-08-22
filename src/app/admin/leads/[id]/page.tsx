@@ -70,7 +70,7 @@ interface LeadDetail {
 type Tab = "notes" | "tasks" | "timeline";
 
 const inputClass =
-  "w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40";
+  "w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3 text-sm text-crm-text outline-none focus:border-crm-gold-bright/40";
 const labelClass = "text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary";
 
 export default function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -191,7 +191,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
   if (loading) {
     return (
-      <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary text-xs font-semibold">
+      <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary text-sm font-semibold">
         <Loader2 size={24} className="animate-spin text-crm-gold-bright" />
         <span>Loading lead...</span>
       </div>
@@ -200,7 +200,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
   if (!lead) {
     return (
-      <div className="py-24 text-center text-xs text-crm-text-secondary">
+      <div className="py-24 text-center text-sm text-crm-text-secondary">
         Lead not found.{" "}
         <Link href="/admin/leads" className="text-crm-gold hover:underline">
           Back to Leads
@@ -213,7 +213,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     <div className="space-y-6">
       <Link
         href="/admin/leads"
-        className="inline-flex items-center gap-1.5 text-xs text-crm-text-secondary hover:text-crm-text transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-crm-text-secondary hover:text-crm-text transition-colors"
       >
         <ArrowLeft size={13} /> Back to Leads
       </Link>
@@ -221,7 +221,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="font-display text-2xl font-bold tracking-wide text-crm-text">{lead.name}</h1>
+            <h1 className="crm-page-title">{lead.name}</h1>
             <button onClick={() => patchLead({ favorite: !lead.favorite })} disabled={updating}>
               <Star
                 size={18}
@@ -233,13 +233,13 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
             </button>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <span className={cn("px-2.5 py-1 rounded-full border text-[9px] font-semibold uppercase", STAGE_BADGE_CLASS[lead.stage as keyof typeof STAGE_BADGE_CLASS])}>
+            <span className={cn("px-2.5 py-1 rounded-full border text-[10px] font-semibold uppercase", STAGE_BADGE_CLASS[lead.stage as keyof typeof STAGE_BADGE_CLASS])}>
               {STAGE_LABELS[lead.stage as keyof typeof STAGE_LABELS] ?? lead.stage}
             </span>
-            <span className={cn("px-2.5 py-1 rounded-full border text-[9px] font-semibold uppercase", PRIORITY_BADGE_CLASS[lead.priority])}>
+            <span className={cn("px-2.5 py-1 rounded-full border text-[10px] font-semibold uppercase", PRIORITY_BADGE_CLASS[lead.priority])}>
               {lead.priority} Priority
             </span>
-            <span className="text-[10px] text-crm-text-secondary">
+            <span className="text-xs text-crm-text-secondary">
               Added {new Date(lead.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" })}
             </span>
           </div>
@@ -249,7 +249,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
           value={lead.stage}
           onChange={(e) => patchLead({ stage: e.target.value })}
           disabled={updating}
-          className="rounded-sm border border-crm-gold-bright/40 bg-crm-bg/40 py-2.5 px-4 text-xs font-semibold text-crm-text outline-none cursor-pointer"
+          className="rounded-sm border border-crm-gold-bright/40 bg-crm-bg/40 py-2.5 px-4 text-sm font-semibold text-crm-text outline-none cursor-pointer"
         >
           {STAGES.map((s) => (
             <option key={s} value={s}>{STAGE_LABELS[s]}</option>
@@ -262,16 +262,16 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
         <div className="xl:col-span-1 space-y-6">
           <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-5 space-y-3.5">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary mb-1">Contact</p>
-            <a href={`tel:${lead.phone}`} className="flex items-center gap-3 text-xs text-crm-gold hover:text-crm-gold-bright transition-colors">
+            <a href={`tel:${lead.phone}`} className="flex items-center gap-3 text-sm text-crm-gold hover:text-crm-gold-bright transition-colors">
               <Phone size={14} /> {lead.phone}
             </a>
             {lead.email && (
-              <a href={`mailto:${lead.email}`} className="flex items-center gap-3 text-xs text-crm-gold hover:text-crm-gold-bright transition-colors">
+              <a href={`mailto:${lead.email}`} className="flex items-center gap-3 text-sm text-crm-gold hover:text-crm-gold-bright transition-colors">
                 <Mail size={14} /> {lead.email}
               </a>
             )}
             {lead.location && (
-              <div className="flex items-center gap-3 text-xs text-crm-text">
+              <div className="flex items-center gap-3 text-sm text-crm-text">
                 <MapPin size={14} className="text-crm-text-secondary" /> {lead.location}
               </div>
             )}
@@ -280,19 +280,19 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                 href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-sm border border-crm-border/40 py-2 text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary hover:border-crm-gold-bright/40 hover:text-crm-text transition-colors"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-sm border border-crm-border/40 py-2 text-xs font-semibold uppercase tracking-wider text-crm-text-secondary hover:border-crm-gold-bright/40 hover:text-crm-text transition-colors"
               >
                 <MessageCircle size={12} /> WhatsApp
               </a>
               <button
                 onClick={() => patchLead({ markContacted: true })}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-sm border border-crm-border/40 py-2 text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary hover:border-crm-gold-bright/40 hover:text-crm-text transition-colors"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-sm border border-crm-border/40 py-2 text-xs font-semibold uppercase tracking-wider text-crm-text-secondary hover:border-crm-gold-bright/40 hover:text-crm-text transition-colors"
               >
                 <Check size={12} /> Mark Contacted
               </button>
             </div>
             {lead.lastContact && (
-              <p className="text-[10px] text-crm-text-secondary/70">
+              <p className="text-xs text-crm-text-secondary">
                 Last contacted {new Date(lead.lastContact).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}
               </p>
             )}
@@ -325,7 +325,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
           {canViewRevenue && (lead.dealValueLakh !== null || lead.commissionLakh !== null) && (
             <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-5 space-y-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary mb-1">
+              <p className="text-xs font-semibold uppercase tracking-wider text-crm-text-secondary mb-1">
                 Deal Summary
               </p>
               <DetailRow label="Deal Value" value={formatMoneyLakh(lead.dealValueLakh)} />
@@ -356,7 +356,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
           {(lead.stage === "WON" || lead.stage === "LOST") && (
             <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-5 space-y-2">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">
+              <p className="text-xs font-semibold uppercase tracking-wider text-crm-text-secondary">
                 {lead.stage === "WON" ? "Win Details" : "Loss Reason"}
               </p>
               <textarea
@@ -397,7 +397,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                 <button
                   onClick={addNote}
                   disabled={savingNote || !noteText.trim()}
-                  className="inline-flex items-center gap-1.5 rounded-sm bg-crm-gold px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-black hover:brightness-110 disabled:opacity-50 transition-all"
+                  className="inline-flex items-center gap-1.5 rounded-sm bg-crm-gold px-4 py-2 text-xs font-semibold uppercase tracking-wider text-black hover:brightness-110 disabled:opacity-50 transition-all"
                 >
                   {savingNote ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />} Add Note
                 </button>
@@ -409,15 +409,15 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                 lead.notes.map((note) => (
                   <div key={note.id} className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-crm-text flex items-center gap-1.5">
+                      <span className="text-sm font-semibold text-crm-text flex items-center gap-1.5">
                         {note.pinned && <Pin size={11} className="text-crm-gold-bright" />}
                         {note.author}
                       </span>
-                      <span className="text-[10px] text-crm-text-secondary/60">
+                      <span className="text-xs text-crm-text-secondary">
                         {new Date(note.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" })}
                       </span>
                     </div>
-                    <p className="mt-2 text-xs text-crm-text-secondary leading-relaxed">{note.content}</p>
+                    <p className="mt-2 text-sm text-crm-text-secondary leading-relaxed">{note.content}</p>
                   </div>
                 ))
               )}
@@ -459,7 +459,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                 <button
                   onClick={addTask}
                   disabled={savingTask || !taskForm.title.trim()}
-                  className="inline-flex items-center gap-1.5 rounded-sm bg-crm-gold px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-black hover:brightness-110 disabled:opacity-50 transition-all"
+                  className="inline-flex items-center gap-1.5 rounded-sm bg-crm-gold px-4 py-2 text-xs font-semibold uppercase tracking-wider text-black hover:brightness-110 disabled:opacity-50 transition-all"
                 >
                   {savingTask ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />} Add Task
                 </button>
@@ -472,12 +472,12 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                   <div key={task.id} className="flex items-center justify-between rounded-sm border border-crm-border/20 bg-crm-card/25 p-4">
                     <div className="min-w-0 flex-1 pr-4">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-crm-text truncate">{task.title}</span>
-                        <span className={cn("px-2 py-0.5 rounded-full border text-[8px] font-semibold uppercase", PRIORITY_BADGE_CLASS[task.priority])}>
+                        <span className="text-sm font-semibold text-crm-text truncate">{task.title}</span>
+                        <span className={cn("px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase", PRIORITY_BADGE_CLASS[task.priority])}>
                           {task.priority}
                         </span>
                       </div>
-                      <div className="mt-1 flex items-center gap-3 text-[10px] text-crm-text-secondary">
+                      <div className="mt-1 flex items-center gap-3 text-xs text-crm-text-secondary">
                         {task.assignedTo && <span>{task.assignedTo}</span>}
                         {task.dueDate && (
                           <span>Due {new Date(task.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" })}</span>
@@ -488,7 +488,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                       value={task.status}
                       onChange={(e) => updateTaskStatus(task.id, e.target.value)}
                       className={cn(
-                        "shrink-0 rounded-full border px-2.5 py-1 text-[9px] font-semibold uppercase outline-none cursor-pointer",
+                        "shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase outline-none cursor-pointer",
                         TASK_STATUS_BADGE_CLASS[task.status]
                       )}
                     >
@@ -513,15 +513,15 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                     <div key={entry.id} className="relative pb-5">
                       <span className="absolute -left-5 top-1 h-2 w-2 rounded-full bg-crm-gold-bright" />
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-crm-text">{entry.title}</span>
-                        <span className="text-[10px] text-crm-text-secondary/60">
+                        <span className="text-sm font-semibold text-crm-text">{entry.title}</span>
+                        <span className="text-xs text-crm-text-secondary">
                           {new Date(entry.createdAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" })}
                         </span>
                       </div>
                       {entry.description && (
-                        <p className="mt-1 text-[11px] text-crm-text-secondary leading-relaxed">{entry.description}</p>
+                        <p className="mt-1 text-sm text-crm-text-secondary leading-relaxed">{entry.description}</p>
                       )}
-                      {entry.author && <p className="mt-0.5 text-[10px] text-crm-text-secondary/50">by {entry.author}</p>}
+                      {entry.author && <p className="mt-0.5 text-xs text-crm-text-secondary">by {entry.author}</p>}
                     </div>
                   ))}
                 </div>
@@ -536,9 +536,9 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between text-xs">
+    <div className="flex items-center justify-between text-sm">
       <span className="text-crm-text-secondary">{label}</span>
-      <span className="font-medium text-crm-text">{value}</span>
+      <span className="font-semibold text-crm-text">{value}</span>
     </div>
   );
 }
@@ -558,7 +558,7 @@ function TabButton({
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-1.5 rounded-sm px-3.5 py-2 text-[11px] font-semibold transition-colors relative",
+        "flex items-center gap-1.5 rounded-sm px-3.5 py-2 text-xs font-semibold transition-colors relative",
         active ? "text-black" : "text-crm-text-secondary hover:text-crm-text"
       )}
     >
@@ -577,7 +577,7 @@ function TabButton({
 
 function EmptyState({ text }: { text: string }) {
   return (
-    <div className="py-12 text-center text-xs text-crm-text-secondary bg-crm-card/25 border border-dashed border-crm-border/20 rounded-sm">
+    <div className="py-12 text-center text-sm text-crm-text-secondary bg-crm-card/25 border border-dashed border-crm-border/20 rounded-sm">
       {text}
     </div>
   );

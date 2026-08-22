@@ -105,7 +105,7 @@ export default async function PropertyDetailPage({
               <div className="sticky top-28">
                 <p className="font-display text-3xl">{property.price}</p>
                 <div className="mt-5">
-                  <EnquiryPanel propertyTitle={property.title} />
+                  <EnquiryPanel propertyId={property.id} propertyTitle={property.title} />
                 </div>
               </div>
             </div>

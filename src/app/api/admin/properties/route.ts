@@ -16,9 +16,25 @@ export async function GET(req: Request) {
   const search = searchParams.get("search") || "";
   const status = searchParams.get("status") || "";
   const category = searchParams.get("category") || "";
+  const builder = searchParams.get("builder") || "";
+  const type = searchParams.get("type") || "";
+  const sort = searchParams.get("sort") || "newest";
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "10");
   const skip = (page - 1) * limit;
+
+  // Client-facing sort keys mapped to Prisma orderBy — kept out of the
+  // querystring's raw shape so the URL stays readable ("sort=price_desc")
+  // without exposing/depending on the Prisma field names directly.
+  const SORT_MAP: Record<string, Prisma.PropertyOrderByWithRelationInput[]> = {
+    newest: [{ createdAt: "desc" }],
+    oldest: [{ createdAt: "asc" }],
+    price_desc: [{ priceValueLakh: "desc" }],
+    price_asc: [{ priceValueLakh: "asc" }],
+    name_asc: [{ title: "asc" }],
+    name_desc: [{ title: "desc" }],
+  };
+  const orderBy = SORT_MAP[sort] ?? SORT_MAP.newest;
 
   try {
     const where: Prisma.PropertyWhereInput = {};
@@ -35,6 +51,12 @@ export async function GET(req: Request) {
     if (category) {
       where.category = { slug: category };
     }
+    if (builder) {
+      where.builderId = builder;
+    }
+    if (type) {
+      where.type = type;
+    }
 
     const [properties, total] = await prisma.$transaction([
       prisma.property.findMany({
@@ -42,11 +64,11 @@ export async function GET(req: Request) {
         include: {
           category: true,
           builder: true,
-          images: { orderBy: { order: "asc" } },
+          images: { orderBy: { order: "asc" }, take: 1 },
         },
         skip,
         take: limit,
-        orderBy: [{ category: { slug: "asc" } }, { createdAt: "desc" }],
+        orderBy,
       }),
       prisma.property.count({ where }),
     ]);

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Cormorant_Garamond, Manrope, Plus_Jakarta_Sans, DM_Sans } from "next/font/google";
 import { FloatingSocialDock } from "@/components/ui/FloatingSocialDock";
 import { BuilderMarquee } from "@/components/ui/BuilderMarquee";
 import { AuthProvider } from "@/components/admin/AuthProvider";
@@ -30,6 +30,27 @@ const cormorantGaramondAccent = Cormorant_Garamond({
 const manrope = Manrope({
   variable: "--font-body",
   subsets: ["latin"],
+});
+
+// CRM (admin console) typeface pair — deliberately separate from the
+// public site's editorial serif/Manrope pairing above. The CRM is a
+// modern enterprise operations tool, not the luxury editorial site, so
+// it gets a clean geometric sans system: Plus Jakarta Sans for page
+// titles/section headings/emphasized values, DM Sans for everything
+// else (nav, labels, inputs, tables, buttons, helper text). Loaded
+// here (once, site-wide) rather than per-admin-page so next/font can
+// still optimize/subset it, but only ever referenced by admin
+// components via the --font-crm-* variables below.
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-crm-display",
+  subsets: ["latin"],
+  weight: ["600", "700"],
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-crm-body",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 // TODO: replace with the real production domain once the site is hosted —
@@ -81,7 +102,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${cormorantGaramond.variable} ${cormorantGaramondAccent.variable} ${manrope.variable} h-full antialiased`}
+      className={`${cormorantGaramond.variable} ${cormorantGaramondAccent.variable} ${manrope.variable} ${plusJakartaSans.variable} ${dmSans.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body

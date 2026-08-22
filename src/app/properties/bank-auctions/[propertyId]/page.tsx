@@ -120,7 +120,11 @@ export default async function BankAuctionDetailPage({
 
             <div className="lg:col-span-1">
               <div className="sticky top-28">
-                <AuctionEnquiryPanel propertyId={property.propertyId} />
+                <AuctionEnquiryPanel
+                  dbId={property.id}
+                  propertyId={property.propertyId}
+                  title={property.title}
+                />
               </div>
             </div>
           </Container>

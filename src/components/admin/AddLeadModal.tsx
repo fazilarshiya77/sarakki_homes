@@ -12,7 +12,7 @@ import {
 } from "@/lib/crm";
 
 const inputClass =
-  "w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40";
+  "w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3 text-sm text-crm-text outline-none focus:border-crm-gold-bright/40";
 const labelClass = "text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary";
 
 export function AddLeadModal({
@@ -100,8 +100,8 @@ export function AddLeadModal({
           >
             <div className="flex items-center justify-between border-b border-crm-border/20 pb-4">
               <div>
-                <h3 className="font-body text-lg font-semibold text-crm-text">Add New Lead</h3>
-                <p className="text-[11px] text-crm-text-secondary mt-0.5">
+                <h3 className="crm-section-heading">Add New Lead</h3>
+                <p className="text-sm text-crm-text-secondary mt-0.5">
                   Capture a walk-in, call, or referral straight into the pipeline.
                 </p>
               </div>
@@ -114,7 +114,7 @@ export function AddLeadModal({
             </div>
 
             {error && (
-              <div className="mt-4 rounded-sm border border-red-500/20 bg-red-500/5 px-3 py-2 text-xs text-red-400">
+              <div className="mt-4 rounded-sm border border-red-500/20 bg-red-500/5 px-3 py-2 text-sm text-red-400">
                 {error}
               </div>
             )}

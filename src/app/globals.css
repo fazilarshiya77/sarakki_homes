@@ -45,15 +45,31 @@
      ============================================================ */
   --crm-espresso: #241E19;
   --crm-brown: #332C26;
-  --crm-gold: #C4A66B;
+  --crm-gold: #C6A15B;
   --crm-gold-bright: #D8C18D;
   --crm-bg: #F4F1EB;
   --crm-card: #FCFBF8;
-  --crm-text: #1C1C1C;
-  --crm-text-secondary: #67615B;
-  --crm-text-muted: #8A837A;
+  --crm-text: #17231F;
+  --crm-text-secondary: #4F5752;
+  --crm-text-muted: #6F756F;
   --crm-border: #DED6C9;
   --crm-ivory: #F6F3EE;
+
+  /* CRM typography scale — modern enterprise sans system (Plus Jakarta
+     Sans display + DM Sans UI), DESIGN_SYSTEM.md-aligned readability
+     pass. A proper hierarchy, not a single global bump. Reused by every
+     admin page/component via these tokens or the .crm-* utility
+     classes below rather than one-off Tailwind sizes, so the scale
+     stays consistent. */
+  --crm-text-page-title: clamp(1.75rem, 0.6vw + 1.65rem, 2rem);   /* ~28-32px */
+  --crm-text-section: clamp(1.25rem, 0.4vw + 1.15rem, 1.5rem);    /* ~20-24px */
+  --crm-text-label: 0.875rem;       /* 14px */
+  --crm-text-input: 1rem;           /* 16px */
+  --crm-text-placeholder: 0.9375rem; /* 15px */
+  --crm-text-body: 0.9375rem;       /* 15px */
+  --crm-text-table: 0.9375rem;      /* 15px */
+  --crm-text-value: clamp(1rem, 0.2vw + 0.95rem, 1.125rem); /* ~16-18px */
+  --crm-text-nav: 0.9375rem;        /* 15px */
 }
 
 @theme inline {
@@ -81,6 +97,8 @@
   --font-display: var(--font-display), serif;
   --font-accent: var(--font-accent), serif;
   --font-body: var(--font-body), sans-serif;
+  --font-crm-display: var(--font-crm-display), sans-serif;
+  --font-crm-body: var(--font-crm-body), sans-serif;
 
   --color-crm-espresso: var(--crm-espresso);
   --color-crm-brown: var(--crm-brown);
@@ -102,11 +120,14 @@
    harmless if unused elsewhere.
    ============================================================ */
 .crm-label {
-  font-size: 0.6875rem;
+  display: inline-block;
+  font-family: var(--font-crm-body), sans-serif;
+  font-size: var(--crm-text-label);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: var(--crm-text-secondary);
+  margin-bottom: 0.5rem;
 }
 
 .crm-input,
@@ -116,16 +137,74 @@
   border-radius: 6px;
   border: 1px solid var(--crm-border);
   background: var(--crm-card);
-  padding: 0.7rem 0.9rem;
-  font-size: 0.8125rem;
-  line-height: 1.3;
+  padding: 0.875rem 1rem;
+  font-family: var(--font-crm-body), sans-serif;
+  font-size: var(--crm-text-input);
+  font-weight: 450;
+  letter-spacing: -0.005em;
+  line-height: 1.5;
   color: var(--crm-text);
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 .crm-input::placeholder,
 .crm-textarea::placeholder {
+  font-family: var(--font-crm-body), sans-serif;
+  font-size: var(--crm-text-placeholder);
   color: var(--crm-text-muted);
+}
+
+/* CRM typography hierarchy utilities — page titles, section headings,
+   table/body text, and emphasized values. Reuse these across admin
+   pages instead of inventing one-off text sizes.
+
+   Modern enterprise sans system, deliberately separate from the public
+   site's editorial serif/Manrope pairing: Plus Jakarta Sans
+   (--font-crm-display) for page titles/section headings/emphasized
+   values only, DM Sans (--font-crm-body) for every UI/data surface —
+   nav, labels, inputs, tables, buttons, helper text. No serif, no
+   decorative faces anywhere in the CRM. */
+.crm-page-title {
+  font-family: var(--font-crm-display), sans-serif;
+  font-size: var(--crm-text-page-title);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--crm-text);
+  letter-spacing: -0.02em;
+}
+.crm-section-heading {
+  font-family: var(--font-crm-display), sans-serif;
+  font-size: var(--crm-text-section);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--crm-text);
+  letter-spacing: -0.01em;
+}
+.crm-body-text {
+  font-family: var(--font-crm-body), sans-serif;
+  font-size: var(--crm-text-body);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--crm-text-secondary);
+}
+.crm-table-text {
+  font-family: var(--font-crm-body), sans-serif;
+  font-size: var(--crm-text-table);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--crm-text);
+}
+.crm-value {
+  font-family: var(--font-crm-display), sans-serif;
+  font-size: var(--crm-text-value);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--crm-text);
+}
+.crm-nav-text {
+  font-family: var(--font-crm-body), sans-serif;
+  font-size: var(--crm-text-nav);
+  font-weight: 500;
 }
 .crm-input:hover,
 .crm-select:hover,
@@ -159,11 +238,12 @@
   justify-content: center;
   gap: 0.5rem;
   border-radius: 6px;
-  font-size: 0.6875rem;
+  font-family: var(--font-crm-body), sans-serif;
+  font-size: 0.875rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0.7rem 1.35rem;
+  letter-spacing: 0.05em;
+  padding: 0.8rem 1.4rem;
   transition: all 0.25s var(--ease-reveal, ease);
   white-space: nowrap;
 }

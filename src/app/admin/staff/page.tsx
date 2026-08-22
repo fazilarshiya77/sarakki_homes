@@ -49,11 +49,10 @@ function formatDate(iso: string) {
 }
 
 const inputClass =
-  "w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40";
+  "w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text outline-none focus:border-crm-gold-bright/40";
 const selectClass =
-  "w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3 text-xs text-crm-text-secondary outline-none focus:border-crm-gold-bright/40 cursor-pointer";
-const labelClass =
-  "text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary";
+  "w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text-secondary outline-none focus:border-crm-gold-bright/40 cursor-pointer";
+const labelClass = "crm-label uppercase tracking-wider text-crm-text-secondary";
 
 export default function StaffPage() {
   const [staff, setStaff] = useState<StaffMember[]>([]);
@@ -221,17 +220,17 @@ export default function StaffPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-bold tracking-wide text-crm-text">
+        <h1 className="crm-page-title tracking-wide text-crm-text">
           Staff Management
         </h1>
-        <p className="text-xs text-crm-text-secondary mt-0.5">
+        <p className="crm-body-text text-crm-text-secondary mt-0.5">
           Create, edit, and remove staff accounts and their role permissions. Admin access only.
         </p>
       </div>
 
       {/* Feedback banners */}
       {error && (
-        <div className="flex items-start gap-2.5 rounded-sm border border-red-500/25 bg-red-500/[0.07] px-4 py-3 text-xs text-red-300">
+        <div className="flex items-start gap-2.5 rounded-sm border border-red-500/25 bg-red-500/[0.07] px-4 py-3 text-sm text-red-300">
           <AlertTriangle size={14} className="mt-px shrink-0 text-red-400" />
           <span className="leading-relaxed">{error}</span>
           <button
@@ -245,7 +244,7 @@ export default function StaffPage() {
         </div>
       )}
       {success && (
-        <div className="flex items-start gap-2.5 rounded-sm border border-emerald-500/25 bg-emerald-500/[0.07] px-4 py-3 text-xs text-emerald-300">
+        <div className="flex items-start gap-2.5 rounded-sm border border-emerald-500/25 bg-emerald-500/[0.07] px-4 py-3 text-sm text-emerald-300">
           <CheckCircle2 size={14} className="mt-px shrink-0 text-emerald-400" />
           <span className="leading-relaxed">{success}</span>
           <button
@@ -264,17 +263,17 @@ export default function StaffPage() {
         <div className="lg:col-span-2">
           <div className="border border-crm-border/20 bg-crm-card/10 rounded-sm overflow-hidden backdrop-blur-sm">
             {loading ? (
-              <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary text-xs font-semibold">
+              <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary crm-body-text font-semibold">
                 <Loader2 size={24} className="animate-spin text-crm-gold-bright" />
                 <span>Loading staff roster...</span>
               </div>
             ) : staff.length === 0 ? (
-              <div className="py-24 text-center text-xs text-crm-text-secondary">
+              <div className="py-24 text-center crm-body-text text-crm-text-secondary">
                 No staff accounts yet. Use the form to add your first team member.
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
+                <table className="w-full text-left border-collapse crm-table-text">
                   <thead>
                     <tr className="border-b border-crm-border/20 bg-foreground/[0.02] text-crm-text-secondary font-semibold">
                       <th className="p-4 uppercase tracking-wider font-semibold">Staff Name</th>
@@ -296,7 +295,7 @@ export default function StaffPage() {
                           <tr key={m.id} className="border-b border-crm-border/10 bg-foreground/[0.02]">
                             <td colSpan={5} className="p-5">
                               <div className="space-y-4">
-                                <span className="text-[10px] font-semibold uppercase tracking-wider text-crm-gold">
+                                <span className="crm-section-heading uppercase tracking-wider text-crm-gold">
                                   Editing {m.name}
                                 </span>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -348,7 +347,7 @@ export default function StaffPage() {
                                     type="button"
                                     disabled={savingEdit}
                                     onClick={() => handleUpdate(m.id)}
-                                    className="inline-flex items-center gap-2 rounded-sm bg-gradient-to-r from-crm-gold to-crm-gold-bright py-2 px-4 text-[10px] font-semibold uppercase tracking-wider text-black transition-all duration-300 hover:brightness-110 disabled:opacity-50"
+                                    className="inline-flex items-center gap-2 rounded-sm bg-gradient-to-r from-crm-gold to-crm-gold-bright py-2 px-4 text-xs font-semibold uppercase tracking-wider text-black transition-all duration-300 hover:brightness-110 disabled:opacity-50"
                                   >
                                     {savingEdit ? (
                                       <Loader2 size={12} className="animate-spin" />
@@ -360,7 +359,7 @@ export default function StaffPage() {
                                   <button
                                     type="button"
                                     onClick={cancelEdit}
-                                    className="inline-flex items-center gap-2 rounded-sm border border-crm-border/40 py-2 px-4 text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary transition-colors hover:text-crm-text"
+                                    className="inline-flex items-center gap-2 rounded-sm border border-crm-border/40 py-2 px-4 text-xs font-semibold uppercase tracking-wider text-crm-text-secondary transition-colors hover:text-crm-text"
                                   >
                                     <X size={12} />
                                     <span>Cancel</span>
@@ -386,7 +385,7 @@ export default function StaffPage() {
                           <td className="p-4 text-crm-text-secondary font-mono">{m.email}</td>
                           <td className="p-4">
                             <span
-                              className={`px-2.5 py-0.5 rounded-full border text-[9px] font-semibold tracking-wide uppercase ${roleBadge(
+                              className={`px-2.5 py-0.5 rounded-full border text-[11px] font-semibold tracking-wide uppercase ${roleBadge(
                                 m.role
                               )}`}
                             >
@@ -397,14 +396,14 @@ export default function StaffPage() {
                           <td className="p-4">
                             {isConfirming ? (
                               <div className="flex items-center justify-end gap-2">
-                                <span className="text-[10px] text-crm-text-secondary">
+                                <span className="text-xs text-crm-text-secondary">
                                   Remove permanently?
                                 </span>
                                 <button
                                   type="button"
                                   disabled={deleting}
                                   onClick={() => handleDelete(m.id)}
-                                  className="inline-flex items-center gap-1.5 rounded-sm border border-red-500/30 bg-red-500/10 py-1.5 px-3 text-[10px] font-semibold uppercase tracking-wider text-red-300 transition-colors hover:bg-red-500/20 disabled:opacity-50"
+                                  className="inline-flex items-center gap-1.5 rounded-sm border border-red-500/30 bg-red-500/10 py-1.5 px-3 text-xs font-semibold uppercase tracking-wider text-red-300 transition-colors hover:bg-red-500/20 disabled:opacity-50"
                                 >
                                   {deleting ? (
                                     <Loader2 size={11} className="animate-spin" />
@@ -416,7 +415,7 @@ export default function StaffPage() {
                                 <button
                                   type="button"
                                   onClick={() => setConfirmDeleteId(null)}
-                                  className="inline-flex items-center gap-1.5 rounded-sm border border-crm-border/40 py-1.5 px-3 text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary transition-colors hover:text-crm-text"
+                                  className="inline-flex items-center gap-1.5 rounded-sm border border-crm-border/40 py-1.5 px-3 text-xs font-semibold uppercase tracking-wider text-crm-text-secondary transition-colors hover:text-crm-text"
                                 >
                                   <X size={11} />
                                   <span>Cancel</span>
@@ -427,7 +426,7 @@ export default function StaffPage() {
                                 <button
                                   type="button"
                                   onClick={() => startEdit(m)}
-                                  className="inline-flex items-center gap-1.5 rounded-sm border border-crm-border/30 py-1.5 px-3 text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary transition-colors hover:border-crm-gold-bright/40 hover:text-crm-gold"
+                                  className="inline-flex items-center gap-1.5 rounded-sm border border-crm-border/30 py-1.5 px-3 text-xs font-semibold uppercase tracking-wider text-crm-text-secondary transition-colors hover:border-crm-gold-bright/40 hover:text-crm-gold"
                                 >
                                   <Pencil size={11} />
                                   <span>Edit</span>
@@ -438,7 +437,7 @@ export default function StaffPage() {
                                     setEditingId(null);
                                     setConfirmDeleteId(m.id);
                                   }}
-                                  className="inline-flex items-center gap-1.5 rounded-sm border border-crm-border/30 py-1.5 px-3 text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary transition-colors hover:border-red-500/40 hover:text-red-300"
+                                  className="inline-flex items-center gap-1.5 rounded-sm border border-crm-border/30 py-1.5 px-3 text-xs font-semibold uppercase tracking-wider text-crm-text-secondary transition-colors hover:border-red-500/40 hover:text-red-300"
                                 >
                                   <Trash2 size={11} />
                                   <span>Delete</span>
@@ -459,10 +458,10 @@ export default function StaffPage() {
         {/* Add Staff form */}
         <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-6 backdrop-blur-md space-y-4">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-crm-text-secondary">
+            <span className="crm-section-heading uppercase tracking-wider text-crm-text-secondary">
               Add Staff
             </span>
-            <p className="text-[10px] text-crm-text-secondary mt-0.5">
+            <p className="text-xs text-crm-text-secondary mt-0.5">
               Create a new account and assign its role scope.
             </p>
           </div>
@@ -499,7 +498,7 @@ export default function StaffPage() {
                 placeholder="Minimum 8 characters"
                 className={inputClass}
               />
-              <p className="text-[10px] text-crm-text-secondary/70">
+              <p className="text-xs text-crm-text-secondary/70">
                 Shared with the staff member privately &mdash; they can change it later.
               </p>
             </div>
@@ -517,7 +516,7 @@ export default function StaffPage() {
                   </option>
                 ))}
               </select>
-              <p className="text-[10px] text-crm-text-secondary/70">
+              <p className="text-xs text-crm-text-secondary/70">
                 Only admins can manage staff accounts.
               </p>
             </div>
@@ -525,7 +524,7 @@ export default function StaffPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-crm-gold to-crm-gold-bright py-2.5 text-xs font-semibold uppercase tracking-wider text-black transition-all duration-300 hover:brightness-110 disabled:opacity-50"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-crm-gold to-crm-gold-bright py-2.5 text-sm font-semibold uppercase tracking-wider text-black transition-all duration-300 hover:brightness-110 disabled:opacity-50"
             >
               {submitting ? (
                 <Loader2 size={14} className="animate-spin" />

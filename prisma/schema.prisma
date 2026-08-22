@@ -152,15 +152,27 @@ model Enquiry {
   propertyId String
   property   Property @relation(fields: [propertyId], references: [id])
   message    String
-  status     String   @default("NEW") // NEW, CONTACTED, CONVERTED, CLOSED
+  status     String   @default("NEW") // NEW, CONTACTED, FOLLOW_UP, CONVERTED, CLOSED
   notes      String?
   staffId    String?
   assignedTo User?    @relation("AssignedStaff", fields: [staffId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  // Added for the public-site "Request a Consultation" flow — reuses
+  // this existing Enquiry model rather than a separate table (every
+  // consultation IS an enquiry: same customer/property relationship,
+  // same CRM list, same status lifecycle). All four are optional so
+  // existing rows and any other future Enquiry source (a plain contact
+  // form with no scheduling concept) are unaffected.
+  enquiryType   String  @default("General") // "General" | "Consultation"
+  contactMethod String? // "Phone" | "WhatsApp" | "Email"
+  preferredDate String?
+  preferredTime String?
+
   @@index([status])
   @@index([createdAt])
+  @@index([enquiryType])
 }
 
 model Customer {

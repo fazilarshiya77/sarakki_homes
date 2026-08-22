@@ -65,11 +65,11 @@ export default function TasksPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-bold tracking-wide text-crm-text flex items-center gap-2.5">
+        <h1 className="crm-page-title flex items-center gap-2.5">
           <CheckSquare size={22} className="text-crm-gold" />
           Tasks
         </h1>
-        <p className="text-xs text-crm-text-secondary mt-0.5">
+        <p className="text-sm text-crm-text-secondary mt-0.5">
           Every follow-up across every lead, in one place.
         </p>
       </div>
@@ -78,7 +78,7 @@ export default function TasksPage() {
         <button
           onClick={() => setStatusFilter("")}
           className={cn(
-            "rounded-sm px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition-colors",
+            "rounded-sm px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors",
             statusFilter === "" ? "bg-crm-gold text-black" : "text-crm-text-secondary hover:text-crm-text"
           )}
         >
@@ -89,7 +89,7 @@ export default function TasksPage() {
             key={s}
             onClick={() => setStatusFilter(s)}
             className={cn(
-              "rounded-sm px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition-colors",
+              "rounded-sm px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors",
               statusFilter === s ? "bg-crm-gold text-black" : "text-crm-text-secondary hover:text-crm-text"
             )}
           >
@@ -99,12 +99,12 @@ export default function TasksPage() {
       </div>
 
       {loading ? (
-        <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary text-xs font-semibold bg-crm-card/25 border border-crm-border/20 rounded-sm">
+        <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary text-sm font-semibold bg-crm-card/25 border border-crm-border/20 rounded-sm">
           <Loader2 size={24} className="animate-spin text-crm-gold-bright" />
           <span>Loading tasks...</span>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="py-24 text-center text-xs text-crm-text-secondary bg-crm-card/25 border border-dashed border-crm-border/20 rounded-sm">
+        <div className="py-24 text-center text-sm text-crm-text-secondary bg-crm-card/25 border border-dashed border-crm-border/20 rounded-sm">
           No tasks here. Add one from a lead&apos;s detail page.
         </div>
       ) : (
@@ -119,20 +119,20 @@ export default function TasksPage() {
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2.5">
-                  <span className="text-xs font-semibold text-crm-text truncate">{task.title}</span>
-                  <span className={cn("px-2 py-0.5 rounded-full border text-[8px] font-semibold uppercase", PRIORITY_BADGE_CLASS[task.priority])}>
+                  <span className="text-sm font-semibold text-crm-text truncate">{task.title}</span>
+                  <span className={cn("px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase", PRIORITY_BADGE_CLASS[task.priority])}>
                     {task.priority}
                   </span>
                   {isOverdue(task) && (
-                    <span className="px-2 py-0.5 rounded-full border border-red-500/30 bg-red-500/10 text-red-400 text-[8px] font-semibold uppercase">
+                    <span className="px-2 py-0.5 rounded-full border border-red-500/30 bg-red-500/10 text-red-400 text-[10px] font-semibold uppercase">
                       Overdue
                     </span>
                   )}
                 </div>
                 {task.description && (
-                  <p className="mt-1.5 text-[11px] text-crm-text-secondary leading-relaxed">{task.description}</p>
+                  <p className="mt-1.5 text-sm text-crm-text-secondary leading-relaxed">{task.description}</p>
                 )}
-                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-crm-text-secondary">
+                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-crm-text-secondary">
                   {task.lead && (
                     <Link href={`/admin/leads/${task.lead.id}`} className="flex items-center gap-1.5 text-crm-gold hover:text-crm-gold-bright transition-colors">
                       <Target size={11} /> {task.lead.name}
@@ -154,7 +154,7 @@ export default function TasksPage() {
                 value={task.status}
                 onChange={(e) => updateStatus(task.id, e.target.value)}
                 className={cn(
-                  "shrink-0 rounded-full border px-3 py-1.5 text-[9px] font-semibold uppercase outline-none cursor-pointer",
+                  "shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold uppercase outline-none cursor-pointer",
                   TASK_STATUS_BADGE_CLASS[task.status]
                 )}
               >

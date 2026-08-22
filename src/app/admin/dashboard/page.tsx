@@ -51,6 +51,9 @@ export default async function DashboardPage() {
     draftProperties,
     recentPropertiesDb,
     recentActivityDb,
+    recentlyUpdatedPropertiesDb,
+    tasksDueToday,
+    newLeadsToday,
     // --- revenue aggregates, all summed by the database ---
     wonAggregate,
     openPipelineAggregate,
@@ -86,6 +89,23 @@ export default async function DashboardPage() {
       orderBy: { createdAt: "desc" },
       include: { user: { select: { name: true } } },
     }),
+    // "Recently updated" is deliberately separate from "recently added"
+    // above (same table, different orderBy) — a property that's been
+    // live for months but just had its price changed belongs here, not
+    // buried in a createdAt-sorted list where it'd never surface again.
+    prisma.property.findMany({
+      take: 5,
+      orderBy: { updatedAt: "desc" },
+      select: { id: true, title: true, status: true, price: true, updatedAt: true, slug: true },
+    }),
+    // "Due today" reads as "needs attention now" to a non-technical
+    // admin — that's overdue (dueDate already passed) OR due by the end
+    // of today, and not already DONE. Everything else can wait for the
+    // full Tasks page.
+    prisma.leadTask.count({
+      where: { status: { not: "DONE" }, dueDate: { lte: new Date(todayStart.getTime() + 86400000) } },
+    }),
+    prisma.lead.count({ where: { createdAt: { gte: todayStart } } }),
     // Revenue earned, deal value closed and average deal size — one pass.
     prisma.lead.aggregate({
       where: { stage: "WON" },
@@ -170,6 +190,8 @@ export default async function DashboardPage() {
     views,
     publishedProperties,
     draftProperties,
+    tasksDueToday,
+    newLeadsToday,
   };
 
   const recentEnquiries = recentEnquiriesDb.map((enq) => ({
@@ -203,6 +225,15 @@ export default async function DashboardPage() {
     createdAt: a.createdAt.toISOString(),
   }));
 
+  const recentlyUpdatedProperties = recentlyUpdatedPropertiesDb.map((p) => ({
+    id: p.id,
+    title: p.title,
+    status: p.status,
+    price: p.price,
+    slug: p.slug,
+    updatedAt: p.updatedAt.toISOString(),
+  }));
+
   return (
     <DashboardClient
       stats={stats}
@@ -210,6 +241,7 @@ export default async function DashboardPage() {
       monthlyRevenue={monthlyRevenue}
       recentEnquiries={recentEnquiries}
       recentProperties={recentProperties}
+      recentlyUpdatedProperties={recentlyUpdatedProperties}
       recentActivity={recentActivity}
     />
   );

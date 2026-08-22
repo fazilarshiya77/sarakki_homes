@@ -38,7 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-crm-bg text-crm-text font-body">
+    <div className="flex h-screen w-screen overflow-hidden bg-crm-bg text-crm-text font-crm-body">
       {/* Collapsible Sidebar */}
       <Sidebar />
 
@@ -47,11 +47,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Top Header Bar */}
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-crm-border px-8 bg-crm-card">
           <div className="flex items-center gap-2.5">
-            <span className="text-[11px] text-crm-text-muted tracking-[0.1em] uppercase font-medium">
+            <span className="text-xs text-crm-text-muted tracking-[0.1em] uppercase font-medium">
               CRM
             </span>
-            <span className="text-[11px] text-crm-text-muted/50">/</span>
-            <span className="text-[13px] font-semibold text-crm-text tracking-wide">
+            <span className="text-xs text-crm-text-muted/50">/</span>
+            <span className="text-sm font-semibold text-crm-text tracking-wide">
               {pageTitleFor(pathname)}
             </span>
           </div>

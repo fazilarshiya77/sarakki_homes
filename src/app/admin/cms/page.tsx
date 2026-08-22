@@ -70,7 +70,7 @@ export default function CmsPage() {
 
   if (loading) {
     return (
-      <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary text-xs font-semibold">
+      <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary crm-body-text font-semibold">
         <Loader2 size={24} className="animate-spin text-crm-gold-bright" />
         <span>Loading website content...</span>
       </div>
@@ -82,17 +82,17 @@ export default function CmsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold tracking-wide text-crm-text">
+          <h1 className="crm-page-title tracking-wide text-crm-text">
             Website Content
           </h1>
-          <p className="text-xs text-crm-text-secondary mt-0.5">
+          <p className="crm-body-text text-crm-text-secondary mt-0.5">
             Edit the homepage headline and about copy without touching code. For company info,
             WhatsApp number, or social links, use Settings instead.
           </p>
         </div>
 
         {success && (
-          <span className="text-xs font-semibold text-emerald-400 border border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5 rounded-sm animate-pulse">
+          <span className="text-sm font-semibold text-emerald-400 border border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5 rounded-sm animate-pulse">
             Website updated successfully!
           </span>
         )}
@@ -101,29 +101,29 @@ export default function CmsPage() {
       <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
         {/* Hero Section */}
         <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-6 backdrop-blur-md space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-crm-gold flex items-center gap-2">
+          <h3 className="crm-section-heading uppercase tracking-wider text-crm-gold flex items-center gap-2">
             <Layout size={14} />
             Hero Section Content
           </h3>
 
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">Hero Headline</label>
+              <label className="crm-label uppercase tracking-wider text-crm-text-secondary">Hero Headline</label>
               <input
                 type="text"
                 value={heroTitle}
                 onChange={(e) => setHeroTitle(e.target.value)}
-                className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
+                className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text outline-none focus:border-crm-gold-bright/40"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">Hero Description Subtext</label>
+              <label className="crm-label uppercase tracking-wider text-crm-text-secondary">Hero Description Subtext</label>
               <textarea
                 rows={4}
                 value={heroDescription}
                 onChange={(e) => setHeroDescription(e.target.value)}
-                className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40 resize-none"
+                className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text outline-none focus:border-crm-gold-bright/40 resize-none"
               />
             </div>
           </div>
@@ -131,28 +131,28 @@ export default function CmsPage() {
 
         {/* About Section */}
         <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-6 backdrop-blur-md space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-crm-gold flex items-center gap-2">
+          <h3 className="crm-section-heading uppercase tracking-wider text-crm-gold flex items-center gap-2">
             About Section Content
           </h3>
 
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">About Headline</label>
+              <label className="crm-label uppercase tracking-wider text-crm-text-secondary">About Headline</label>
               <input
                 type="text"
                 value={aboutHeadline}
                 onChange={(e) => setAboutHeadline(e.target.value)}
-                className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
+                className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text outline-none focus:border-crm-gold-bright/40"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">About Description Paragraph</label>
+              <label className="crm-label uppercase tracking-wider text-crm-text-secondary">About Description Paragraph</label>
               <textarea
                 rows={4}
                 value={aboutDescription}
                 onChange={(e) => setAboutDescription(e.target.value)}
-                className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40 resize-none"
+                className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text outline-none focus:border-crm-gold-bright/40 resize-none"
               />
             </div>
           </div>
@@ -161,7 +161,7 @@ export default function CmsPage() {
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-crm-gold to-crm-gold-bright px-6 py-3 text-xs font-semibold uppercase tracking-wider text-black transition-all duration-300 hover:brightness-110 disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-crm-gold to-crm-gold-bright px-6 py-3 text-sm font-semibold uppercase tracking-wider text-black transition-all duration-300 hover:brightness-110 disabled:opacity-50"
         >
           {saving ? (
             <Loader2 size={14} className="animate-spin" />

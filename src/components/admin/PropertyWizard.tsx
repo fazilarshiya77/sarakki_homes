@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,13 +13,28 @@ import {
   Building,
   DollarSign,
   Gavel,
-  Sliders,
   Image as ImageIcon,
-  Search,
   CheckCircle2,
   Check,
+  Save,
+  Eye,
+  ChevronDown,
+  X,
 } from "lucide-react";
 import { PropertyImageManager, type ManagedImage } from "@/components/admin/PropertyImageManager";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+
+/** Reads the leading number out of the Price field — which now also
+ *  accepts letters (e.g. "85 Lakh", "2.5 Crore") alongside a bare
+ *  number, per the input-restriction requirement — the same way
+ *  `parseFloat` (and the properties API route) already do: it stops at
+ *  the first non-numeric character rather than rejecting the whole
+ *  string like `Number()` would. Storage/display convention is
+ *  unchanged; this only makes reading the value tolerate trailing text. */
+function parsePriceLakh(raw: string): number {
+  const n = parseFloat(raw);
+  return Number.isFinite(n) ? n : 0;
+}
 
 /** Turns the single "Price (in Lakhs)" number into the display string a
  *  property card actually shows -- e.g. 85 -> "₹85 Lakh", 240 -> "₹2.40 Cr".
@@ -42,7 +57,15 @@ const propertySchema = z.object({
     .min(1, "Property name is required.")
     .refine((v) => v.trim().length >= 3, "Property name must be at least 3 characters."),
   categoryId: z.string().min(1, "Category is required."),
-  builderId: z.string().min(1, "Please select a builder"),
+  // NOTE: unlike Location/Address/Description below, Builder genuinely
+  // can't be relaxed to optional — Property.builderId is a required,
+  // non-nullable foreign key in the database (not just a plain string
+  // column), so submitting an empty value here doesn't save a blank
+  // property, it fails the write outright with a foreign-key error.
+  // Marked required (with a "*") in the UI to match, which is also the
+  // actual fix for a real bug: the field was already enforced as
+  // required here but had no asterisk, contradicting itself.
+  builderId: z.string().min(1, "Please select a builder."),
   type: z.string().min(1, "Property type is required."),
   // Was two separate fields (a free-text display string + this numeric
   // value) that both had to be filled in sync by hand -- collapsed into
@@ -50,11 +73,28 @@ const propertySchema = z.object({
   // string (e.g. "₹ 85 Lakh" / "₹ 2.40 Cr") is now derived automatically
   // from this number in onSubmit below, so there's nothing left to type
   // twice and nothing that can drift out of sync between the two.
-  priceValueLakh: z.string().min(1, "Price is required."),
-  location: z.string().min(1, "Location is required (e.g. Whitefield, Bengaluru)"),
-  address: z.string().min(1, "Address is required"),
-  mapQuery: z.string().min(1, "Google Maps Location is required."),
-  description: z.string().min(10, "Description must be at least 10 characters"),
+  priceValueLakh: z
+    .string()
+    .min(1, "Price is required.")
+    // Numbers, letters, spaces and a decimal point only (e.g. "85",
+    // "85 Lakh", "2.5 Crore") — no symbols/emoji. Enforced both here
+    // (on Continue/Publish) and live while typing, via the input's own
+    // onChange filter below, which strips a disallowed character the
+    // instant it's typed rather than only complaining after the fact.
+    .refine(
+      (v) => /^[a-zA-Z0-9.\s]*$/.test(v),
+      "Only numbers, letters and a decimal point are allowed in Price — no symbols or special characters."
+    ),
+  // Location, Address, Google Maps Location and Description all show no
+  // asterisk in the UI, so — same rule as Builder above — they're
+  // optional and must never block Continue/Publish. Property.location/
+  // address/mapQuery/description are non-nullable DB columns, but an
+  // empty string satisfies that just fine; nothing downstream requires
+  // them to be non-empty.
+  location: z.string().optional(),
+  address: z.string().optional(),
+  mapQuery: z.string().optional(),
+  description: z.string().optional(),
 
   // Auction Info (optional)
   auctionInfo: z.object({
@@ -66,11 +106,12 @@ const propertySchema = z.object({
     legalStatus: z.string().optional(),
   }).optional(),
 
-  // Details
-  beds: z.string(),
-  baths: z.string(),
-  area: z.string().min(1, "Area display value is required (e.g. 3,200 sq.ft)"),
-  areaSqft: z.string(),
+  // Details — none of these carry an asterisk in the UI, so none of
+  // them are required.
+  beds: z.string().optional(),
+  baths: z.string().optional(),
+  area: z.string().optional(),
+  areaSqft: z.string().optional(),
 
   // Media is managed outside this schema by PropertyImageManager (an
   // ordered array, not a single registered input) — see `galleryImages`.
@@ -89,19 +130,47 @@ interface PropertyWizardProps {
   initialData?: any;
 }
 
-const STEPS = [
-  { label: "Basic Info", icon: Building },
-  { label: "Auction Info", icon: Gavel },
-  { label: "Property Details", icon: Sliders },
-  { label: "Media & Attachments", icon: ImageIcon },
-  { label: "SEO Config", icon: Search },
-  { label: "Review & Publish", icon: CheckCircle2 },
-];
+// Was 6 always-shown steps (Basic Info / Auction Info / Property Details
+// / Media / SEO Config / Review) — measured as genuinely tiring to click
+// through, especially since two of those steps were skip-or-fill-nothing
+// most of the time (Auction Info for the ~80% of listings that aren't
+// bank auctions, SEO Config for admins who never touch meta tags).
+// Collapsed to 3 steps for a typical listing, 4 for a bank auction:
+//   1. Property Details — merges the old Basic Info + Property Details
+//      (one scroll instead of two clicks; nothing here was ever
+//      logically two separate steps, just two form pages).
+//   2. Auction Details — `conditional: true`, filtered out of the
+//      visible list entirely (not just grayed out) unless Property Type
+//      is "Bank Auction", so non-auction listings never see it at all.
+//   3. Photos.
+//   4. Review & Publish — SEO fields moved here as an optional,
+//      collapsed-by-default section rather than their own step, since
+//      they're rarely touched and always have a working default.
+const ALL_STEPS = [
+  { key: "details", label: "Property Details", icon: Building },
+  { key: "auction", label: "Auction Details", icon: Gavel, conditional: true },
+  { key: "photos", label: "Photos", icon: ImageIcon },
+  { key: "review", label: "Review & Publish", icon: CheckCircle2 },
+] as const;
+
+type StepKey = (typeof ALL_STEPS)[number]["key"];
 
 export function PropertyWizard({ categories, builders, initialData }: PropertyWizardProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  // SEO fields (title/description/slug overrides) folded into the
+  // Review step as a collapsed-by-default section instead of their own
+  // wizard step — every one of them already has a working default
+  // (property name, description, auto-generated slug), so most admins
+  // never need to open this at all.
+  const [seoOpen, setSeoOpen] = useState(false);
+  const [exitConfirmOpen, setExitConfirmOpen] = useState(false);
+  // Which of the two submit buttons was actually clicked ("Save as
+  // Draft" vs "Publish to Website") — a ref rather than state because
+  // it needs to be readable synchronously inside onSubmit the moment
+  // react-hook-form's validation resolves, with no re-render in between.
+  const submitIntentRef = useRef<"draft" | "publish">("publish");
   const [errorMessage, setErrorMessage] = useState("");
 
   // Gallery lives outside react-hook-form: it's an ordered array built by
@@ -165,17 +234,27 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
   const propertyType = watch("type");
   const formValues = watch();
 
-  const STEP_0_FIELDS = [
-    "title",
-    "type",
-    "categoryId",
-    "priceValueLakh",
-    "builderId",
-    "location",
-    "address",
-    "mapQuery",
-    "description",
-  ] as const;
+  // The visible step list — "auction" only appears when it's actually
+  // relevant. Recomputed whenever Property Type changes, which is also
+  // why currentStep gets clamped below (picking a different Property
+  // Type mid-flow can shrink this list out from under the current index).
+  const steps = useMemo(
+    () => ALL_STEPS.filter((s) => !("conditional" in s) || !s.conditional || propertyType === "Bank Auction"),
+    [propertyType]
+  );
+
+  useEffect(() => {
+    setCurrentStep((prev) => Math.min(prev, steps.length - 1));
+  }, [steps.length]);
+
+  const currentStepKey: StepKey = steps[currentStep]?.key ?? "details";
+
+  // Only the fields actually marked required (a red "*" in the UI —
+  // Property Name, Property Type, Category, Price) block Continue.
+  // Everything else on the merged "Property Details" step (Builder,
+  // Location, Address, Google Maps Location, Description, Bedrooms/
+  // Bathrooms/Area) is optional and must never hold up navigation.
+  const DETAILS_STEP_FIELDS = ["title", "type", "categoryId", "builderId", "priceValueLakh"] as const;
 
   const handleNext = async () => {
     // Basic step validation before moving forward. This used to do its
@@ -185,22 +264,22 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
     // (via the Field component's `error` prop) never lit up because
     // nothing had actually run react-hook-form's own validation yet.
     // `trigger()` runs the real zodResolver validation for exactly the
-    // step-0 fields and populates `formState.errors` for each one that
+    // relevant fields and populates `formState.errors` for each one that
     // fails, so the same inline messages the final submit already shows
     // (Property Name, Property Type, Category, Price, etc.) now appear
     // immediately when Next is clicked too -- the field itself is
     // highlighted, not just a top-of-page banner. onInvalid (wired to
     // handleSubmit below) remains the backstop for the Review & Publish
     // step, in case a step gets reached some other way.
-    if (currentStep === 0) {
-      const isValid = await trigger(STEP_0_FIELDS);
+    if (currentStepKey === "details") {
+      const isValid = await trigger(DETAILS_STEP_FIELDS);
       if (!isValid) {
         setErrorMessage("Please fix the highlighted fields before continuing.");
         return;
       }
     }
     setErrorMessage("");
-    setCurrentStep((prev) => Math.min(prev + 1, STEPS.length - 1));
+    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
   };
 
   // Every currently-required field (see propertySchema) lives on step 0 —
@@ -248,16 +327,15 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
       // PropertyImage.order, and the public site reads images[0] as the
       // cover shot.
       //
-      // status: the create route (POST /api/admin/properties) defaults a
-      // property to UNPUBLISHED whenever the request omits `status` --
-      // and this form never registered a status field, so every listing
-      // created here silently saved as a hidden draft no matter what,
-      // even though the button is literally labelled "Publish Property".
-      // Only set it on create: the PUT route already treats a missing
-      // `status` as "leave it alone" (Prisma skips undefined fields), so
-      // editing an existing property must NOT force it back to
-      // PUBLISHED here -- that would undo a deliberate unpublish done
-      // from the properties list.
+      // Explicit publishing workflow: the two footer buttons on the
+      // final step ("Save as Draft" / "Publish to Website") each set
+      // submitIntentRef before the form submits, so status here always
+      // reflects what the admin actually clicked — never a silent
+      // default. This applies on both create AND edit now: an edit
+      // previously left status untouched (so the buttons had no effect
+      // on an existing listing), which is exactly the ambiguity this
+      // wizard rework is meant to remove.
+      const status = submitIntentRef.current === "draft" ? "UNPUBLISHED" : "PUBLISHED";
       const payload = {
         ...data,
         // The DB still stores both a numeric priceValueLakh (used for
@@ -265,9 +343,9 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
         // display string (what a property card actually shows) -- the
         // form only collects the number now, so the string is generated
         // here rather than typed by hand.
-        price: formatPriceDisplay(Number(data.priceValueLakh)),
+        price: formatPriceDisplay(parsePriceLakh(data.priceValueLakh)),
         images: galleryImages,
-        ...(initialData ? {} : { status: "PUBLISHED" }),
+        status,
       };
 
       const res = await fetch(endpoint, {
@@ -282,9 +360,11 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
         // shows it as a dismissing toast (see sh_crm_publish_toast there).
         sessionStorage.setItem(
           "sh_crm_publish_toast",
-          initialData
-            ? `"${data.title}" was updated successfully.`
-            : `"${data.title}" was published successfully.`
+          status === "UNPUBLISHED"
+            ? `"${data.title}" was saved as a draft. It won't appear on the website until you publish it.`
+            : initialData
+              ? `"${data.title}" was updated and published successfully.`
+              : `"${data.title}" was published successfully.`
         );
         router.push("/admin/properties");
         router.refresh();
@@ -309,7 +389,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
         <div className="relative pl-1">
           <div className="absolute left-[15px] top-2 bottom-2 w-px bg-crm-border" />
           <div className="flex flex-col gap-1">
-            {STEPS.map((step, idx) => {
+            {steps.map((step, idx) => {
               const isCompleted = idx < currentStep;
               const isActive = idx === currentStep;
 
@@ -327,7 +407,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                 >
                   <div
                     className={cn(
-                      "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-[11px] font-bold transition-all duration-300",
+                      "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold transition-all duration-300",
                       isActive
                         ? "border-crm-gold bg-crm-gold text-crm-espresso shadow-[0_0_0_4px_rgba(196,166,107,0.16)]"
                         : isCompleted
@@ -340,7 +420,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                   <div className="flex flex-col min-w-0">
                     <span
                       className={cn(
-                        "text-[11px] font-bold uppercase tracking-[0.08em] transition-colors duration-200",
+                        "text-[13px] font-bold uppercase tracking-[0.06em] transition-colors duration-200",
                         isActive
                           ? "text-crm-text"
                           : isCompleted
@@ -360,24 +440,43 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
 
       {/* Form Steps Panel (Right Panel) */}
       <div className="lg:col-span-3 crm-card p-8">
+        <div className="flex items-center justify-end -mt-2 mb-4">
+          <button
+            type="button"
+            onClick={() => setExitConfirmOpen(true)}
+            className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-crm-text-muted hover:text-crm-text transition-colors"
+          >
+            <X size={13} />
+            <span>Exit</span>
+          </button>
+        </div>
+
         {errorMessage && (
-          <div className="mb-6 rounded-sm border border-red-300 bg-red-50 px-4 py-3 text-xs text-red-700">
+          <div className="mb-6 rounded-sm border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
             {errorMessage}
           </div>
         )}
 
         <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-8">
-          <AnimatePresence mode="wait">
-            {/* Step 1: Basic Information */}
-            {currentStep === 0 && (
-              <motion.div
-                key="step-0"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="space-y-8"
-              >
-                <StepHeading title="Basic Information" description="Core listing parameters for buyers." />
+          {/* All four steps below are ALWAYS mounted — only CSS
+              visibility (the `hidden` class) switches between them.
+              This is the actual fix for the wizard "resetting" when
+              navigating back and forth: react-hook-form's registered
+              values live in its own internal store keyed by field name,
+              not in the DOM, so they never depended on a step's inputs
+              being mounted — but the step content used to be
+              conditionally rendered with `{condition && <motion.div>}`,
+              which unmounts/remounts the whole subtree (including
+              PropertyImageManager's own internal drag/upload state,
+              and briefly drops focus/selection). Always-mounted +
+              hidden avoids that unmount entirely, at the cost of the
+              old slide-in step transition animation. */}
+            {/* Step: Property Details — merges what used to be two
+                separate steps (Basic Info + Property Details). Same
+                fields, same validation, just one scroll instead of an
+                extra click-through. */}
+            <div className={cn("space-y-8", currentStepKey !== "details" && "hidden")}>
+                <StepHeading title="Property Details" description="Core listing parameters for buyers." />
 
                 <FieldGroup title="Property Basics">
                   <Field label="Property Name" required error={errors.title}>
@@ -409,7 +508,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     </select>
                   </Field>
 
-                  <Field label="Builder" error={errors.builderId}>
+                  <Field label="Builder" required error={errors.builderId}>
                     <select {...register("builderId")} className="crm-select">
                       <option value="">Select Builder</option>
                       {builders.map((b) => (
@@ -425,10 +524,21 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                       single required value now, with the display string
                       ("₹ 85 Lakh" / "₹ 2.40 Cr") generated automatically
                       from it in onSubmit below. */}
-                  <Field label="Price (in Lakhs)" required error={errors.priceValueLakh}>
+                  <Field label="Price" required error={errors.priceValueLakh}>
                     <input
-                      type="number"
-                      {...register("priceValueLakh")}
+                      type="text"
+                      inputMode="decimal"
+                      {...register("priceValueLakh", {
+                        // Belt-and-suspenders with the zod .refine above:
+                        // strip any disallowed character the moment it's
+                        // typed (including a paste), so an invalid one
+                        // never actually lands in the field rather than
+                        // being typed and then flagged after the fact.
+                        onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                          const filtered = e.target.value.replace(/[^a-zA-Z0-9.\s]/g, "");
+                          if (filtered !== e.target.value) e.target.value = filtered;
+                        },
+                      })}
                       className="crm-input"
                       placeholder="e.g. 85 for ₹85 Lakh, 240 for ₹2.4 Cr"
                     />
@@ -474,26 +584,47 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     />
                   </Field>
                 </FieldGroup>
-              </motion.div>
-            )}
 
-            {/* Step 2: Auction Information */}
-            {currentStep === 1 && (
-              <motion.div
-                key="step-1"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="space-y-8"
-              >
-                <StepHeading title="Auction Information" description='Required fields only if the type is "Bank Auction".' />
+                <FieldGroup title="Measurements">
+                  <Field label="Bedrooms">
+                    <input type="number" {...register("beds")} className="crm-input" />
+                  </Field>
 
-                {propertyType !== "Bank Auction" ? (
-                  <div className="py-10 text-center text-xs text-crm-text-muted border border-dashed border-crm-border rounded-sm bg-crm-bg/60">
-                    This property is not categorized as a Bank Auction. You can skip this step.
-                  </div>
-                ) : (
-                  <FieldGroup title="Auction Details">
+                  <Field label="Bathrooms">
+                    <input type="number" {...register("baths")} className="crm-input" />
+                  </Field>
+
+                  <Field label="Area Display Text" error={errors.area}>
+                    <input
+                      type="text"
+                      {...register("area")}
+                      className="crm-input"
+                      placeholder="e.g. 3,200 sq.ft"
+                    />
+                  </Field>
+
+                  <Field label="Area in Sqft (Value)">
+                    <input
+                      type="number"
+                      {...register("areaSqft")}
+                      className="crm-input"
+                      placeholder="e.g. 3200"
+                    />
+                  </Field>
+                </FieldGroup>
+            </div>
+
+            {/* Step: Auction Details — only ever shown when Property
+                Type is "Bank Auction" (it's also filtered out of the
+                left-hand step list entirely in that case, via `steps`
+                above), so a non-auction listing never sees it. Still
+                always mounted per the note above — harmless, since
+                auctionInfo is optional and only persisted when
+                type === "Bank Auction" (see onSubmit / the API route). */}
+            <div className={cn("space-y-8", currentStepKey !== "auction" && "hidden")}>
+                <StepHeading title="Auction Details" description="Bank auction specifics buyers will ask about." />
+
+                <FieldGroup title="Auction Details">
                     <Field label="Bank Name / Notice Info">
                       <input
                         type="text"
@@ -536,8 +667,8 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
 
                     <div className="md:col-span-2 flex items-center justify-between rounded-sm border border-crm-border bg-crm-bg/60 p-4">
                       <div className="flex flex-col">
-                        <span className="text-xs font-semibold text-crm-text">Physical Possession</span>
-                        <span className="text-[10px] text-crm-text-muted mt-0.5">Has the bank taken active physical possession?</span>
+                        <span className="text-sm font-semibold text-crm-text">Physical Possession</span>
+                        <span className="text-[13px] text-crm-text-muted mt-0.5">Has the bank taken active physical possession?</span>
                       </div>
                       <input
                         type="checkbox"
@@ -546,132 +677,35 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                       />
                     </div>
                   </FieldGroup>
-                )}
-              </motion.div>
-            )}
+            </div>
 
-            {/* Step 3: Property Details */}
-            {currentStep === 2 && (
-              <motion.div
-                key="step-2"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="space-y-8"
-              >
-                <StepHeading title="Property Details" description="Specific metrics and structural definitions." />
-
-                <FieldGroup title="Measurements">
-                  <Field label="Bedrooms">
-                    <input type="number" {...register("beds")} className="crm-input" />
-                  </Field>
-
-                  <Field label="Bathrooms">
-                    <input type="number" {...register("baths")} className="crm-input" />
-                  </Field>
-
-                  <Field label="Area Display Text" error={errors.area}>
-                    <input
-                      type="text"
-                      {...register("area")}
-                      className="crm-input"
-                      placeholder="e.g. 3,200 sq.ft"
-                    />
-                  </Field>
-
-                  <Field label="Area in Sqft (Value)">
-                    <input
-                      type="number"
-                      {...register("areaSqft")}
-                      className="crm-input"
-                      placeholder="e.g. 3200"
-                    />
-                  </Field>
-                </FieldGroup>
-              </motion.div>
-            )}
-
-            {/* Step 4: Media & Images */}
-            {currentStep === 3 && (
-              <motion.div
-                key="step-3"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="space-y-8"
-              >
-                <StepHeading title="Media & Attachments" description="Upload photographs, or paste image URLs. The first image is used as the cover." />
+            {/* Step: Photos */}
+            <div className={cn("space-y-8", currentStepKey !== "photos" && "hidden")}>
+                <StepHeading title="Photos" description="Upload photographs, or paste image URLs. The first image is used as the cover." />
 
                 <FieldGroup title="Property Images">
                   <PropertyImageManager images={galleryImages} onChange={setGalleryImages} />
                 </FieldGroup>
-              </motion.div>
-            )}
+            </div>
 
-            {/* Step 5: SEO Configuration */}
-            {currentStep === 4 && (
-              <motion.div
-                key="step-4"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="space-y-8"
-              >
-                <StepHeading title="SEO Config" description="Define metadata parameters for search indexing." />
-
-                <FieldGroup title="Search Metadata">
-                  <Field label="SEO Title Override" span2>
-                    <input
-                      type="text"
-                      {...register("seoTitle")}
-                      className="crm-input"
-                      placeholder="Keep empty to use Property Name"
-                    />
-                  </Field>
-
-                  <Field label="SEO Meta Description" span2>
-                    <textarea
-                      rows={3}
-                      {...register("seoDescription")}
-                      className="crm-textarea resize-none"
-                      placeholder="Summarize listing in 150-160 characters..."
-                    />
-                  </Field>
-
-                  <Field label="Slug (URL endpoint)" span2>
-                    <input
-                      type="text"
-                      {...register("slug")}
-                      className="crm-input"
-                      placeholder="e.g. sarjapur-emerald-villa"
-                    />
-                  </Field>
-                </FieldGroup>
-              </motion.div>
-            )}
-
-            {/* Step 6: Review & Submit */}
-            {currentStep === 5 && (
-              <motion.div
-                key="step-5"
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="space-y-8"
-              >
-                <StepHeading title="Review & Publish" description="Please review listing details before saving to local database." />
+            {/* Step: Review & Publish */}
+            <div className={cn("space-y-8", currentStepKey !== "review" && "hidden")}>
+                <StepHeading
+                  title="Review & Publish"
+                  description='Check everything below, then choose "Save as Draft" to keep working on it privately, or "Publish to Website" to make it live immediately.'
+                />
 
                 <div className="rounded-sm border border-crm-border bg-crm-bg/60 p-7">
                   <div className="flex flex-wrap items-start justify-between gap-6">
                     <div>
                       <span className="crm-label">Property Name</span>
-                      <p className="mt-1.5 font-body text-xl text-crm-text">{formValues.title || "N/A"}</p>
-                      <p className="mt-1 text-xs text-crm-text-secondary">{formValues.location || "N/A"}</p>
+                      <p className="mt-1.5 font-crm-body text-xl text-crm-text">{formValues.title || "N/A"}</p>
+                      <p className="mt-1 text-sm text-crm-text-secondary">{formValues.location || "N/A"}</p>
                     </div>
                     <div className="text-right">
                       <span className="crm-label">Price</span>
-                      <p className="mt-1.5 font-body text-2xl font-semibold text-crm-gold">
-                        {formValues.priceValueLakh ? formatPriceDisplay(Number(formValues.priceValueLakh)) : "N/A"}
+                      <p className="mt-1.5 font-crm-display text-2xl font-semibold text-crm-gold">
+                        {formValues.priceValueLakh ? formatPriceDisplay(parsePriceLakh(formValues.priceValueLakh)) : "N/A"}
                       </p>
                     </div>
                   </div>
@@ -683,9 +717,60 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     <ReviewStat label="Area" value={formValues.area || "N/A"} />
                   </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+
+                {/* Optional and collapsed by default — see seoOpen above. */}
+                <div className="rounded-sm border border-crm-border">
+                  <button
+                    type="button"
+                    onClick={() => setSeoOpen((v) => !v)}
+                    className="flex w-full items-center justify-between px-5 py-4 text-left"
+                  >
+                    <div>
+                      <span className="text-sm font-semibold text-crm-text">Advanced: Search &amp; URL Settings</span>
+                      <p className="text-[13px] text-crm-text-muted mt-0.5">
+                        Optional — leave blank to use sensible defaults automatically.
+                      </p>
+                    </div>
+                    <ChevronDown
+                      size={16}
+                      className={cn("text-crm-text-muted transition-transform duration-200", seoOpen && "rotate-180")}
+                    />
+                  </button>
+
+                  {seoOpen && (
+                    <div className="border-t border-crm-border p-5">
+                      <FieldGroup title="Search Metadata">
+                        <Field label="SEO Title Override" span2>
+                          <input
+                            type="text"
+                            {...register("seoTitle")}
+                            className="crm-input"
+                            placeholder="Keep empty to use Property Name"
+                          />
+                        </Field>
+
+                        <Field label="SEO Meta Description" span2>
+                          <textarea
+                            rows={3}
+                            {...register("seoDescription")}
+                            className="crm-textarea resize-none"
+                            placeholder="Summarize listing in 150-160 characters..."
+                          />
+                        </Field>
+
+                        <Field label="Slug (URL endpoint)" span2>
+                          <input
+                            type="text"
+                            {...register("slug")}
+                            className="crm-input"
+                            placeholder="e.g. sarjapur-emerald-villa"
+                          />
+                        </Field>
+                      </FieldGroup>
+                    </div>
+                  )}
+                </div>
+            </div>
 
           {/* Form Actions Buttons */}
           <div className="flex items-center justify-between border-t border-crm-border pt-6 mt-8">
@@ -699,23 +784,75 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
               <span>Back</span>
             </button>
 
-            {currentStep < STEPS.length - 1 ? (
+            {currentStep < steps.length - 1 ? (
               <button type="button" onClick={handleNext} className="crm-btn-primary">
                 <span>Continue</span>
                 <ChevronRight size={14} />
               </button>
             ) : (
-              <button type="submit" disabled={loading} className="crm-btn-gold">
-                {loading ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <span>Publish Property</span>
+              <div className="flex items-center gap-3">
+                {/* Preview only makes sense once a listing has a real
+                    public URL — i.e. it already exists (edit mode). In
+                    create mode there's nothing to preview yet, so the
+                    button is simply not shown rather than linking to a
+                    404 or forcing an unwanted save first. */}
+                {initialData?.slug && (
+                  <a
+                    href={`/properties/${initialData.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="crm-btn-secondary"
+                  >
+                    <Eye size={14} />
+                    <span>Preview</span>
+                  </a>
                 )}
-              </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  onClick={() => {
+                    submitIntentRef.current = "draft";
+                  }}
+                  className="crm-btn-secondary"
+                >
+                  {loading && submitIntentRef.current === "draft" ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <>
+                      <Save size={14} />
+                      <span>Save as Draft</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  onClick={() => {
+                    submitIntentRef.current = "publish";
+                  }}
+                  className="crm-btn-gold"
+                >
+                  {loading && submitIntentRef.current === "publish" ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <span>Publish to Website</span>
+                  )}
+                </button>
+              </div>
             )}
           </div>
         </form>
       </div>
+
+      <ConfirmDialog
+        open={exitConfirmOpen}
+        title="Exit without publishing?"
+        message="Everything you've entered on this listing will be discarded. This can't be undone."
+        confirmLabel="Exit"
+        tone="danger"
+        onConfirm={() => router.push("/admin/properties")}
+        onCancel={() => setExitConfirmOpen(false)}
+      />
     </div>
   );
 }
@@ -723,8 +860,8 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
 function StepHeading({ title, description }: { title: string; description: string }) {
   return (
     <div>
-      <h3 className="font-body text-xl font-semibold text-crm-text">{title}</h3>
-      <p className="text-xs text-crm-text-secondary mt-1">{description}</p>
+      <h3 className="crm-section-heading">{title}</h3>
+      <p className="text-sm text-crm-text-secondary mt-1">{description}</p>
     </div>
   );
 }
@@ -732,7 +869,7 @@ function StepHeading({ title, description }: { title: string; description: strin
 function FieldGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="space-y-4">
-      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-crm-gold border-b border-crm-border pb-2.5">
+      <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-crm-gold border-b border-crm-border pb-2.5">
         {title}
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">{children}</div>
@@ -764,7 +901,7 @@ function Field({
         )}
       </label>
       {children}
-      {error && <span className="block text-[10px] text-red-600">{String(error.message)}</span>}
+      {error && <span className="block text-[13px] text-red-600">{String(error.message)}</span>}
     </div>
   );
 }

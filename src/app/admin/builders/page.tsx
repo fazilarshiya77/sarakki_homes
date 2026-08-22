@@ -57,10 +57,10 @@ export default function BuildersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-bold tracking-wide text-crm-text">
+        <h1 className="crm-page-title tracking-wide">
           Builders Registry
         </h1>
-        <p className="text-xs text-crm-text-secondary mt-0.5">
+        <p className="crm-body-text mt-0.5">
           Manage builders and developers associated with Sarakki Homes listings.
         </p>
       </div>
@@ -69,18 +69,18 @@ export default function BuildersPage() {
         {/* Builders list */}
         <div className="lg:col-span-2 border border-crm-border/20 bg-crm-card/10 rounded-sm overflow-hidden backdrop-blur-sm">
           {loading ? (
-            <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary text-xs font-semibold">
+            <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary crm-body-text font-semibold">
               <Loader2 size={24} className="animate-spin text-crm-gold-bright" />
               <span>Fetching builders...</span>
             </div>
           ) : builders.length === 0 ? (
-            <div className="py-24 text-center text-xs text-crm-text-secondary">
+            <div className="py-24 text-center crm-body-text">
               No builders registered in the database.
             </div>
           ) : (
             <div className="divide-y divide-border/10">
               {builders.map((b) => (
-                <div key={b.id} className="flex items-center justify-between p-4 text-xs">
+                <div key={b.id} className="flex items-center justify-between p-4 crm-table-text">
                   <span className="font-semibold text-crm-text flex items-center gap-2">
                     <Hammer size={12} className="text-crm-gold" />
                     {b.name}
@@ -97,20 +97,20 @@ export default function BuildersPage() {
         {/* Add Builder form */}
         <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-6 backdrop-blur-md space-y-4">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-crm-text-secondary">Add Builder</span>
-            <p className="text-[10px] text-crm-text-secondary mt-0.5">Register a new real estate developer.</p>
+            <span className="crm-section-heading uppercase tracking-wider">Add Builder</span>
+            <p className="text-xs text-crm-text-secondary mt-0.5">Register a new real estate developer.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">Developer Name</label>
+              <label className="crm-label">Developer Name</label>
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Prestige Group"
-                className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
+                className="crm-input"
               />
             </div>
 

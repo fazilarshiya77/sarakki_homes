@@ -18,6 +18,10 @@ import {
   Wallet,
   Target,
   Trophy,
+  MessageSquarePlus,
+  UserPlus,
+  ClipboardList,
+  FileEdit,
 } from "lucide-react";
 import { formatMoneyLakh } from "@/lib/crm";
 import { cn } from "@/lib/utils";
@@ -56,6 +60,8 @@ interface DashboardClientProps {
     views: number;
     publishedProperties: number;
     draftProperties: number;
+    tasksDueToday: number;
+    newLeadsToday: number;
   };
   revenue: RevenueSummary;
   monthlyRevenue: MonthlyRevenuePoint[];
@@ -73,6 +79,14 @@ interface DashboardClientProps {
     price: string;
     slug: string;
     createdAt: string;
+  }>;
+  recentlyUpdatedProperties: Array<{
+    id: string;
+    title: string;
+    status: string;
+    price: string;
+    slug: string;
+    updatedAt: string;
   }>;
   recentActivity: Array<{
     id: string;
@@ -98,6 +112,7 @@ export function DashboardClient({
   monthlyRevenue,
   recentEnquiries,
   recentProperties,
+  recentlyUpdatedProperties,
   recentActivity,
 }: DashboardClientProps) {
   // The chart series is real, database-derived data (revenue and deals
@@ -116,7 +131,7 @@ export function DashboardClient({
       {/* Header section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="font-body text-3xl font-semibold tracking-wide text-crm-text">
+          <h1 className="crm-page-title">
             Overview
           </h1>
           <p className="text-sm text-crm-text-secondary mt-1">
@@ -124,10 +139,87 @@ export function DashboardClient({
           </p>
         </div>
 
-        <Link href="/admin/properties/create" className="crm-btn-gold">
-          <Plus size={14} />
-          <span>New Property</span>
-        </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link href="/admin/leads?new=1" className="crm-btn-secondary">
+            <UserPlus size={14} />
+            <span>Add Lead</span>
+          </Link>
+          <Link href="/admin/properties/create" className="crm-btn-gold">
+            <Plus size={14} />
+            <span>Add Property</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* "What needs my attention today?" — the dashboard's whole job,
+          answered in one glance rather than making the admin dig
+          through five separate pages to find out. Each card links
+          straight to the filtered view that resolves it. */}
+      <div className="space-y-3">
+        <h2 className="crm-section-heading !text-base">Needs Your Attention</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            {
+              label: "New Enquiries Today",
+              value: stats.todayEnquiries,
+              href: "/admin/enquiries",
+              icon: MessageSquarePlus,
+              tone: stats.todayEnquiries > 0,
+            },
+            {
+              label: "New Leads Today",
+              value: stats.newLeadsToday,
+              href: "/admin/leads",
+              icon: UserPlus,
+              tone: stats.newLeadsToday > 0,
+            },
+            {
+              label: "Tasks Due Today",
+              value: stats.tasksDueToday,
+              href: "/admin/tasks",
+              icon: ClipboardList,
+              tone: stats.tasksDueToday > 0,
+            },
+            {
+              label: "Draft Properties",
+              value: stats.draftProperties,
+              href: "/admin/properties?status=UNPUBLISHED",
+              icon: FileEdit,
+              tone: false,
+            },
+          ].map((card) => {
+            const Icon = card.icon;
+            return (
+              <Link
+                key={card.label}
+                href={card.href}
+                className={cn(
+                  "flex items-center gap-3.5 rounded-sm border p-4 transition-all duration-200 hover:-translate-y-0.5",
+                  card.tone
+                    ? "border-crm-gold/30 bg-crm-gold/[0.06] hover:border-crm-gold/50"
+                    : "border-crm-border bg-crm-card hover:border-crm-gold/30"
+                )}
+              >
+                <span
+                  className={cn(
+                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                    card.tone ? "bg-crm-gold/20 text-crm-gold" : "bg-crm-bg text-crm-text-muted"
+                  )}
+                >
+                  <Icon size={16} strokeWidth={1.75} />
+                </span>
+                <div className="min-w-0">
+                  <div className="font-crm-display text-xl font-bold text-crm-text leading-none">
+                    {card.value}
+                  </div>
+                  <div className="text-xs font-semibold text-crm-text-secondary mt-1 truncate">
+                    {card.label}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
       {/* KPI Grid */}
@@ -168,7 +260,7 @@ export function DashboardClient({
               className="crm-card p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(36,30,25,0.09)]"
             >
               <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase tracking-wider font-semibold text-crm-text-muted">
+                <span className="text-xs uppercase tracking-wider font-semibold text-crm-text-muted">
                   {card.label}
                 </span>
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-crm-gold/12 text-crm-gold">
@@ -176,9 +268,9 @@ export function DashboardClient({
                 </div>
               </div>
               <div className="mt-4 flex items-baseline gap-2">
-                <span className="font-body text-3xl font-bold tracking-tight text-crm-text">{card.value}</span>
+                <span className="font-crm-display text-3xl font-bold tracking-tight text-crm-text">{card.value}</span>
               </div>
-              <p className="text-[11px] text-crm-text-secondary mt-2 font-medium">
+              <p className="text-xs text-crm-text-secondary mt-2 font-medium">
                 {card.desc}
               </p>
             </motion.div>
@@ -190,7 +282,7 @@ export function DashboardClient({
       <div className="space-y-5">
         <div className="flex items-end justify-between">
           <div>
-            <h2 className="font-body text-2xl font-bold tracking-wide text-crm-text">
+            <h2 className="crm-section-heading">
               Revenue &amp; Deals
             </h2>
             <p className="text-sm text-crm-text-secondary mt-1">
@@ -199,7 +291,7 @@ export function DashboardClient({
           </div>
           <Link
             href="/admin/leads"
-            className="hidden md:flex items-center gap-1 text-[11px] font-semibold text-crm-gold hover:text-crm-gold-bright uppercase tracking-wider transition-colors"
+            className="hidden md:flex items-center gap-1 text-xs font-semibold text-crm-gold hover:text-crm-gold-bright uppercase tracking-wider transition-colors"
           >
             <span>Open Pipeline</span>
             <ChevronRight size={12} />
@@ -254,7 +346,7 @@ export function DashboardClient({
                 }
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase tracking-wider font-semibold text-crm-text-muted">
+                  <span className="text-xs uppercase tracking-wider font-semibold text-crm-text-muted">
                     {card.label}
                   </span>
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-crm-gold/12 text-crm-gold">
@@ -262,11 +354,11 @@ export function DashboardClient({
                   </div>
                 </div>
                 <div className="mt-4 flex items-baseline gap-2">
-                  <span className="font-body text-3xl font-bold tracking-tight text-crm-text">
+                  <span className="font-crm-display text-3xl font-bold tracking-tight text-crm-text">
                     {card.value}
                   </span>
                 </div>
-                <p className="text-[11px] text-crm-text-secondary mt-2 font-medium">
+                <p className="text-xs text-crm-text-secondary mt-2 font-medium">
                   {card.desc}
                 </p>
               </motion.div>
@@ -278,14 +370,14 @@ export function DashboardClient({
         <div className="crm-card p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex flex-col">
-              <span className="text-sm font-semibold tracking-wide text-crm-text">
+              <span className="crm-section-heading">
                 Revenue Closed by Month
               </span>
-              <span className="text-xs text-crm-text-secondary mt-0.5">
+              <span className="text-sm text-crm-text-secondary mt-0.5">
                 Commission earned and deals won over the last 6 months
               </span>
             </div>
-            <div className="flex items-center gap-4 text-xs font-semibold text-crm-text-secondary">
+            <div className="flex items-center gap-4 text-sm font-semibold text-crm-text-secondary">
               <span className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-crm-gold" /> Revenue
               </span>
@@ -296,7 +388,7 @@ export function DashboardClient({
           </div>
 
           {!hasChartData && (
-            <p className="mb-4 text-[11px] text-crm-text-muted">
+            <p className="mb-4 text-sm text-crm-text-muted">
               No deals have been closed in the last six months yet — every month below is a
               real zero, not a placeholder.
             </p>
@@ -330,7 +422,7 @@ export function DashboardClient({
                     </div>
                   </motion.div>
                 </div>
-                <span className="text-[10px] font-semibold text-crm-text-muted uppercase mt-3">
+                <span className="text-xs font-semibold text-crm-text-muted uppercase mt-3">
                   {d.month}
                 </span>
               </div>
@@ -345,7 +437,7 @@ export function DashboardClient({
         <div className="lg:col-span-2 crm-card p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex flex-col">
-              <span className="text-sm font-semibold tracking-wide text-crm-text">
+              <span className="crm-section-heading">
                 Deal Performance
               </span>
               <span className="text-xs text-crm-text-secondary mt-0.5">
@@ -385,13 +477,13 @@ export function DashboardClient({
                 key={item.label}
                 className="rounded-sm border border-crm-border/70 bg-crm-bg/60 p-4"
               >
-                <span className="text-[10px] uppercase tracking-wider font-semibold text-crm-text-muted">
+                <span className="text-xs uppercase tracking-wider font-semibold text-crm-text-muted">
                   {item.label}
                 </span>
-                <p className="font-body text-2xl font-bold tracking-tight text-crm-text mt-2">
+                <p className="font-crm-display text-2xl font-bold tracking-tight text-crm-text mt-2">
                   {item.value}
                 </p>
-                <p className="text-[11px] text-crm-text-secondary mt-1 font-medium">{item.desc}</p>
+                <p className="text-xs text-crm-text-secondary mt-1 font-medium">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -401,7 +493,7 @@ export function DashboardClient({
         {/* Quick Actions Panel */}
         <div className="crm-card p-6 flex flex-col justify-between">
           <div>
-            <span className="text-sm font-semibold tracking-wide text-crm-text">
+            <span className="crm-section-heading">
               Quick Actions
             </span>
             <p className="text-xs text-crm-text-secondary mt-0.5">
@@ -410,7 +502,8 @@ export function DashboardClient({
 
             <div className="mt-6 space-y-2">
               {[
-                { label: "Create Property", href: "/admin/properties/create" },
+                { label: "Add Property", href: "/admin/properties/create" },
+                { label: "Add Lead", href: "/admin/leads?new=1" },
                 { label: "Check Enquiries", href: "/admin/enquiries" },
                 { label: "CMS Website Editor", href: "/admin/cms" },
                 { label: "Review Settings", href: "/admin/settings" },
@@ -439,12 +532,12 @@ export function DashboardClient({
         {/* Recent Enquiries */}
         <div className="lg:col-span-2 crm-card p-6">
           <div className="flex items-center justify-between mb-6">
-            <span className="text-sm font-semibold tracking-wide text-crm-text">
+            <span className="crm-section-heading">
               Recent Website Enquiries
             </span>
             <Link
               href="/admin/enquiries"
-              className="flex items-center gap-1 text-[11px] font-semibold text-crm-gold hover:text-crm-gold-bright uppercase tracking-wider transition-colors"
+              className="flex items-center gap-1 text-xs font-semibold text-crm-gold hover:text-crm-gold-bright uppercase tracking-wider transition-colors"
             >
               <span>View All</span>
               <ChevronRight size={12} />
@@ -452,7 +545,7 @@ export function DashboardClient({
           </div>
 
           {recentEnquiries.length === 0 ? (
-            <div className="py-12 text-center text-xs text-crm-text-muted border border-dashed border-crm-border rounded-sm">
+            <div className="py-12 text-center text-sm text-crm-text-muted border border-dashed border-crm-border rounded-sm">
               No recent enquiries found in database.
             </div>
           ) : (
@@ -463,17 +556,17 @@ export function DashboardClient({
                   className="flex items-start justify-between p-4 rounded-sm bg-crm-bg/60 border border-crm-border/70 hover:border-crm-gold/40 transition-all duration-200"
                 >
                   <div className="space-y-1">
-                    <span className="text-xs font-semibold text-crm-text">
+                    <span className="text-sm font-semibold text-crm-text">
                       {enq.customer.name}
                     </span>
-                    <p className="text-[11px] text-crm-text-secondary truncate max-w-sm md:max-w-md">
+                    <p className="crm-table-text text-crm-text-secondary truncate max-w-sm md:max-w-md">
                       Interested in: <strong className="text-crm-text">{enq.property.title}</strong>
                     </p>
-                    <p className="text-[11px] text-crm-text-muted italic mt-1 line-clamp-1">
+                    <p className="crm-table-text text-crm-text-muted italic mt-1 line-clamp-1">
                       &ldquo;{enq.message}&rdquo;
                     </p>
                   </div>
-                  <span className="text-[9px] uppercase tracking-wider font-semibold text-crm-text-muted shrink-0 pl-4">
+                  <span className="text-xs uppercase tracking-wider font-semibold text-crm-text-muted shrink-0 pl-4">
                     {/* Explicit timeZone is required, not cosmetic: this
                         component receives fully-loaded data as props from a
                         force-dynamic Server Component (no useEffect/fetch
@@ -504,7 +597,7 @@ export function DashboardClient({
 
         {/* Category Distribution */}
         <div className="crm-card p-6">
-          <span className="text-sm font-semibold tracking-wide text-crm-text">
+          <span className="crm-section-heading">
             Category Breakdown
           </span>
           <p className="text-xs text-crm-text-secondary mt-0.5 mb-6">
@@ -523,7 +616,7 @@ export function DashboardClient({
               const pct = cat.total > 0 ? (cat.value / cat.total) * 100 : 0;
               return (
                 <div key={cat.label} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center justify-between text-sm">
                     <span className="text-crm-text-secondary font-medium">{cat.label}</span>
                     <span className="text-crm-text font-semibold">{cat.value}</span>
                   </div>
@@ -547,12 +640,12 @@ export function DashboardClient({
         {/* Recent Properties */}
         <div className="crm-card p-6">
           <div className="flex items-center justify-between mb-6">
-            <span className="text-sm font-semibold tracking-wide text-crm-text">
+            <span className="crm-section-heading">
               Recently Added Properties
             </span>
             <Link
               href="/admin/properties"
-              className="flex items-center gap-1 text-[11px] font-semibold text-crm-gold hover:text-crm-gold-bright uppercase tracking-wider transition-colors"
+              className="flex items-center gap-1 text-xs font-semibold text-crm-gold hover:text-crm-gold-bright uppercase tracking-wider transition-colors"
             >
               <span>View All</span>
               <ChevronRight size={12} />
@@ -560,7 +653,7 @@ export function DashboardClient({
           </div>
 
           {recentProperties.length === 0 ? (
-            <div className="py-12 text-center text-xs text-crm-text-muted border border-dashed border-crm-border rounded-sm">
+            <div className="py-12 text-center text-sm text-crm-text-muted border border-dashed border-crm-border rounded-sm">
               No properties yet — add your first listing.
             </div>
           ) : (
@@ -572,12 +665,12 @@ export function DashboardClient({
                   className="flex items-center justify-between p-4 rounded-sm bg-crm-bg/60 border border-crm-border/70 hover:border-crm-gold/40 transition-all duration-200"
                 >
                   <div className="min-w-0 flex-1 pr-3">
-                    <span className="block text-xs font-semibold text-crm-text truncate">{p.title}</span>
-                    <span className="text-[10px] text-crm-text-muted">{p.price}</span>
+                    <span className="block text-sm font-semibold text-crm-text truncate">{p.title}</span>
+                    <span className="crm-value block mt-0.5">{p.price}</span>
                   </div>
                   <span
                     className={cn(
-                      "shrink-0 px-2 py-0.5 rounded-full border text-[8px] font-semibold uppercase tracking-wide",
+                      "shrink-0 px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase tracking-wide",
                       STATUS_BADGE[p.status] ?? STATUS_BADGE.UNPUBLISHED
                     )}
                   >
@@ -593,13 +686,13 @@ export function DashboardClient({
         <div className="crm-card p-6">
           <div className="flex items-center gap-2 mb-6">
             <Activity size={15} className="text-crm-gold" />
-            <span className="text-sm font-semibold tracking-wide text-crm-text">
+            <span className="crm-section-heading">
               Recent CRM Activity
             </span>
           </div>
 
           {recentActivity.length === 0 ? (
-            <div className="py-12 text-center text-xs text-crm-text-muted border border-dashed border-crm-border rounded-sm">
+            <div className="py-12 text-center text-sm text-crm-text-muted border border-dashed border-crm-border rounded-sm">
               No activity logged yet.
             </div>
           ) : (
@@ -608,10 +701,10 @@ export function DashboardClient({
                 <div key={a.id} className="flex items-start gap-3 p-3 rounded-sm bg-crm-bg/60 border border-crm-border/70">
                   <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-crm-gold" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] text-crm-text-secondary leading-relaxed">
+                    <p className="crm-table-text text-crm-text-secondary leading-relaxed">
                       <span className="font-semibold text-crm-text">{a.userName}</span> {a.details}
                     </p>
-                    <span className="text-[9px] uppercase tracking-wider text-crm-text-muted">
+                    <span className="text-xs uppercase tracking-wider text-crm-text-muted">
                       {new Date(a.createdAt).toLocaleDateString("en-IN", {
                         day: "numeric",
                         month: "short",
@@ -626,6 +719,60 @@ export function DashboardClient({
             </div>
           )}
         </div>
+      </div>
+
+      {/* Recently Updated Properties — distinct from "Recently Added"
+          above: surfaces a listing that's been live for a while but
+          just got a price/status change, which the "added" list (sorted
+          by createdAt) would otherwise never resurface. */}
+      <div className="crm-card p-6">
+        <div className="flex items-center justify-between mb-6">
+          <span className="crm-section-heading">Recently Updated Properties</span>
+          <Link
+            href="/admin/properties"
+            className="flex items-center gap-1 text-xs font-semibold text-crm-gold hover:text-crm-gold-bright uppercase tracking-wider transition-colors"
+          >
+            <span>View All</span>
+            <ChevronRight size={12} />
+          </Link>
+        </div>
+
+        {recentlyUpdatedProperties.length === 0 ? (
+          <div className="py-12 text-center text-sm text-crm-text-muted border border-dashed border-crm-border rounded-sm">
+            No edits yet — updates to existing listings will show up here.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {recentlyUpdatedProperties.map((p) => (
+              <Link
+                key={p.id}
+                href={`/admin/properties/${p.id}/edit`}
+                className="flex items-center justify-between p-4 rounded-sm bg-crm-bg/60 border border-crm-border/70 hover:border-crm-gold/40 transition-all duration-200"
+              >
+                <div className="min-w-0 flex-1 pr-3">
+                  <span className="block text-sm font-semibold text-crm-text truncate">{p.title}</span>
+                  <span className="text-xs text-crm-text-muted mt-0.5 block">
+                    {new Date(p.updatedAt).toLocaleDateString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      timeZone: "Asia/Kolkata",
+                    })}
+                  </span>
+                </div>
+                <span
+                  className={cn(
+                    "shrink-0 px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase tracking-wide",
+                    STATUS_BADGE[p.status] ?? STATUS_BADGE.UNPUBLISHED
+                  )}
+                >
+                  {p.status.replace(/_/g, " ")}
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

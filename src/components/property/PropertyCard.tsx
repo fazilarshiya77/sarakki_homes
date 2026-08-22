@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Heart, ArrowUpRight } from "lucide-react";
+import { Heart, ArrowUpRight, MessageCircle } from "lucide-react";
 import { MediaPlaceholder } from "@/components/ui/MediaPlaceholder";
+import { ConsultationModal } from "@/components/property/ConsultationModal";
 import { cn } from "@/lib/utils";
 import type { Property } from "@/lib/data";
 
@@ -61,6 +63,7 @@ const FEATURED = {
 
 export function PropertyCard({ property }: { property: Property }) {
   const isFeatured = property.featured;
+  const [consultOpen, setConsultOpen] = useState(false);
 
   return (
     <motion.article
@@ -199,6 +202,29 @@ export function PropertyCard({ property }: { property: Property }) {
                 <ArrowUpRight size={14} />
               </span>
             </div>
+
+            {/* Consultation — deliberately a slim outline pill, not a
+                filled/gold button: it must read as secondary to the
+                price/View row above, never compete with it. Sits above
+                the card's full-bleed overlay Link (z-20 > z-10) with its
+                own stopPropagation, same pattern as the favorite button,
+                so clicking it opens the modal instead of navigating. */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setConsultOpen(true);
+              }}
+              className="relative z-20 mt-3 flex w-full items-center justify-center gap-1.5 rounded-full border py-2 text-[11px] font-semibold uppercase tracking-wider transition-colors duration-200"
+              style={{
+                borderColor: isFeatured ? "rgba(245,241,232,0.3)" : CARD.border,
+                color: isFeatured ? FEATURED.secondaryText : CARD.textSecondary,
+              }}
+            >
+              <MessageCircle size={12} />
+              Consultation
+            </button>
           </div>
         </div>
 
@@ -208,6 +234,13 @@ export function PropertyCard({ property }: { property: Property }) {
           aria-label={`View details for ${property.title}`}
         />
       </div>
+
+      <ConsultationModal
+        open={consultOpen}
+        onClose={() => setConsultOpen(false)}
+        propertyId={property.id}
+        propertyTitle={property.title}
+      />
     </motion.article>
   );
 }

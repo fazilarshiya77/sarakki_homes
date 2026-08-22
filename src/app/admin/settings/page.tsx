@@ -89,7 +89,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary text-xs font-semibold">
+      <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary crm-body-text font-semibold">
         <Loader2 size={24} className="animate-spin text-crm-gold-bright" />
         <span>Loading system settings...</span>
       </div>
@@ -101,16 +101,16 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold tracking-wide text-crm-text">
+          <h1 className="crm-page-title tracking-wide text-crm-text">
             Global Settings
           </h1>
-          <p className="text-xs text-crm-text-secondary mt-0.5">
+          <p className="crm-body-text text-crm-text-secondary mt-0.5">
             Configure SMTP, WhatsApp lines, SEO parameters, and meta branding.
           </p>
         </div>
 
         {success && (
-          <span className="text-xs font-semibold text-emerald-400 border border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5 rounded-sm animate-pulse">
+          <span className="text-sm font-semibold text-emerald-400 border border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5 rounded-sm animate-pulse">
             Settings saved successfully!
           </span>
         )}
@@ -121,29 +121,29 @@ export default function SettingsPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Card 1: Company details */}
           <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-6 backdrop-blur-md space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-crm-gold flex items-center gap-2">
+            <h3 className="crm-section-heading uppercase tracking-wider text-crm-gold flex items-center gap-2">
               <Settings size={14} />
               Company Profile
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">Company Name</label>
+                <label className="crm-label uppercase tracking-wider text-crm-text-secondary">Company Name</label>
                 <input
                   type="text"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
+                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text outline-none focus:border-crm-gold-bright/40"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">WhatsApp Primary Number</label>
+                <label className="crm-label uppercase tracking-wider text-crm-text-secondary">WhatsApp Primary Number</label>
                 <input
                   type="text"
                   value={whatsappNo}
                   onChange={(e) => setWhatsappNo(e.target.value)}
-                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
+                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text outline-none focus:border-crm-gold-bright/40"
                 />
               </div>
             </div>
@@ -151,50 +151,50 @@ export default function SettingsPage() {
 
           {/* Card 2: SMTP Mail Gateways */}
           <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-6 backdrop-blur-md space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-crm-gold flex items-center gap-2">
+            <h3 className="crm-section-heading uppercase tracking-wider text-crm-gold flex items-center gap-2">
               SMTP Mail Gateway
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">SMTP Host</label>
+                <label className="crm-label uppercase tracking-wider text-crm-text-secondary">SMTP Host</label>
                 <input
                   type="text"
                   value={smtpHost}
                   onChange={(e) => setSmtpHost(e.target.value)}
                   placeholder="smtp.mailgun.org"
-                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
+                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text outline-none focus:border-crm-gold-bright/40"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">SMTP Port</label>
+                <label className="crm-label uppercase tracking-wider text-crm-text-secondary">SMTP Port</label>
                 <input
                   type="text"
                   value={smtpPort}
                   onChange={(e) => setSmtpPort(e.target.value)}
                   placeholder="587"
-                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
+                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text outline-none focus:border-crm-gold-bright/40"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">SMTP Username</label>
+                <label className="crm-label uppercase tracking-wider text-crm-text-secondary">SMTP Username</label>
                 <input
                   type="text"
                   value={smtpUser}
                   onChange={(e) => setSmtpUser(e.target.value)}
-                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
+                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text outline-none focus:border-crm-gold-bright/40"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">SMTP Password</label>
+                <label className="crm-label uppercase tracking-wider text-crm-text-secondary">SMTP Password</label>
                 <input
                   type="password"
                   value={smtpPassword}
                   onChange={(e) => setSmtpPassword(e.target.value)}
-                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
+                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text outline-none focus:border-crm-gold-bright/40"
                 />
               </div>
             </div>
@@ -204,28 +204,28 @@ export default function SettingsPage() {
         {/* SEO Defaults & Saves (Right) */}
         <div className="space-y-6">
           <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-6 backdrop-blur-md space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-crm-gold">
+            <h3 className="crm-section-heading uppercase tracking-wider text-crm-gold">
               Default SEO Metadata
             </h3>
 
-            <div className="space-y-4 text-xs">
+            <div className="space-y-4 crm-body-text">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">Meta Title</label>
+                <label className="crm-label uppercase tracking-wider text-crm-text-secondary">Meta Title</label>
                 <input
                   type="text"
                   value={metaTitle}
                   onChange={(e) => setMetaTitle(e.target.value)}
-                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40"
+                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text outline-none focus:border-crm-gold-bright/40"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary">Meta Description</label>
+                <label className="crm-label uppercase tracking-wider text-crm-text-secondary">Meta Description</label>
                 <textarea
                   rows={4}
                   value={metaDesc}
                   onChange={(e) => setMetaDesc(e.target.value)}
-                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3.5 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40 resize-none"
+                  className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text outline-none focus:border-crm-gold-bright/40 resize-none"
                 />
               </div>
             </div>
@@ -235,7 +235,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-crm-gold to-crm-gold-bright py-3 text-xs font-semibold uppercase tracking-wider text-black transition-all duration-300 hover:brightness-110 disabled:opacity-50"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-sm bg-gradient-to-r from-crm-gold to-crm-gold-bright py-3 text-sm font-semibold uppercase tracking-wider text-black transition-all duration-300 hover:brightness-110 disabled:opacity-50"
           >
             {saving ? (
               <Loader2 size={14} className="animate-spin" />

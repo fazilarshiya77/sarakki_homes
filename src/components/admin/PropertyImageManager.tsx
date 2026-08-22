@@ -144,10 +144,10 @@ export function PropertyImageManager({
         ) : (
           <Upload size={20} className="text-crm-text-muted" />
         )}
-        <span className="text-xs font-semibold text-crm-text">
+        <span className="text-sm font-semibold text-crm-text">
           {uploading ? "Uploading…" : "Drag images here, or click to choose files"}
         </span>
-        <span className="text-[10px] text-crm-text-muted">
+        <span className="text-[13px] text-crm-text-muted">
           JPEG, PNG, WebP or AVIF · up to 5 MB each
         </span>
         <input
@@ -192,7 +192,7 @@ export function PropertyImageManager({
       </div>
 
       {error && (
-        <p className="flex items-start gap-2 rounded-sm border border-red-500/20 bg-red-500/5 px-3 py-2 text-[11px] leading-relaxed text-red-400">
+        <p className="flex items-start gap-2 rounded-sm border border-red-500/20 bg-red-500/5 px-3 py-2 text-sm leading-relaxed text-red-400">
           <AlertCircle size={13} className="mt-px shrink-0" />
           {error}
         </p>
@@ -233,7 +233,7 @@ export function PropertyImageManager({
                   unoptimized
                 />
                 {i === 0 && (
-                  <span className="absolute left-1.5 top-1.5 rounded-sm bg-crm-gold px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-crm-espresso">
+                  <span className="absolute left-1.5 top-1.5 rounded-sm bg-crm-gold px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-crm-espresso">
                     Cover
                   </span>
                 )}

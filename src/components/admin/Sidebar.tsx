@@ -114,10 +114,10 @@ export function Sidebar() {
               exit={{ opacity: 0, x: -10 }}
               className="flex flex-col"
             >
-              <span className="font-display text-sm tracking-[0.14em] uppercase text-crm-ivory font-bold">
+              <span className="font-crm-display text-base tracking-[0.1em] uppercase text-crm-ivory font-bold">
                 Sarakki Homes
               </span>
-              <span className="text-[9px] uppercase tracking-[0.18em] text-crm-gold/80 mt-0.5 font-semibold">
+              <span className="text-[10px] uppercase tracking-[0.17em] text-crm-gold/80 mt-0.5 font-semibold">
                 Enterprise CRM
               </span>
             </motion.div>
@@ -137,7 +137,7 @@ export function Sidebar() {
         {NAV_GROUPS.map((group, gi) => (
           <div key={group.label} className={cn(gi > 0 && "mt-5")}>
             {!collapsed && (
-              <p className="px-3.5 pb-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-white/30">
+              <p className="px-3.5 pb-2 text-[10.5px] font-semibold uppercase tracking-[0.15em] text-white/35">
                 {group.label}
               </p>
             )}
@@ -151,7 +151,7 @@ export function Sidebar() {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "group relative flex items-center gap-3 rounded-sm px-3.5 py-2.5 text-[13px] tracking-wide transition-all duration-200",
+                      "group relative flex items-center gap-3 rounded-sm px-3.5 py-2.5 text-[14.5px] tracking-wide transition-all duration-200",
                       isActive
                         ? "bg-white/[0.06] text-crm-ivory font-semibold"
                         : "text-white/50 font-medium hover:bg-white/[0.035] hover:text-white/85"
@@ -189,10 +189,10 @@ export function Sidebar() {
               {session.user.name?.charAt(0) ?? "A"}
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-xs font-semibold text-crm-ivory truncate">
+              <span className="text-sm font-semibold text-crm-ivory truncate">
                 {session.user.name}
               </span>
-              <span className="text-[9px] text-white/40 uppercase tracking-wide font-medium">
+              <span className="text-[10.5px] text-white/45 uppercase tracking-wide font-medium">
                 {(session.user as any).role || "SALES_EXECUTIVE"}
               </span>
             </div>
@@ -201,7 +201,7 @@ export function Sidebar() {
 
         <button
           onClick={handleLogout}
-          className="group flex w-full items-center gap-3 rounded-sm px-3.5 py-2.5 text-[13px] font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/[0.06] transition-all duration-200"
+          className="group flex w-full items-center gap-3 rounded-sm px-3.5 py-2.5 text-[14.5px] font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/[0.06] transition-all duration-200"
         >
           <LogOut size={16} strokeWidth={1.75} className="shrink-0" />
           {!collapsed && <span>Logout</span>}

@@ -20,9 +20,8 @@ interface PropertyOption {
 }
 
 const inputClass =
-  "w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3 text-xs text-crm-text outline-none focus:border-crm-gold-bright/40";
-const labelClass =
-  "text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary";
+  "w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text outline-none focus:border-crm-gold-bright/40";
+const labelClass = "crm-label uppercase tracking-wider text-crm-text-secondary";
 
 /**
  * "Deal & Revenue" capture for a single lead.
@@ -98,7 +97,7 @@ export function DealRevenuePanel({
     return (
       <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-5">
         <p className={labelClass}>Deal &amp; Revenue</p>
-        <div className="mt-3 flex items-center gap-2 text-[11px] text-crm-text-secondary">
+        <div className="mt-3 flex items-center gap-2 crm-body-text text-crm-text-secondary">
           <Lock size={12} />
           <span>Commission figures are visible to managers and admins only.</span>
         </div>
@@ -177,7 +176,7 @@ export function DealRevenuePanel({
                 setCommissionTouched(false);
                 setCommission(String(derived));
               }}
-              className="text-[9px] font-semibold uppercase tracking-wider text-crm-gold hover:text-crm-gold-bright"
+              className="text-[11px] font-semibold uppercase tracking-wider text-crm-gold hover:text-crm-gold-bright"
             >
               Reset to {formatMoneyLakh(derived)}
             </button>
@@ -195,7 +194,7 @@ export function DealRevenuePanel({
           placeholder="Auto-filled from deal value × %"
           className={inputClass}
         />
-        <p className="text-[10px] text-crm-text-secondary/70">
+        <p className="text-xs text-crm-text-secondary/70">
           Auto-filled from the percentage &mdash; override it for negotiated or flat fees.
         </p>
       </div>
@@ -217,7 +216,7 @@ export function DealRevenuePanel({
       </div>
 
       <div className="flex items-center justify-between gap-3 pt-1 border-t border-crm-border/20">
-        <div className="text-[10px] text-crm-text-secondary">
+        <div className="text-xs text-crm-text-secondary">
           {values.closedAt ? (
             <>
               Closed{" "}
@@ -235,7 +234,7 @@ export function DealRevenuePanel({
         <button
           onClick={save}
           disabled={saving || invalid}
-          className="inline-flex items-center gap-1.5 rounded-sm bg-crm-gold px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-black hover:brightness-110 disabled:opacity-50 transition-all"
+          className="inline-flex items-center gap-1.5 rounded-sm bg-crm-gold px-4 py-2 text-xs font-semibold uppercase tracking-wider text-black hover:brightness-110 disabled:opacity-50 transition-all"
         >
           {saving ? <Loader2 size={12} className="animate-spin" /> : saved ? <Check size={12} /> : null}
           {saved ? "Saved" : "Save Deal"}
@@ -243,11 +242,11 @@ export function DealRevenuePanel({
       </div>
 
       {invalid && (
-        <p className="text-[10px] text-red-400">
+        <p className="text-xs text-red-400">
           Values must be non-negative, and commission % cannot exceed 100.
         </p>
       )}
-      {error && <p className="text-[10px] text-red-400">{error}</p>}
+      {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
 }

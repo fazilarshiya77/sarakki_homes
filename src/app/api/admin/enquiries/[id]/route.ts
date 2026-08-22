@@ -46,3 +46,38 @@ export async function PUT(
     return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const auth = await requireRole(CAN.MANAGE_CRM);
+  if (!auth.ok) return auth.response;
+
+  const { id } = await params;
+
+  try {
+    const existing = await prisma.enquiry.findUnique({
+      where: { id },
+      select: { id: true, customer: { select: { name: true } } },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: "Enquiry not found." }, { status: 404 });
+    }
+
+    await prisma.enquiry.delete({ where: { id } });
+
+    await prisma.activityLog.create({
+      data: {
+        userId: auth.user.id,
+        action: "DELETE_ENQUIRY",
+        details: `Deleted enquiry from ${existing.customer.name} (ID: ${id})`,
+      },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    console.error("[api/admin/enquiries/[id]] DELETE failed:", error);
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
+  }
+}
