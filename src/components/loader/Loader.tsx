@@ -102,7 +102,7 @@ export function Loader({ visible }: { visible: boolean }) {
                 transition={{ delay: 0.95, duration: 0.8, ease: EASE }}
               />
               <motion.p
-                className="mt-4 text-[10px] font-medium uppercase tracking-[0.4em] text-background/45"
+                className="mt-4 text-[14px] font-medium uppercase tracking-[0.4em] text-background/45"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.05, duration: 0.6 }}

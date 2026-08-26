@@ -110,7 +110,7 @@ export function PropertyCard({ property }: { property: Property }) {
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/45 to-transparent" />
 
             <span
-              className="absolute left-0 top-0 z-20 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em]"
+              className="absolute left-0 top-0 z-20 px-3.5 py-1.5 text-[14px] font-semibold uppercase tracking-[0.14em]"
               style={{ backgroundColor: CARD.brand, color: CARD.bg }}
             >
               {property.type}
@@ -150,13 +150,13 @@ export function PropertyCard({ property }: { property: Property }) {
             style={isFeatured ? { backgroundColor: FEATURED.card } : undefined}
           >
             <h3
-              className="line-clamp-1 font-display text-xl leading-snug"
+              className="line-clamp-1 font-display text-[20px] font-semibold leading-snug"
               style={{ color: isFeatured ? FEATURED.text : CARD.text }}
             >
               {property.title}
             </h3>
             <p
-              className="mt-1 line-clamp-1 text-sm"
+              className="mt-1 line-clamp-1 text-[16px] font-medium"
               style={{ color: isFeatured ? FEATURED.secondaryText : CARD.textSecondary }}
             >
               {property.location}
@@ -164,14 +164,14 @@ export function PropertyCard({ property }: { property: Property }) {
 
             {property.subFlats && property.subFlats.length > 0 ? (
               <p
-                className="mt-3 line-clamp-1 text-xs uppercase tracking-[0.08em]"
+                className="mt-3 line-clamp-1 text-[15px] font-medium uppercase tracking-[0.06em]"
                 style={{ color: isFeatured ? FEATURED.secondaryText : CARD.textSecondary }}
               >
                 {property.subFlats.length} Configurations · From {property.subFlats[0].area}
               </p>
             ) : (
               <p
-                className="mt-3 line-clamp-1 text-xs uppercase tracking-[0.08em]"
+                className="mt-3 line-clamp-1 text-[15px] font-medium uppercase tracking-[0.06em]"
                 style={{ color: isFeatured ? FEATURED.secondaryText : CARD.textSecondary }}
               >
                 {property.beds} BHK · {property.area}
@@ -186,7 +186,7 @@ export function PropertyCard({ property }: { property: Property }) {
                   per the typography spec, kept bold/tight-tracked so it
                   still reads as the strongest thing on the card. */}
               <p
-                className="font-body text-xl font-bold tracking-tight"
+                className="font-body text-[20px] font-bold tracking-tight"
                 style={{ color: isFeatured ? FEATURED.price : CARD.brand }}
               >
                 {property.subFlats && property.subFlats.length > 0
@@ -195,7 +195,7 @@ export function PropertyCard({ property }: { property: Property }) {
               </p>
 
               <span
-                className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wider transition-transform duration-300 group-hover:translate-x-1"
+                className="flex items-center gap-1 text-[15px] font-semibold uppercase tracking-wider transition-transform duration-300 group-hover:translate-x-1"
                 style={{ color: CARD.gold }}
               >
                 View
@@ -216,7 +216,7 @@ export function PropertyCard({ property }: { property: Property }) {
                 e.stopPropagation();
                 setConsultOpen(true);
               }}
-              className="relative z-20 mt-3 flex w-full items-center justify-center gap-1.5 rounded-full border py-2 text-[11px] font-semibold uppercase tracking-wider transition-colors duration-200"
+              className="relative z-20 mt-3 flex w-full items-center justify-center gap-1.5 rounded-full border py-2 text-[15px] font-semibold uppercase tracking-wider transition-colors duration-200"
               style={{
                 borderColor: isFeatured ? "rgba(245,241,232,0.3)" : CARD.border,
                 color: isFeatured ? FEATURED.secondaryText : CARD.textSecondary,

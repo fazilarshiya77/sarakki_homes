@@ -45,7 +45,7 @@ function Slide({
           bank auctions) carries the brand wordmark; this brings the
           general property gallery fallback in line with that. */}
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-background/50">
+        <p className="text-[14px] font-semibold uppercase tracking-[0.22em] text-background/50">
           Sarakki Homes
         </p>
         <p className="mt-2 font-display text-lg text-accent-gold/90">Photography Coming Soon</p>

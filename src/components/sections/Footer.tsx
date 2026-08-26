@@ -22,7 +22,7 @@ export async function Footer() {
           <div className="md:col-span-2">
             <p className="font-display text-3xl font-medium tracking-[-0.01em]">Sarakki Homes</p>
             <div className="mt-5 h-px w-12 bg-accent-gold/50" />
-            <p className="mt-6 max-w-sm text-sm leading-relaxed text-background/70">
+            <p className="mt-6 max-w-sm text-sm leading-relaxed text-background">
               A premium Bengaluru real estate consultancy — guiding you
               through property selection, legal verification, financing, and
               registration with complete transparency.
@@ -33,7 +33,7 @@ export async function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-background/20 text-background/70 transition-colors duration-300 hover:border-accent-gold hover:text-accent-gold"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-background/20 text-background transition-colors duration-300 hover:border-accent-gold hover:text-accent-gold"
               >
                 <InstagramIcon />
               </a>
@@ -54,7 +54,7 @@ export async function Footer() {
                 <li key={service.slug}>
                   <Link
                     href={`/services/${service.slug}`}
-                    className="text-sm text-background/70 transition-colors duration-300 hover:text-background"
+                    className="text-sm text-background transition-colors duration-300 hover:text-accent-gold"
                   >
                     {service.title}
                   </Link>
@@ -80,7 +80,7 @@ export async function Footer() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-sm text-background/70 transition-colors duration-300 hover:text-background"
+                    className="text-sm text-background transition-colors duration-300 hover:text-accent-gold"
                   >
                     {item.label}
                   </Link>
@@ -88,8 +88,8 @@ export async function Footer() {
               ))}
             </ul>
 
-            <div className="mt-8 flex flex-col gap-3 text-sm text-background/70">
-              <a href={CONTACT.phoneHref} className="flex items-center gap-2 hover:text-background">
+            <div className="mt-8 flex flex-col gap-3 text-sm text-background">
+              <a href={CONTACT.phoneHref} className="flex items-center gap-2 hover:text-accent-gold">
                 <PhoneCall size={14} /> {CONTACT.phoneDisplay}
               </a>
               <span className="flex items-center gap-2">
@@ -102,13 +102,13 @@ export async function Footer() {
           </div>
         </div>
 
-        <div className="mt-20 flex flex-col items-center justify-between gap-4 border-t border-background/15 pt-8 text-xs text-background/50 md:flex-row">
+        <div className="mt-20 flex flex-col items-center justify-between gap-4 border-t border-background/15 pt-8 text-sm text-background md:flex-row">
           <p>© {new Date().getFullYear()} Sarakki Homes. All rights reserved.</p>
           <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-background/80">
+            <Link href="/privacy" className="hover:text-accent-gold">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="hover:text-background/80">
+            <Link href="/terms" className="hover:text-accent-gold">
               Terms of Service
             </Link>
           </div>

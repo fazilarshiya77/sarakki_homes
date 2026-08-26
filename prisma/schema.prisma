@@ -35,8 +35,30 @@ model Category {
   idealFor        String     @default("[]") // JSON stringified array
   tone            String     @default("warm")
   properties      Property[]
+  brochures       Brochure[]
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
+}
+
+// A brochure is a downloadable/viewable PDF the CRM attaches to a
+// property category (e.g. "Bank Auction Property Guide" under Bank
+// Auctions) — deliberately its own model, not a Property: it's category
+// -level marketing collateral, not a listing, and must never be mixed
+// into the property grid on the public site.
+model Brochure {
+  id           String   @id @default(uuid())
+  categoryId   String
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  title        String
+  description  String? // optional per spec — never required to publish
+  fileUrl      String // Supabase Storage public URL (PDF)
+  thumbnailUrl String? // optional cover image, Supabase Storage public URL
+  order        Int      @default(0) // admin-controlled display order within its category
+  published    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([categoryId])
 }
 
 model Builder {

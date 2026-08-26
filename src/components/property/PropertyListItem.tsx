@@ -64,7 +64,7 @@ export function PropertyListItem({ property }: { property: Property }) {
               <MediaPlaceholder tone={property.gallery[0]} className="h-full w-full" />
             )}
             <span
-              className="absolute left-0 top-0 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.12em]"
+              className="absolute left-0 top-0 px-2.5 py-1 text-[13px] font-semibold uppercase tracking-[0.12em]"
               style={{ backgroundColor: CARD.brand, color: CARD.bg }}
             >
               {property.type}

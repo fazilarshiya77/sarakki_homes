@@ -73,7 +73,14 @@ export function ServiceCard({ slug, featured = false }: { slug: string; featured
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
     >
       <Link
-        href={`/services/${category.slug}`}
+        // Property categories link to their own category page (with the
+        // property listings + any published brochures for that
+        // category) — NOT /services/[slug], which is a different content
+        // type entirely (legal services like "Sale Deed"/"E-Khata").
+        // bank-auctions has its own dedicated page/UI; every other
+        // category goes through the generic /properties/category/[slug]
+        // route.
+        href={category.slug === "bank-auctions" ? "/properties/bank-auctions" : `/properties/category/${category.slug}`}
         style={{ "--accent": accent } as React.CSSProperties}
         className="group relative block"
       >
@@ -113,7 +120,7 @@ export function ServiceCard({ slug, featured = false }: { slug: string; featured
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/40 to-transparent" />
 
             <span
-              className="absolute left-0 top-0 z-10 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-background"
+              className="absolute left-0 top-0 z-10 px-3.5 py-1.5 text-[14px] font-semibold uppercase tracking-[0.14em] text-background"
               style={{ backgroundColor: "var(--accent)" }}
             >
               {label}

@@ -68,7 +68,7 @@ export default async function TermsOfServicePage() {
               {SECTIONS.map((section) => (
                 <div key={section.heading}>
                   <h2 className="font-display text-2xl">{section.heading}</h2>
-                  <p className="mt-3 leading-relaxed text-foreground/80">
+                  <p className="mt-3 leading-relaxed text-foreground">
                     {section.body}
                   </p>
                 </div>

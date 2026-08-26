@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Tags, Loader2, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { Tags, Loader2, Trash2, FileText } from "lucide-react";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 
 interface Category {
@@ -136,6 +137,13 @@ export default function CategoriesPage() {
                       <span className="text-crm-text-secondary font-mono text-xs">
                         {c._count.properties} properties
                       </span>
+                      <Link
+                        href={`/admin/categories/${c.id}/brochures`}
+                        title="Manage brochures"
+                        className="inline-flex items-center gap-1.5 rounded-sm border border-crm-border px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-crm-text-secondary hover:border-crm-gold-bright/40 hover:text-crm-text transition-all duration-200"
+                      >
+                        <FileText size={12} /> Brochures
+                      </Link>
                       <button
                         type="button"
                         onClick={() => {

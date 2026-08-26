@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarCheck, MessageCircle, PhoneCall, Sparkles } from "lucide-react";
+import { CalendarCheck, Handshake, MessageCircle, PhoneCall } from "lucide-react";
 import { buttonClasses } from "@/components/ui/Button";
 import { ButtonFX } from "@/components/ui/ButtonFX";
 import { useSiteSettings } from "@/components/providers/SettingsProvider";
@@ -33,7 +33,7 @@ export function EnquiryPanel({ propertyId, propertyTitle }: { propertyId: string
         className={buttonClasses("primary", "relative mt-6 w-full")}
       >
         <ButtonFX />
-        <Sparkles size={16} />
+        <Handshake size={16} />
         Request a Consultation
       </button>
 

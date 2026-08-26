@@ -117,7 +117,7 @@ export function Sidebar() {
               <span className="font-crm-display text-base tracking-[0.1em] uppercase text-crm-ivory font-bold">
                 Sarakki Homes
               </span>
-              <span className="text-[10px] uppercase tracking-[0.17em] text-crm-gold/80 mt-0.5 font-semibold">
+              <span className="text-[12px] uppercase tracking-[0.17em] text-crm-gold mt-0.5 font-semibold">
                 Enterprise CRM
               </span>
             </motion.div>
@@ -126,7 +126,7 @@ export function Sidebar() {
 
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm border border-white/10 bg-white/[0.03] text-white/50 hover:border-crm-gold/40 hover:text-crm-gold transition-colors duration-200"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm border border-white/10 bg-white/[0.03] text-white/70 hover:border-crm-gold/40 hover:text-crm-gold transition-colors duration-200"
         >
           {collapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
         </button>
@@ -137,7 +137,7 @@ export function Sidebar() {
         {NAV_GROUPS.map((group, gi) => (
           <div key={group.label} className={cn(gi > 0 && "mt-5")}>
             {!collapsed && (
-              <p className="px-3.5 pb-2 text-[10.5px] font-semibold uppercase tracking-[0.15em] text-white/35">
+              <p className="px-3.5 pb-2 text-[12px] font-semibold uppercase tracking-[0.15em] text-white/55">
                 {group.label}
               </p>
             )}
@@ -151,10 +151,10 @@ export function Sidebar() {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "group relative flex items-center gap-3 rounded-sm px-3.5 py-2.5 text-[14.5px] tracking-wide transition-all duration-200",
+                      "group relative flex items-center gap-3 rounded-sm px-3.5 py-3 text-[16px] tracking-wide transition-all duration-200",
                       isActive
                         ? "bg-white/[0.06] text-crm-ivory font-semibold"
-                        : "text-white/50 font-medium hover:bg-white/[0.035] hover:text-white/85"
+                        : "text-white/75 font-medium hover:bg-white/[0.035] hover:text-white/95"
                     )}
                   >
                     {isActive && (
@@ -192,7 +192,7 @@ export function Sidebar() {
               <span className="text-sm font-semibold text-crm-ivory truncate">
                 {session.user.name}
               </span>
-              <span className="text-[10.5px] text-white/45 uppercase tracking-wide font-medium">
+              <span className="text-[12px] text-white/65 uppercase tracking-wide font-medium">
                 {session.user.role || "SALES_EXECUTIVE"}
               </span>
             </div>
@@ -201,7 +201,7 @@ export function Sidebar() {
 
         <button
           onClick={handleLogout}
-          className="group flex w-full items-center gap-3 rounded-sm px-3.5 py-2.5 text-[14.5px] font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/[0.06] transition-all duration-200"
+          className="group flex w-full items-center gap-3 rounded-sm px-3.5 py-3 text-[16px] font-medium text-red-400 hover:text-red-300 hover:bg-red-500/[0.06] transition-all duration-200"
         >
           <LogOut size={16} strokeWidth={1.75} className="shrink-0" />
           {!collapsed && <span>Logout</span>}

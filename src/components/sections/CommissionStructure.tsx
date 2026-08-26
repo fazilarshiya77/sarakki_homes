@@ -129,7 +129,7 @@ export function CommissionStructure() {
                           whileInView={{ opacity: 1 }}
                           viewport={{ once: true, amount: 0.3 }}
                           transition={{ duration: 0.4, delay: i * 0.08 + 0.1 }}
-                          className="pt-1 font-body text-xs font-semibold tabular-nums tracking-[0.08em] text-muted-foreground/60 sm:text-sm"
+                          className="pt-1 font-body text-xs font-semibold tabular-nums tracking-[0.08em] text-muted-foreground sm:text-sm"
                         >
                           {String(i + 1).padStart(2, "0")}
                         </motion.span>
@@ -144,7 +144,7 @@ export function CommissionStructure() {
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true, amount: 0.3 }}
                                 transition={{ duration: 0.4, delay: i * 0.08 + 0.25, ease: [0.22, 1, 0.36, 1] }}
-                                className="rounded-pill border border-accent-gold/40 bg-accent-gold/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-accent-gold-dark"
+                                className="rounded-pill border border-accent-gold/40 bg-accent-gold/10 px-2.5 py-0.5 text-[14px] font-semibold uppercase tracking-[0.1em] text-accent-gold-dark"
                               >
                                 Sarakki Homes Advantage
                               </motion.span>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import {
   User,
@@ -98,9 +98,8 @@ export default function CustomersPage() {
                 {customers.map((cust) => {
                   const isExpanded = expandedId === cust.id;
                   return (
-                    <>
+                    <Fragment key={cust.id}>
                       <tr
-                        key={cust.id}
                         onClick={() => toggleExpand(cust.id)}
                         className="border-b border-crm-border/10 hover:bg-foreground/[0.01] cursor-pointer transition-all"
                       >
@@ -163,7 +162,7 @@ export default function CustomersPage() {
                           </tr>
                         )}
                       </AnimatePresence>
-                    </>
+                    </Fragment>
                   );
                 })}
               </tbody>

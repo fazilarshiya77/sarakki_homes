@@ -45,6 +45,13 @@ Rules:
 
 ## 3. Typography
 
+**v4 update (client-requested brand font):** the site now uses a single typeface everywhere — **Roboto** (Google Fonts, variable — 3 axes, self-hosted at build time via `next/font/google`, see `src/app/layout.tsx`) — across the public site AND the CRM. Every `font-display`/`font-accent`/`font-body`/`font-crm-display`/`font-crm-body` Tailwind class in the codebase now resolves to Roboto via the `@theme` mapping in `globals.css` — component code was not rewritten, only the underlying font variables. Being a true variable font, every weight the scale below calls for (400–800) is a real cut, not synthetic/faux bold.
+
+This supersedes two prior iterations, both kept only as history: v2's two-typeface system (Bodoni Moda/Cormorant Garamond + Manrope for the public site; Plus Jakarta Sans + DM Sans for the CRM), and a brief v3 (client-supplied Concert One, single 400 weight, then a Concert One + Google Sans pairing) — neither is in effect any longer. The **size** hierarchy (desktop→mobile scale, tracking) below is still the operative rule; only the **font** column is superseded (read every occurrence of "Bodoni Moda"/"Manrope" as "Roboto").
+
+<details>
+<summary>Historical two-typeface system (superseded by the above, kept for reference)</summary>
+
 **Display / Editorial (headings, pull quotes, hero statements):** Bodoni Moda (primary) or Cormorant Garamond (alternate for more delicate moments) — high-contrast didone serif, large, editorial. Architectural Soft UI, not neumorphism: depth comes from soft shadows, thin stone-colored borders, and layered warm-neutral surfaces — never puffy insets, embossing, or toy-like rounded bubbles.
 
 **Body / UI (paragraphs, labels, nav, buttons, forms):** Manrope — clean, geometric, highly legible at small sizes.
@@ -67,6 +74,8 @@ Rules:
 - Line-height for serif display: 1.05–1.15. For body: 1.6–1.7.
 - Heading-to-body spacing should feel generous — never cramped (`margin-bottom` of ~0.4–0.5em minimum between an eyebrow and its heading, ~1.5–2em between a heading block and following body).
 - Never mix more than two typefaces on a page (Bodoni Moda + Manrope only — no third font; Cormorant Garamond is reserved for rare delicate accent moments, e.g. pull quotes).
+
+</details>
 - Numerals (prices, stats, counters) render in Manrope tabular-nums, not the serif.
 
 ---

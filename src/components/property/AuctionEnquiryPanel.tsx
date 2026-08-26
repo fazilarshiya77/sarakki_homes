@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MessageCircle, PhoneCall, Sparkles } from "lucide-react";
+import { Handshake, MessageCircle, PhoneCall } from "lucide-react";
 import { buttonClasses } from "@/components/ui/Button";
 import { ButtonFX } from "@/components/ui/ButtonFX";
 import { useSiteSettings } from "@/components/providers/SettingsProvider";
@@ -60,7 +60,7 @@ export function AuctionEnquiryPanel({
           className={buttonClasses("secondary", "relative w-full")}
         >
           <ButtonFX />
-          <Sparkles size={16} />
+          <Handshake size={16} />
           Request a Consultation
         </button>
       </div>

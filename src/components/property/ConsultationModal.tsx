@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, Loader2, X } from "lucide-react";
 import { buttonClasses } from "@/components/ui/Button";
@@ -43,6 +43,20 @@ export function ConsultationModal({
   const [website, setWebsite] = useState("");
 
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+
+  // Lock background scroll while the modal is open — without this, a
+  // scroll gesture on mobile (or a trackpad flick) that started an
+  // instant before the click registers can carry into the page behind
+  // the fixed overlay, which reads as the whole popup "fluctuating" as
+  // it animates in against a page that's still moving underneath it.
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
   const [errorMessage, setErrorMessage] = useState("");
 
   const reset = () => {
@@ -109,15 +123,20 @@ export function ConsultationModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
           className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4 py-8"
           onClick={handleClose}
         >
+          {/* No `scale` in this transform — animating scale on a tall,
+              text-heavy card renders every line at a shifting sub-pixel
+              size for the ~250ms of the transition, which reads as a
+              jittery "fluctuating" pop-in rather than a smooth one. A
+              plain opacity+y slide has no such artifact. */}
           <motion.div
-            initial={{ opacity: 0, y: 16, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 16, scale: 0.98 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-md border border-border bg-card p-7 shadow-soft-lg"
             role="dialog"
             aria-modal="true"

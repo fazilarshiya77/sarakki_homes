@@ -73,7 +73,7 @@ export default async function ServiceDetailPage({
                 {String(serviceIndex + 1).padStart(2, "0")}
               </span>
               <span className="h-px w-16 bg-accent-gold/50" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-background/70">
+              <span className="text-[15px] font-semibold uppercase tracking-[0.22em] text-background/70">
                 Our Services
               </span>
             </div>
@@ -94,7 +94,7 @@ export default async function ServiceDetailPage({
             <div className="lg:col-span-2">
               <RevealOnScroll>
                 <h2 className="font-display text-2xl">{service.title}</h2>
-                <p className="mt-5 max-w-2xl text-lg leading-relaxed text-foreground/85">
+                <p className="mt-5 max-w-2xl text-lg leading-relaxed text-foreground">
                   {service.longDescription}
                 </p>
 
@@ -108,7 +108,7 @@ export default async function ServiceDetailPage({
                       <span className="shrink-0 font-display text-xs tabular-nums text-accent-gold-dark">
                         {String(i + 1).padStart(2, "0")}
                       </span>
-                      <span className="text-[0.95rem] leading-relaxed text-foreground/85">
+                      <span className="text-[1rem] leading-relaxed text-foreground">
                         {highlight}
                       </span>
                     </li>
@@ -124,7 +124,7 @@ export default async function ServiceDetailPage({
                 </p>
                 <ul className="mt-4 flex flex-col gap-3">
                   {service.idealFor.map((item) => (
-                    <li key={item} className="text-sm leading-relaxed text-foreground/85">
+                    <li key={item} className="text-sm leading-relaxed text-foreground">
                       {item}
                     </li>
                   ))}

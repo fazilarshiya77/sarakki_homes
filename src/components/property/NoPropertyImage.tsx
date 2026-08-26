@@ -57,7 +57,7 @@ export function NoPropertyImage({
         </div>
 
         <p
-          className="mt-5 text-[10px] font-semibold uppercase tracking-[0.22em]"
+          className="mt-5 text-[14px] font-semibold uppercase tracking-[0.22em]"
           style={{ color: "rgba(245,241,232,0.5)" }}
         >
           Sarakki Homes
@@ -71,7 +71,7 @@ export function NoPropertyImage({
           style={{ borderColor: "rgba(198,161,91,0.2)" }}
         >
           <p
-            className="text-[9px] font-semibold uppercase tracking-[0.18em]"
+            className="text-[13px] font-semibold uppercase tracking-[0.18em]"
             style={{ color: "rgba(245,241,232,0.4)" }}
           >
             Property ID

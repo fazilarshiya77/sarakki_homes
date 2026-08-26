@@ -38,7 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-crm-bg text-crm-text font-crm-body">
+    <div data-scope="crm" className="flex h-screen w-screen overflow-hidden bg-crm-bg text-crm-text font-crm-body">
       {/* Collapsible Sidebar */}
       <Sidebar />
 
@@ -47,11 +47,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Top Header Bar */}
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-crm-border px-8 bg-crm-card">
           <div className="flex items-center gap-2.5">
-            <span className="text-xs text-crm-text-muted tracking-[0.1em] uppercase font-medium">
+            <span className="text-[13px] text-crm-text-muted tracking-[0.1em] uppercase font-semibold">
               CRM
             </span>
-            <span className="text-xs text-crm-text-muted/50">/</span>
-            <span className="text-sm font-semibold text-crm-text tracking-wide">
+            <span className="text-[13px] text-crm-text-muted">/</span>
+            <span className="text-[16px] font-semibold text-crm-text tracking-wide">
               {pageTitleFor(pathname)}
             </span>
           </div>
@@ -61,7 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
             </span>
-            <span className="text-[10px] text-crm-text-muted uppercase tracking-[0.12em] font-semibold">
+            <span className="text-[12px] text-crm-text-muted uppercase tracking-[0.12em] font-semibold">
               Live Database
             </span>
           </div>

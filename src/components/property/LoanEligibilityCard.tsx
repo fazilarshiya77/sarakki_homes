@@ -36,7 +36,7 @@ export async function LoanEligibilityCard({ loan }: { loan: LoanEligibility }) {
         {loan.partnerBanks.map((bank) => (
           <span
             key={bank}
-            className="rounded-pill border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground/80"
+            className="rounded-pill border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground"
           >
             {bank}
           </span>

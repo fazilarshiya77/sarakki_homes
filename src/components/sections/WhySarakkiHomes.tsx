@@ -176,7 +176,7 @@ function PillarItem({
       onMouseLeave={onHoverEnd}
       className={mobile ? "relative z-10 flex flex-col items-center px-6 py-5 text-center" : "relative z-10 flex flex-col items-center px-2 pt-0 text-center"}
     >
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: `${GOLD}99` }}>
+      <p className="text-[15px] font-semibold uppercase tracking-[0.14em]" style={{ color: `${GOLD}99` }}>
         Step {String(index + 1).padStart(2, "0")}
       </p>
 

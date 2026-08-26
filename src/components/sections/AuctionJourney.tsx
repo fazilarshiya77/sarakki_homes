@@ -153,8 +153,8 @@ export function AuctionJourney() {
                     >
                       <span
                         className={cn(
-                          "font-display text-[0.85rem] font-medium leading-tight tracking-[0.01em] md:text-[0.95rem]",
-                          i <= active ? "text-background" : "text-muted-foreground group-hover:text-foreground/80"
+                          "font-display text-[0.9375rem] font-medium leading-tight tracking-[0.01em] md:text-[1rem]",
+                          i <= active ? "text-background" : "text-muted-foreground group-hover:text-foreground"
                         )}
                       >
                         {item.title}

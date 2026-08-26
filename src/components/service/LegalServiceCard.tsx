@@ -69,7 +69,7 @@ export function LegalServiceCard({ slug }: { slug: string }) {
               <Icon size={16} strokeWidth={1.75} />
             </span>
             {service.featured && (
-              <span className="absolute left-0 top-0 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-background bg-accent-gold">
+              <span className="absolute left-0 top-0 px-3.5 py-1.5 text-[14px] font-semibold uppercase tracking-[0.14em] text-background bg-accent-gold">
                 Sarakki Homes Advantage
               </span>
             )}

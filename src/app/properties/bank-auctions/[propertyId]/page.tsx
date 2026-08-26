@@ -83,11 +83,11 @@ export default async function BankAuctionDetailPage({
                   <MapPin size={15} />
                   {property.location}
                 </p>
-                <p className="mt-2 text-xs uppercase tracking-[0.1em] text-muted-foreground/70">
+                <p className="mt-2 text-xs uppercase tracking-[0.1em] text-muted-foreground">
                   Property ID · {property.propertyId}
                 </p>
 
-                <p className="mt-6 max-w-2xl text-base leading-relaxed text-foreground/85">
+                <p className="mt-6 max-w-2xl text-base leading-relaxed text-foreground">
                   {property.description}
                 </p>
               </RevealOnScroll>

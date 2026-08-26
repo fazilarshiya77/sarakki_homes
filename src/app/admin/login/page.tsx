@@ -40,7 +40,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#0d0d0d] px-6 py-12">
+    <div data-scope="crm" className="relative flex min-h-screen items-center justify-center bg-[#0d0d0d] px-6 py-12">
       {/* Dynamic Background Gradients */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-[30%] -left-[20%] h-[80%] w-[60%] rounded-full bg-crm-gold-bright/5 blur-[120px]" />

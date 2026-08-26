@@ -48,3 +48,9 @@ next-env.d.ts
 # live in /public/media/properties and ARE committed.
 /public/requirements/
 /public/requirements.zip
+
+# Raw client-supplied font source folder — same reasoning as above (not
+# code, not meant for the repo). The actual font files the app uses are
+# copied into /src/fonts and loaded via next/font/local; those ARE
+# committed.
+/Concert_One,Google_Sans/

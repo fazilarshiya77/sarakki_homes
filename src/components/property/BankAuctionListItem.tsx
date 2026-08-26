@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowUpRight, Landmark, MapPin, MessageCircle } from "lucide-react";
+import { ArrowUpRight, Handshake, Landmark, MapPin, MessageCircle } from "lucide-react";
 import { NoPropertyImage } from "@/components/property/NoPropertyImage";
 import { AuctionStatusBadge } from "@/components/property/AuctionStatusBadge";
+import { ConsultationModal } from "@/components/property/ConsultationModal";
 import { useSiteSettings } from "@/components/providers/SettingsProvider";
 import { buildAuctionWhatsAppLink, type AuctionProperty } from "@/lib/auctionHelpers";
 
@@ -15,6 +17,7 @@ export function BankAuctionListItem({ property }: { property: AuctionProperty })
   const { contact } = useSiteSettings();
   const detailHref = `/properties/bank-auctions/${property.propertyId}`;
   const hasImage = property.images.length > 0;
+  const [consultOpen, setConsultOpen] = useState(false);
 
   return (
     <motion.article
@@ -40,7 +43,7 @@ export function BankAuctionListItem({ property }: { property: AuctionProperty })
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-sm bg-foreground px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-background">
+          <span className="rounded-sm bg-foreground px-2.5 py-1 text-[13px] font-semibold uppercase tracking-wider text-background">
             Bank Auction
           </span>
           <AuctionStatusBadge status={property.derivedStatus} />
@@ -61,17 +64,17 @@ export function BankAuctionListItem({ property }: { property: AuctionProperty })
           )}
           <span>{property.propertyType}</span>
           {property.area && <span>{property.area}</span>}
-          <span className="text-muted-foreground/60">ID · {property.propertyId}</span>
+          <span className="text-muted-foreground">ID · {property.propertyId}</span>
         </p>
       </div>
 
       <div className="flex shrink-0 items-center gap-6 border-t border-border pt-4 sm:border-t-0 sm:border-l sm:pl-6 sm:pt-0">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">Reserve Price</p>
+          <p className="text-[14px] font-semibold uppercase tracking-wider text-muted-foreground">Reserve Price</p>
           <p className="mt-0.5 font-body text-xl font-bold tracking-tight text-foreground">{property.reservePrice || "Not specified"}</p>
         </div>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">Auction Date</p>
+          <p className="text-[14px] font-semibold uppercase tracking-wider text-muted-foreground">Auction Date</p>
           <p className="mt-0.5 text-sm font-semibold text-foreground">{property.auctionDateDisplay || "Not specified"}</p>
         </div>
       </div>
@@ -84,6 +87,20 @@ export function BankAuctionListItem({ property }: { property: AuctionProperty })
           View Details
           <ArrowUpRight size={13} />
         </Link>
+        {/* Tracked path into the CRM — unlike the WhatsApp icon beside
+            it (a direct deep link with no database record), this opens
+            the shared consultation form which POSTs to /api/enquiries
+            and lands the enquiry (with this property already attached)
+            in CRM → Website Enquiries. */}
+        <button
+          type="button"
+          onClick={() => setConsultOpen(true)}
+          aria-label="Request a consultation"
+          title="Request a consultation"
+          className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-sm border border-accent-gold/40 text-accent-gold-dark transition-all duration-300 hover:border-accent-gold hover:bg-accent-gold/10"
+        >
+          <Handshake size={17} />
+        </button>
         <a
           href={buildAuctionWhatsAppLink(property.propertyId, contact.whatsappNumber)}
           target="_blank"
@@ -95,6 +112,13 @@ export function BankAuctionListItem({ property }: { property: AuctionProperty })
           <MessageCircle size={17} />
         </a>
       </div>
+
+      <ConsultationModal
+        open={consultOpen}
+        onClose={() => setConsultOpen(false)}
+        propertyId={property.id}
+        propertyTitle={property.title}
+      />
     </motion.article>
   );
 }

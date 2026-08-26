@@ -3,7 +3,12 @@
 :root {
   /* Color tokens — DESIGN_SYSTEM.md §2 (v2: Forest/Ivory/Champagne system) */
   --background: #F5F1E8;
-  --foreground: #171715;
+  /* Readability pass (client request — older-user contrast, don't rely
+     on opacity for text): --foreground/--muted-foreground darkened to
+     the client's exact spec values. Was #171715 / #766F65 — the old
+     muted-foreground in particular was too light/washed-out for
+     secondary copy (labels, meta, dropdown items). */
+  --foreground: #17231F;
   --accent-gold: #C6A15B;
   --accent-gold-dark: #A98847;
   --accent-emerald: #083C35;
@@ -12,7 +17,7 @@
   --card: #FFFFFF;
   --border: #DCD2BE;
   --success: #5C7A5E;
-  --muted-foreground: #766F65;
+  --muted-foreground: #4F5752;
   --footer: #052C27;
   --glass-tint: rgba(255, 255, 255, 0.08);
 
@@ -55,21 +60,27 @@
   --crm-border: #DED6C9;
   --crm-ivory: #F6F3EE;
 
-  /* CRM typography scale — modern enterprise sans system (Plus Jakarta
-     Sans display + DM Sans UI), DESIGN_SYSTEM.md-aligned readability
-     pass. A proper hierarchy, not a single global bump. Reused by every
-     admin page/component via these tokens or the .crm-* utility
-     classes below rather than one-off Tailwind sizes, so the scale
-     stays consistent. */
-  --crm-text-page-title: clamp(1.75rem, 0.6vw + 1.65rem, 2rem);   /* ~28-32px */
-  --crm-text-section: clamp(1.25rem, 0.4vw + 1.15rem, 1.5rem);    /* ~20-24px */
-  --crm-text-label: 0.875rem;       /* 14px */
-  --crm-text-input: 1rem;           /* 16px */
-  --crm-text-placeholder: 0.9375rem; /* 15px */
-  --crm-text-body: 0.9375rem;       /* 15px */
-  --crm-text-table: 0.9375rem;      /* 15px */
-  --crm-text-value: clamp(1rem, 0.2vw + 0.95rem, 1.125rem); /* ~16-18px */
-  --crm-text-nav: 0.9375rem;        /* 15px */
+  /* CRM typography scale — a proper size hierarchy, not a single global
+     bump (typeface itself is now Roboto site-wide, see
+     --font-crm-display/--font-crm-body in the @theme block below).
+     Reused by every admin page/component via these tokens or the
+     .crm-* utility classes below rather than one-off Tailwind sizes,
+     so the scale stays consistent. */
+  /* Readability pass v2 (client request — CRM used by an older client,
+     must be operable without zooming). Every value below raised toward
+     the upper end of what was already a deliberate scale, not a random
+     bump — page titles/sections/values are fluid via clamp() so they
+     still fit the header bar on a smaller viewport, table/input/nav are
+     a flat size since those columns need to stay predictable. */
+  --crm-text-page-title: clamp(2rem, 0.8vw + 1.85rem, 2.375rem);  /* ~32-38px, was ~28-32px */
+  --crm-text-section: clamp(1.375rem, 0.5vw + 1.25rem, 1.625rem); /* ~22-26px, was ~20-24px */
+  --crm-text-label: 0.9375rem;      /* 15px, was 14px */
+  --crm-text-input: 1.125rem;       /* 18px, was 16px */
+  --crm-text-placeholder: 1rem;     /* 16px, was 15px */
+  --crm-text-body: 1rem;            /* 16px, was 15px */
+  --crm-text-table: 1rem;           /* 16px, was 15px */
+  --crm-text-value: clamp(1.125rem, 0.3vw + 1.05rem, 1.25rem); /* ~18-20px, was ~16-18px */
+  --crm-text-nav: 1rem;             /* 16px, was 15px */
 }
 
 @theme inline {
@@ -94,11 +105,20 @@
   --shadow-soft: var(--shadow-soft);
   --shadow-soft-lg: var(--shadow-soft-lg);
 
-  --font-display: var(--font-display), serif;
-  --font-accent: var(--font-accent), serif;
-  --font-body: var(--font-body), sans-serif;
-  --font-crm-display: var(--font-crm-display), sans-serif;
-  --font-crm-body: var(--font-crm-body), sans-serif;
+  /* Client-requested brand font (Roboto, Google Fonts — variable, 3
+     axes, so every weight is a real cut not synthetic bold), applied
+     everywhere — public site AND CRM. Supersedes the previous Concert
+     One + Google Sans pairing. Kept as five separate theme tokens
+     rather than collapsing every `font-display`/`font-accent`/
+     `font-body`/`font-crm-display`/`font-crm-body` className in the
+     codebase to one — this way every existing usage keeps working
+     unchanged, it just now resolves to Roboto instead of the previous
+     font(s). */
+  --font-display: var(--font-roboto), sans-serif;
+  --font-accent: var(--font-roboto), sans-serif;
+  --font-body: var(--font-roboto), sans-serif;
+  --font-crm-display: var(--font-roboto), sans-serif;
+  --font-crm-body: var(--font-roboto), sans-serif;
 
   --color-crm-espresso: var(--crm-espresso);
   --color-crm-brown: var(--crm-brown);
@@ -111,6 +131,46 @@
   --color-crm-text-muted: var(--crm-text-muted);
   --color-crm-border: var(--crm-border);
   --color-crm-ivory: var(--crm-ivory);
+}
+
+/* ============================================================
+   Public-site typography boost — "make the font bold and larger,
+   strong change" (client request), PUBLIC SITE ONLY. Scoped via
+   Tailwind's own theme CSS variables (every `text-*`/`font-*` utility
+   compiles to `var(--text-*)`/`var(--font-weight-*)`, confirmed in the
+   built CSS), redefined only inside `body:not(:has([data-scope="crm"]))`.
+   Every CRM page wraps its content in a `[data-scope="crm"]` element
+   (see src/app/admin/layout.tsx and src/app/admin/login/page.tsx), so
+   this selector is true on public pages and false on admin pages —
+   the CRM keeps Tailwind's stock scale untouched (it has its own,
+   separate --crm-text-* tokens anyway, see below).
+   ============================================================ */
+body:not(:has([data-scope="crm"])) {
+  font-weight: 500; /* base body copy (Manrope), was inherited 400 */
+
+  --font-weight-medium: 600;
+  --font-weight-semibold: 700;
+
+  --text-xs: 0.8125rem;   /* 13px, was 12px */
+  --text-xs--line-height: calc(1.125 / 0.8125);
+  --text-sm: 0.9375rem;   /* 15px, was 14px */
+  --text-sm--line-height: calc(1.375 / 0.9375);
+  --text-base: 1.125rem;  /* 18px, was 16px */
+  --text-base--line-height: calc(1.75 / 1.125);
+  --text-lg: 1.25rem;     /* 20px, was 18px */
+  --text-lg--line-height: calc(1.85 / 1.25);
+  --text-xl: 1.5rem;      /* 24px, was 20px */
+  --text-xl--line-height: calc(2 / 1.5);
+  --text-2xl: 1.75rem;    /* 28px, was 24px */
+  --text-2xl--line-height: calc(2.15 / 1.75);
+  --text-3xl: 2.25rem;    /* 36px, was 30px */
+  --text-3xl--line-height: calc(2.5 / 2.25);
+  --text-4xl: 2.75rem;    /* 44px, was 36px */
+  --text-4xl--line-height: calc(3 / 2.75);
+  --text-5xl: 3.5rem;     /* 56px, was 48px */
+  --text-6xl: 4.5rem;     /* 72px, was 60px */
+  --text-7xl: 5.5rem;     /* 88px, was 72px — top of the Display range
+                              in DESIGN_SYSTEM.md §3 (88–120px desktop) */
 }
 
 /* ============================================================
@@ -140,7 +200,7 @@
   padding: 0.875rem 1rem;
   font-family: var(--font-crm-body), sans-serif;
   font-size: var(--crm-text-input);
-  font-weight: 450;
+  font-weight: 500;
   letter-spacing: -0.005em;
   line-height: 1.5;
   color: var(--crm-text);
@@ -158,12 +218,11 @@
    table/body text, and emphasized values. Reuse these across admin
    pages instead of inventing one-off text sizes.
 
-   Modern enterprise sans system, deliberately separate from the public
-   site's editorial serif/Manrope pairing: Plus Jakarta Sans
-   (--font-crm-display) for page titles/section headings/emphasized
-   values only, DM Sans (--font-crm-body) for every UI/data surface —
-   nav, labels, inputs, tables, buttons, helper text. No serif, no
-   decorative faces anywhere in the CRM. */
+   --font-crm-display (page titles/section headings/emphasized values)
+   and --font-crm-body (nav, labels, inputs, tables, buttons, helper
+   text) both resolve to the same client-requested brand font (Roboto)
+   — kept as two separate tokens purely so the *size* hierarchy below
+   stays distinct, not because the typeface differs. */
 .crm-page-title {
   font-family: var(--font-crm-display), sans-serif;
   font-size: var(--crm-text-page-title);
@@ -183,15 +242,15 @@
 .crm-body-text {
   font-family: var(--font-crm-body), sans-serif;
   font-size: var(--crm-text-body);
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.6;
   color: var(--crm-text-secondary);
 }
 .crm-table-text {
   font-family: var(--font-crm-body), sans-serif;
   font-size: var(--crm-text-table);
-  font-weight: 400;
-  line-height: 1.5;
+  font-weight: 500;
+  line-height: 1.55;
   color: var(--crm-text);
 }
 .crm-value {
@@ -239,11 +298,11 @@
   gap: 0.5rem;
   border-radius: 6px;
   font-family: var(--font-crm-body), sans-serif;
-  font-size: 0.875rem;
+  font-size: 0.9375rem; /* 15px, was 14px */
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 0.8rem 1.4rem;
+  padding: 0.95rem 1.4rem; /* taller — comfortable ~44px+ touch target */
   transition: all 0.25s var(--ease-reveal, ease);
   white-space: nowrap;
 }

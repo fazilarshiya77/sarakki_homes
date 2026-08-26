@@ -166,7 +166,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
                     className={cn(
                       "group relative py-1 text-sm font-medium tracking-wide transition-colors duration-300",
                       isSolid
-                        ? "text-foreground/75 hover:text-foreground"
+                        ? "text-foreground hover:text-foreground"
                         : "text-background/90 hover:text-background",
                       isActive && (isSolid ? "text-foreground" : "text-background")
                     )}
@@ -190,7 +190,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
                     className={cn(
                       "group relative flex items-center gap-1 py-1 text-sm font-medium tracking-wide transition-colors duration-300",
                       isSolid
-                        ? "text-foreground/75 hover:text-foreground"
+                        ? "text-foreground hover:text-foreground"
                         : "text-background/90 hover:text-background",
                       isActive && (isSolid ? "text-foreground" : "text-background")
                     )}
@@ -229,7 +229,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
                           <Link
                             key={item.label}
                             href={item.href}
-                            className="block rounded-sm px-4 py-2.5 text-sm leading-snug text-foreground/75 transition-colors duration-200 hover:bg-surface hover:text-foreground"
+                            className="block rounded-sm px-4 py-2.5 text-sm leading-snug text-foreground transition-colors duration-200 hover:bg-surface hover:text-foreground"
                           >
                             {item.label}
                           </Link>
@@ -302,7 +302,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
                       key={link.href}
                       href={link.href}
                       onClick={() => setMenuOpen(false)}
-                      className="rounded-sm px-4 py-3 text-sm font-medium text-foreground/80 transition-colors duration-200 hover:bg-surface hover:text-foreground"
+                      className="rounded-sm px-4 py-3 text-sm font-medium text-foreground transition-colors duration-200 hover:bg-surface hover:text-foreground"
                     >
                       {link.label}
                     </Link>
@@ -312,7 +312,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
                 const isOpen = mobileOpenAccordion === link.label;
                 return (
                   <div key={link.href}>
-                    <div className="flex items-center rounded-sm text-foreground/80">
+                    <div className="flex items-center rounded-sm text-foreground">
                       <Link
                         href={link.href}
                         onClick={() => setMenuOpen(false)}
@@ -347,7 +347,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
                               key={item.label}
                               href={item.href}
                               onClick={() => setMenuOpen(false)}
-                              className="block rounded-sm px-4 py-2.5 text-sm text-foreground/70 transition-colors duration-200 hover:bg-surface hover:text-foreground"
+                              className="block rounded-sm px-4 py-2.5 text-sm text-foreground transition-colors duration-200 hover:bg-surface hover:text-foreground"
                             >
                               {item.label}
                             </Link>
@@ -404,7 +404,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
 
                 <div className="space-y-6 text-[#171715]">
                   <div>
-                    <span className="text-[10px] uppercase tracking-[0.15em] text-[#C6A15B] font-semibold">Contact & Location</span>
+                    <span className="text-[14px] uppercase tracking-[0.15em] text-[#C6A15B] font-semibold">Contact & Location</span>
                     <h3 className="font-display text-2xl tracking-wide mt-1 text-[#171715]">Sarakki Homes</h3>
                     <div className="w-12 h-[1.5px] bg-[#C6A15B] mt-3" />
                   </div>
@@ -412,7 +412,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
                   <div className="space-y-4 text-xs leading-relaxed">
                     <div className="flex gap-3 border-b border-border/60 pb-3">
                       <MapPin size={16} className="text-[#C6A15B] shrink-0 mt-0.5" />
-                      <p className="font-semibold text-foreground uppercase text-[11px] tracking-wide leading-relaxed">
+                      <p className="font-semibold text-foreground uppercase text-[15px] tracking-wide leading-relaxed">
                         SARAKKI HOMES, # 5A, DR. PUNEETH RAJKUMAR ROAD, NEXT TO UNION BANK OF INDIA, OPP. NANDI GARDEN RESTAURANT, NEAR J P NAGAR METRO STATION, J P NAGAR 6TH PHASE, BENGALURU 560078.
                       </p>
                     </div>
@@ -421,29 +421,29 @@ export function Header({ solid = false }: { solid?: boolean }) {
                       <div className="flex items-center gap-3">
                         <Phone size={14} className="text-[#C6A15B] shrink-0" />
                         <p>
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Phone</span>
-                          <span className="font-semibold font-mono text-[11px]">080-41550138</span>
+                          <span className="text-[14px] uppercase tracking-wider text-muted-foreground block">Phone</span>
+                          <span className="font-semibold font-mono text-[15px]">080-41550138</span>
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
                         <MessageCircle size={14} className="text-[#C6A15B] shrink-0" />
                         <p>
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Mobile / WhatsApp</span>
-                          <span className="font-semibold font-mono text-[11px]">9663676464</span>
+                          <span className="text-[14px] uppercase tracking-wider text-muted-foreground block">Mobile / WhatsApp</span>
+                          <span className="font-semibold font-mono text-[15px]">9663676464</span>
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
                         <Mail size={14} className="text-[#C6A15B] shrink-0" />
                         <p>
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Email</span>
-                          <span className="font-semibold text-[11px]">SARAKKIHOMES@GMAIL.COM</span>
+                          <span className="text-[14px] uppercase tracking-wider text-muted-foreground block">Email</span>
+                          <span className="font-semibold text-[15px]">SARAKKIHOMES@GMAIL.COM</span>
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
                         <Globe size={14} className="text-[#C6A15B] shrink-0" />
                         <p>
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Website</span>
-                          <span className="font-semibold text-[11px]">SARAKKIHOMES.COM</span>
+                          <span className="text-[14px] uppercase tracking-wider text-muted-foreground block">Website</span>
+                          <span className="font-semibold text-[15px]">SARAKKIHOMES.COM</span>
                         </p>
                       </div>
                     </div>
@@ -451,8 +451,8 @@ export function Header({ solid = false }: { solid?: boolean }) {
                     <div className="flex items-start gap-3 pt-3 border-t border-border/60">
                       <Clock size={15} className="text-[#C6A15B] shrink-0 mt-0.5" />
                       <p>
-                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Office Timings</span>
-                        <span className="font-semibold text-[11px] uppercase">MONDAY TO SATURDAY 10 AM TO 7 PM. SUNDAY HOLIDAY.</span>
+                        <span className="text-[14px] uppercase tracking-wider text-muted-foreground block">Office Timings</span>
+                        <span className="font-semibold text-[15px] uppercase">MONDAY TO SATURDAY 10 AM TO 7 PM. SUNDAY HOLIDAY.</span>
                       </p>
                     </div>
                   </div>
@@ -462,13 +462,13 @@ export function Header({ solid = false }: { solid?: boolean }) {
                       href="https://maps.google.com/?q=Sarakki+Homes,+J+P+Nagar+6th+Phase,+Bengaluru"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 inline-flex items-center justify-center gap-2 border border-[#C6A15B]/50 rounded-sm py-3 text-[10px] font-semibold uppercase tracking-wider text-[#C6A15B] hover:bg-[#E8DFD0] transition-colors"
+                      className="flex-1 inline-flex items-center justify-center gap-2 border border-[#C6A15B]/50 rounded-sm py-3 text-[14px] font-semibold uppercase tracking-wider text-[#C6A15B] hover:bg-[#E8DFD0] transition-colors"
                     >
                       <Map size={12} /> Location Map
                     </a>
                     <button
                       onClick={() => setModalOpen(false)}
-                      className="px-6 rounded-sm bg-[#C6A15B] py-3 text-[10px] font-semibold uppercase tracking-wider text-background hover:bg-[#A98847] transition-colors"
+                      className="px-6 rounded-sm bg-[#C6A15B] py-3 text-[14px] font-semibold uppercase tracking-wider text-background hover:bg-[#A98847] transition-colors"
                     >
                       Close
                     </button>

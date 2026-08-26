@@ -78,7 +78,7 @@ export function BuilderMarquee() {
       >
         <div className="hidden shrink-0 items-center gap-2 self-stretch border-r border-accent-gold/25 bg-accent-emerald-dark px-4 sm:flex md:px-6">
           <span className="h-1 w-1 shrink-0 rounded-full bg-accent-gold" aria-hidden />
-          <span className="whitespace-nowrap font-body text-[10px] font-semibold uppercase tracking-[0.18em] text-accent-gold">
+          <span className="whitespace-nowrap font-body text-[14px] font-semibold uppercase tracking-[0.18em] text-accent-gold">
             Partner Builders
           </span>
         </div>
@@ -96,7 +96,7 @@ export function BuilderMarquee() {
               {PARTNER_BUILDERS.map((name) => (
                 <span
                   key={name}
-                  className="whitespace-nowrap font-body text-[11px] font-semibold uppercase tracking-[0.12em] text-[#F6F3EE] md:text-[11.5px]"
+                  className="whitespace-nowrap font-body text-[15px] font-semibold uppercase tracking-[0.12em] text-[#F6F3EE] md:text-[15px]"
                 >
                   {name}
                 </span>
@@ -106,7 +106,7 @@ export function BuilderMarquee() {
             <motion.div ref={trackRef} style={{ x }} className="flex w-max items-center will-change-transform">
               {doubled.map((name, i) => (
                 <span key={`${name}-${i}`} className="flex items-center gap-6 px-3">
-                  <span className="whitespace-nowrap font-body text-[11px] font-semibold uppercase tracking-[0.12em] text-[#F6F3EE] md:text-[11.5px]">
+                  <span className="whitespace-nowrap font-body text-[15px] font-semibold uppercase tracking-[0.12em] text-[#F6F3EE] md:text-[15px]">
                     {name}
                   </span>
                   <span className="h-1 w-1 shrink-0 rounded-full bg-accent-gold/70" aria-hidden />

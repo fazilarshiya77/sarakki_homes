@@ -4,7 +4,9 @@ import { Footer } from "@/components/sections/Footer";
 import { Container, Section } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { BankAuctionExplorer } from "@/components/property/BankAuctionExplorer";
+import { BrochureShowcase } from "@/components/property/BrochureShowcase";
 import { getBankAuctionProperties } from "@/lib/auctions";
+import { getPublishedBrochures } from "@/lib/brochures";
 
 // Auction listings are admin-managed and can change frequently — re-fetch at
 // most once a minute rather than only at build time.
@@ -17,7 +19,10 @@ export const metadata: Metadata = {
 };
 
 export default async function BankAuctionsPage() {
-  const properties = await getBankAuctionProperties();
+  const [properties, brochures] = await Promise.all([
+    getBankAuctionProperties(),
+    getPublishedBrochures("bank-auctions"),
+  ]);
 
   return (
     <>
@@ -38,6 +43,10 @@ export default async function BankAuctionsPage() {
             </p>
           </Container>
         </Section>
+
+        {/* Placed above the property grid, right under the intro, so
+            it's visible without scrolling past listings first. */}
+        <BrochureShowcase brochures={brochures} />
 
         <Section className="bg-[#EDE6D6]">
           <Container>

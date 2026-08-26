@@ -184,7 +184,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                   </p>
                 </div>
 
-                <span className="text-[10px] uppercase tracking-[0.15em] text-[#F7F3EA]/40 mb-8 hover:text-[#C6A15B] transition-colors">
+                <span className="text-[14px] uppercase tracking-[0.15em] text-[#F7F3EA]/40 mb-8 hover:text-[#C6A15B] transition-colors">
                   Click to Open Portfolio →
                 </span>
               </div>
@@ -219,7 +219,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                             <span className="font-semibold text-sm text-[#171715] group-hover:text-accent-gold-dark transition-colors">
                               {t.name}
                             </span>
-                            <span className="text-[10px] uppercase tracking-wide text-muted-foreground mt-0.5">
+                            <span className="text-[14px] uppercase tracking-wide text-muted-foreground mt-0.5">
                               {t.location}
                             </span>
                           </div>
@@ -228,7 +228,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                     </div>
                   </div>
 
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Index Page • Portfolio Vol. I</span>
+                  <span className="text-[14px] uppercase tracking-wider text-muted-foreground">Index Page • Portfolio Vol. I</span>
                 </div>
               </div>
             </div>
@@ -323,7 +323,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                     </div>
                   </div>
 
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-full text-right">Page 6 • Sarakki Homes</span>
+                  <span className="text-[14px] uppercase tracking-wider text-muted-foreground w-full text-right">Page 6 • Sarakki Homes</span>
                 </div>
               </div>
 
@@ -343,7 +343,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                     <div className="space-y-4 text-xs leading-relaxed">
                       <div className="flex gap-3">
                         <MapPin size={16} className="text-[#C6A15B] shrink-0 mt-0.5" />
-                        <p className="font-semibold text-foreground/90 uppercase text-[11px] tracking-wide">
+                        <p className="font-semibold text-foreground uppercase text-[15px] tracking-wide">
                           SARAKKI HOMES, # 5A, DR. PUNEETH RAJKUMAR ROAD, NEXT TO UNION BANK OF INDIA, OPP. NANDI GARDEN RESTAURANT, NEAR J P NAGAR METRO STATION, J P NAGAR 6TH PHASE, BENGALURU 560078.
                         </p>
                       </div>
@@ -352,29 +352,29 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                         <div className="flex items-center gap-3">
                           <Phone size={14} className="text-[#C6A15B] shrink-0" />
                           <p>
-                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Phone</span>
-                            <span className="font-semibold font-mono text-[11px]">080-41550138</span>
+                            <span className="text-[14px] uppercase tracking-wider text-muted-foreground block">Phone</span>
+                            <span className="font-semibold font-mono text-[15px]">080-41550138</span>
                           </p>
                         </div>
                         <div className="flex items-center gap-3">
                           <Globe size={14} className="text-[#C6A15B] shrink-0" />
                           <p>
-                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Mobile / WhatsApp</span>
-                            <span className="font-semibold font-mono text-[11px]">9663676464</span>
+                            <span className="text-[14px] uppercase tracking-wider text-muted-foreground block">Mobile / WhatsApp</span>
+                            <span className="font-semibold font-mono text-[15px]">9663676464</span>
                           </p>
                         </div>
                         <div className="flex items-center gap-3">
                           <Mail size={14} className="text-[#C6A15B] shrink-0" />
                           <p>
-                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Email</span>
-                            <span className="font-semibold text-[11px]">SARAKKIHOMES@GMAIL.COM</span>
+                            <span className="text-[14px] uppercase tracking-wider text-muted-foreground block">Email</span>
+                            <span className="font-semibold text-[15px]">SARAKKIHOMES@GMAIL.COM</span>
                           </p>
                         </div>
                         <div className="flex items-center gap-3">
                           <Clock size={14} className="text-[#C6A15B] shrink-0" />
                           <p>
-                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground block">Office Timings</span>
-                            <span className="font-semibold text-[11px]">Mon to Sat: 10 AM - 7 PM (Sunday Holiday)</span>
+                            <span className="text-[14px] uppercase tracking-wider text-muted-foreground block">Office Timings</span>
+                            <span className="font-semibold text-[15px]">Mon to Sat: 10 AM - 7 PM (Sunday Holiday)</span>
                           </p>
                         </div>
                       </div>
@@ -387,7 +387,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-2 border border-[#C6A15B]/50 rounded-sm px-4 py-2 hover:bg-[#EEE0C8] transition-colors font-semibold text-[10px] uppercase tracking-wider text-[#C6A15B]"
+                      className="inline-flex items-center gap-2 border border-[#C6A15B]/50 rounded-sm px-4 py-2 hover:bg-[#EEE0C8] transition-colors font-semibold text-[14px] uppercase tracking-wider text-[#C6A15B]"
                     >
                       <Map size={12} /> View Location Map
                     </a>
@@ -425,13 +425,13 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center justify-center rounded-sm bg-[#C6A15B] px-6 py-2.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#F7F3EA] transition-all hover:bg-[#9A7638]"
+                        className="inline-flex items-center justify-center rounded-sm bg-[#C6A15B] px-6 py-2.5 text-[14px] font-semibold uppercase tracking-[0.1em] text-[#F7F3EA] transition-all hover:bg-[#9A7638]"
                       >
                         Book a Consultation
                       </a>
                     </div>
                   </div>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-full text-right">Page 7 • Vol. I</span>
+                  <span className="text-[14px] uppercase tracking-wider text-muted-foreground w-full text-right">Page 7 • Vol. I</span>
                 </div>
               </div>
 
@@ -449,17 +449,17 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                 <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-[#C6A15B]/30" />
                 <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-[#C6A15B]/30" />
 
-                <span className="text-[#C6A15B]/40 text-[10px] uppercase tracking-[0.2em] font-semibold mt-8">End of Portfolio</span>
+                <span className="text-[#C6A15B]/40 text-[14px] uppercase tracking-[0.2em] font-semibold mt-8">End of Portfolio</span>
 
                 <div className="flex flex-col items-center">
                   <span className="h-6 w-6 rounded-full border border-[#C6A15B]/40 flex items-center justify-center text-[#C6A15B] font-display text-xs mb-4">S</span>
                   <p className="font-display text-base tracking-[0.1em] text-[#F7F3EA]/80 font-bold uppercase">
                     Sarakki Homes
                   </p>
-                  <p className="text-[10px] text-muted-foreground mt-2">© 2026 All Rights Reserved.</p>
+                  <p className="text-[14px] text-muted-foreground mt-2">© 2026 All Rights Reserved.</p>
                 </div>
 
-                <span className="text-[10px] uppercase tracking-[0.15em] text-[#F7F3EA]/40 mb-8 hover:text-[#C6A15B] transition-colors">
+                <span className="text-[14px] uppercase tracking-[0.15em] text-[#F7F3EA]/40 mb-8 hover:text-[#C6A15B] transition-colors">
                   ← Go Back
                 </span>
               </div>
@@ -510,7 +510,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
             {mobilePage === 0 && (
               <div className="absolute inset-0 bg-[#083C35] p-8 flex flex-col justify-between items-center text-center">
                 <div className="absolute inset-4 border border-[#C6A15B]/20 pointer-events-none rounded-sm" />
-                <span className="text-[10px] uppercase tracking-[0.15em] text-[#C6A15B]/60 font-semibold mt-4">Exclusive Portfolio</span>
+                <span className="text-[14px] uppercase tracking-[0.15em] text-[#C6A15B]/60 font-semibold mt-4">Exclusive Portfolio</span>
                 <div className="flex flex-col items-center">
                   <h3 className="font-display text-3xl text-[#F7F3EA] tracking-wider font-bold">
                     SARAKKI HOMES
@@ -520,7 +520,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                     Trusted Property Stories
                   </p>
                 </div>
-                <span className="text-[9px] uppercase tracking-[0.12em] text-[#F7F3EA]/40 mb-4" onClick={nextMobile}>
+                <span className="text-[13px] uppercase tracking-[0.12em] text-[#F7F3EA]/40 mb-4" onClick={nextMobile}>
                   Tap Next to Open Portfolio →
                 </span>
               </div>
@@ -530,7 +530,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
               <div className="h-full flex flex-col justify-between">
                 <div>
                   <h4 className="font-display text-xl tracking-wide text-[#171715]">Client Stories</h4>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Vetted transaction logs.</p>
+                  <p className="text-[14px] text-muted-foreground mt-0.5">Vetted transaction logs.</p>
                   
                   <div className="mt-6 space-y-2.5">
                     {CLIENT_TESTIMONIALS.map((t, idx) => (
@@ -539,14 +539,14 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                         onClick={() => setMobilePage(idx + 2)}
                         className="flex items-center gap-3 p-2.5 rounded-sm bg-[#EEE0C8]/40 border border-border/20 cursor-pointer"
                       >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#C6A15B]/40 bg-[#F7F3EA] text-[10px] font-semibold font-display text-[#C6A15B]">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#C6A15B]/40 bg-[#F7F3EA] text-[14px] font-semibold font-display text-[#C6A15B]">
                           {t.initials}
                         </div>
                         <div className="flex flex-col">
                           <span className="font-semibold text-xs text-[#171715]">
                             {t.name}
                           </span>
-                          <span className="text-[9px] uppercase tracking-wide text-muted-foreground">
+                          <span className="text-[13px] uppercase tracking-wide text-muted-foreground">
                             {t.category}
                           </span>
                         </div>
@@ -554,7 +554,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                     ))}
                   </div>
                 </div>
-                <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Index Page • Sarakki Homes</span>
+                <span className="text-[13px] uppercase tracking-wider text-muted-foreground">Index Page • Sarakki Homes</span>
               </div>
             )}
 
@@ -567,7 +567,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
             {mobilePage === 6 && (
               <div className="h-full flex flex-col justify-between items-center text-center">
                 <div className="my-auto space-y-4">
-                  <span className="text-[10px] uppercase tracking-[0.12em] text-[#C6A15B] font-semibold">Your Next Chapter</span>
+                  <span className="text-[14px] uppercase tracking-[0.12em] text-[#C6A15B] font-semibold">Your Next Chapter</span>
                   <h4 className="font-display text-2xl leading-snug text-[#171715]">
                     Begin Your Investment Journey
                   </h4>
@@ -577,13 +577,13 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                   <div className="pt-2">
                     <button
                       onClick={nextMobile}
-                      className="inline-flex items-center justify-center rounded-sm bg-[#C6A15B] px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#F7F3EA]"
+                      className="inline-flex items-center justify-center rounded-sm bg-[#C6A15B] px-6 py-3 text-[14px] font-semibold uppercase tracking-[0.1em] text-[#F7F3EA]"
                     >
                       Contact & Locations
                     </button>
                   </div>
                 </div>
-                <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Page 6 • Sarakki Homes</span>
+                <span className="text-[13px] uppercase tracking-wider text-muted-foreground">Page 6 • Sarakki Homes</span>
               </div>
             )}
 
@@ -592,19 +592,19 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                 <div className="space-y-4">
                   <h4 className="font-display text-xl tracking-wide">Office Contact</h4>
                   
-                  <div className="space-y-3.5 leading-relaxed text-[11px]">
+                  <div className="space-y-3.5 leading-relaxed text-[15px]">
                     <div className="flex gap-2">
                       <MapPin size={14} className="text-[#C6A15B] shrink-0 mt-0.5" />
-                      <p className="font-semibold text-foreground/90 uppercase text-[9px]">
+                      <p className="font-semibold text-foreground uppercase text-[13px]">
                         SARAKKI HOMES, # 5A, DR. PUNEETH RAJKUMAR ROAD, NEXT TO UNION BANK, J P NAGAR 6TH PHASE, BENGALURU 560078.
                       </p>
                     </div>
 
                     <div className="space-y-2 pt-2 border-t border-border/40">
-                      <p><span className="text-[9px] uppercase text-muted-foreground">Phone:</span> 080-41550138</p>
-                      <p><span className="text-[9px] uppercase text-muted-foreground">WhatsApp:</span> 9663676464</p>
-                      <p><span className="text-[9px] uppercase text-muted-foreground">Email:</span> SARAKKIHOMES@GMAIL.COM</p>
-                      <p><span className="text-[9px] uppercase text-muted-foreground">Timings:</span> Mon-Sat 10AM-7PM (Sun Holiday)</p>
+                      <p><span className="text-[13px] uppercase text-muted-foreground">Phone:</span> 080-41550138</p>
+                      <p><span className="text-[13px] uppercase text-muted-foreground">WhatsApp:</span> 9663676464</p>
+                      <p><span className="text-[13px] uppercase text-muted-foreground">Email:</span> SARAKKIHOMES@GMAIL.COM</p>
+                      <p><span className="text-[13px] uppercase text-muted-foreground">Timings:</span> Mon-Sat 10AM-7PM (Sun Holiday)</p>
                     </div>
                   </div>
                 </div>
@@ -614,11 +614,11 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                     href="https://maps.google.com/?q=Sarakki+Homes,+J+P+Nagar+6th+Phase,+Bengaluru"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 border border-[#C6A15B]/50 rounded-sm px-3 py-1.5 text-[9px] uppercase tracking-wider text-[#C6A15B]"
+                    className="inline-flex items-center gap-1.5 border border-[#C6A15B]/50 rounded-sm px-3 py-1.5 text-[13px] uppercase tracking-wider text-[#C6A15B]"
                   >
                     <Map size={10} /> Maps Location
                   </a>
-                  <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Page 7</span>
+                  <span className="text-[13px] uppercase tracking-wider text-muted-foreground">Page 7</span>
                 </div>
               </div>
             )}
@@ -626,15 +626,15 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
             {mobilePage === 8 && (
               <div className="absolute inset-0 bg-[#083C35] p-8 flex flex-col justify-between items-center text-center">
                 <div className="absolute inset-4 border border-[#C6A15B]/20 pointer-events-none rounded-sm" />
-                <span className="text-[#C6A15B]/40 text-[9px] uppercase tracking-[0.15em] font-semibold mt-4">End of Portfolio</span>
+                <span className="text-[#C6A15B]/40 text-[13px] uppercase tracking-[0.15em] font-semibold mt-4">End of Portfolio</span>
                 <div className="flex flex-col items-center">
-                  <span className="h-5 w-5 rounded-full border border-[#C6A15B]/40 flex items-center justify-center text-[#C6A15B] font-display text-[10px] mb-3">S</span>
+                  <span className="h-5 w-5 rounded-full border border-[#C6A15B]/40 flex items-center justify-center text-[#C6A15B] font-display text-[14px] mb-3">S</span>
                   <p className="font-display text-sm tracking-[0.1em] text-[#F7F3EA]/80 font-bold uppercase">
                     Sarakki Homes
                   </p>
-                  <p className="text-[9px] text-muted-foreground mt-1">© 2026 All Rights Reserved.</p>
+                  <p className="text-[13px] text-muted-foreground mt-1">© 2026 All Rights Reserved.</p>
                 </div>
-                <span className="text-[9px] uppercase tracking-[0.12em] text-[#F7F3EA]/40 mb-4" onClick={() => setMobilePage(0)}>
+                <span className="text-[13px] uppercase tracking-[0.12em] text-[#F7F3EA]/40 mb-4" onClick={() => setMobilePage(0)}>
                   ← Restart Portfolio
                 </span>
               </div>
@@ -651,7 +651,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
             >
               <ChevronLeft size={14} /> Prev
             </button>
-            <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+            <span className="text-[14px] font-semibold tracking-wider text-muted-foreground uppercase">
               {mobilePage === 0 ? "Cover" : mobilePage === 8 ? "Back" : `${mobilePage} of 7`}
             </span>
             <button
@@ -687,7 +687,7 @@ function TestimonialPage({ testimonial, pageNum }: { testimonial: TestimonialDat
           </div>
           <div className="flex flex-col">
             <h5 className="font-display text-xl font-bold tracking-wide text-[#171715]">{testimonial.name}</h5>
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground mt-0.5">
+            <span className="text-[14px] uppercase tracking-wider text-muted-foreground mt-0.5">
               {testimonial.location}
             </span>
           </div>
@@ -716,13 +716,13 @@ function TestimonialPage({ testimonial, pageNum }: { testimonial: TestimonialDat
 
         {/* Property Type / Category badge */}
         <div>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#C6A15B] bg-[#C6A15B]/8 px-3 py-1 rounded-sm">
+          <span className="text-[14px] font-semibold uppercase tracking-wider text-[#C6A15B] bg-[#C6A15B]/8 px-3 py-1 rounded-sm">
             {testimonial.category}
           </span>
         </div>
       </div>
 
-      <span className="text-[10px] uppercase tracking-wider text-muted-foreground text-right w-full">
+      <span className="text-[14px] uppercase tracking-wider text-muted-foreground text-right w-full">
         Page {pageNum} • Ledger Records
       </span>
     </div>
@@ -747,7 +747,7 @@ function MobileTestimonialPage({ testimonial, pageNum }: { testimonial: Testimon
           </div>
           <div className="flex flex-col">
             <h5 className="font-display text-base font-bold text-[#171715]">{testimonial.name}</h5>
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
+            <span className="text-[13px] uppercase tracking-wider text-muted-foreground">
               {testimonial.location}
             </span>
           </div>
@@ -782,7 +782,7 @@ function MobileTestimonialPage({ testimonial, pageNum }: { testimonial: Testimon
         </div>
       </div>
 
-      <span className="text-[9px] uppercase tracking-wider text-muted-foreground w-full text-right">
+      <span className="text-[13px] uppercase tracking-wider text-muted-foreground w-full text-right">
         Page {pageNum} • stories
       </span>
     </div>

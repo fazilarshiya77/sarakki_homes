@@ -42,43 +42,43 @@ export function PropertyOverview({ property }: { property: Property }) {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {property.landmark && (
               <div className="rounded-sm border border-border/80 bg-card/40 p-4">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Landmark</span>
+                <span className="text-[14px] uppercase tracking-wider text-muted-foreground font-semibold">Landmark</span>
                 <p className="text-xs font-semibold text-foreground mt-1">{property.landmark}</p>
               </div>
             )}
             {property.approval && (
               <div className="rounded-sm border border-border/80 bg-card/40 p-4">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Approval</span>
+                <span className="text-[14px] uppercase tracking-wider text-muted-foreground font-semibold">Approval</span>
                 <p className="text-xs font-semibold text-foreground mt-1">{property.approval}</p>
               </div>
             )}
             {property.landArea && (
               <div className="rounded-sm border border-border/80 bg-card/40 p-4">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Land Area</span>
+                <span className="text-[14px] uppercase tracking-wider text-muted-foreground font-semibold">Land Area</span>
                 <p className="text-xs font-semibold text-foreground mt-1">{property.landArea}</p>
               </div>
             )}
             {property.floors && (
               <div className="rounded-sm border border-border/80 bg-card/40 p-4">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Floors</span>
+                <span className="text-[14px] uppercase tracking-wider text-muted-foreground font-semibold">Floors</span>
                 <p className="text-xs font-semibold text-foreground mt-1">{property.floors}</p>
               </div>
             )}
             {property.totalFlats && (
               <div className="rounded-sm border border-border/80 bg-card/40 p-4">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Total Flats</span>
+                <span className="text-[14px] uppercase tracking-wider text-muted-foreground font-semibold">Total Flats</span>
                 <p className="text-xs font-semibold text-foreground mt-1">{property.totalFlats} units</p>
               </div>
             )}
             {property.blocks && (
               <div className="rounded-sm border border-border/80 bg-card/40 p-4">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Blocks</span>
+                <span className="text-[14px] uppercase tracking-wider text-muted-foreground font-semibold">Blocks</span>
                 <p className="text-xs font-semibold text-foreground mt-1">{property.blocks}</p>
               </div>
             )}
             {property.availability && (
               <div className="rounded-sm border border-border/80 bg-card/40 p-4">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Availability</span>
+                <span className="text-[14px] uppercase tracking-wider text-muted-foreground font-semibold">Availability</span>
                 <p className="text-xs font-semibold text-emerald-600 mt-1">{property.availability} units left</p>
               </div>
             )}
