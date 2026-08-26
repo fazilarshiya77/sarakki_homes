@@ -62,7 +62,7 @@ export function DealRevenuePanel({
         const data = await res.json();
         if (!cancelled && Array.isArray(data.properties)) {
           setProperties(
-            data.properties.map((p: any) => ({
+            data.properties.map((p: { id: string; title: string; propertyId: string }) => ({
               id: p.id,
               title: p.title,
               propertyId: p.propertyId,
@@ -90,6 +90,12 @@ export function DealRevenuePanel({
 
   useEffect(() => {
     if (commissionTouched) return;
+    // Intentional: this syncs the editable `commission` field from the
+    // derived percentage calculation until the admin manually overrides
+    // it (commissionTouched) — a real "external state until overridden"
+    // case, not a plain derived-during-render value, since the field
+    // must stay independently editable afterward.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCommission(derived === null ? "" : String(derived));
   }, [derived, commissionTouched]);
 
@@ -124,8 +130,8 @@ export function DealRevenuePanel({
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
-    } catch (err: any) {
-      setError(err?.message || "Could not save deal details.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save deal details.");
     } finally {
       setSaving(false);
     }

@@ -72,6 +72,11 @@ function LeadsPageInner() {
   // into this page with the modal already open, instead of landing on
   // the list and making the admin find + click Add Lead themselves.
   useEffect(() => {
+    // Intentional: syncing UI state (modal open/closed) from the URL's
+    // `?new=1` deep-link param is exactly the "external system" a
+    // layout effect exists for, not a value that could be computed
+    // during render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (searchParams.get("new") === "1") setModalOpen(true);
   }, [searchParams]);
 
@@ -89,6 +94,9 @@ function LeadsPageInner() {
   };
 
   useEffect(() => {
+    // Standard fetch-on-mount — setState happens inside fetchLeads
+    // after its own await, not synchronously in this effect body.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchLeads();
   }, []);
 
@@ -250,7 +258,14 @@ function LeadsPageInner() {
                     key={lead.id}
                     layoutId={`lead_${lead.id}`}
                     draggable
-                    onDragStart={(e: any) => e.dataTransfer.setData("text/lead-id", lead.id)}
+                    // motion.div's TS types give onDragStart its own
+                    // drag-gesture signature (MouseEvent|TouchEvent|
+                    // PointerEvent), not the native HTML5 DragEvent this
+                    // actually receives via the plain `draggable`
+                    // attribute — a real gap in framer-motion's types,
+                    // not a mistyped handler, hence the cast through
+                    // `unknown` rather than `any`.
+                    onDragStart={(e) => (e as unknown as React.DragEvent).dataTransfer.setData("text/lead-id", lead.id)}
                     className="cursor-grab rounded-sm border border-crm-border/20 bg-crm-card p-3.5 shadow-sm hover:border-crm-gold-bright/30 active:cursor-grabbing transition-colors"
                   >
                     <Link href={`/admin/leads/${lead.id}`} className="block">

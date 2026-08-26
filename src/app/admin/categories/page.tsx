@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Tags, Loader2, Trash2 } from "lucide-react";
+import { Tags, Loader2, Trash2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 
 interface Category {
@@ -39,6 +39,9 @@ export default function CategoriesPage() {
   };
 
   useEffect(() => {
+    // Standard fetch-on-mount -- setState happens inside fetchCategories
+    // after its own await, not synchronously in this effect body.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCategories();
   }, []);
 
@@ -90,7 +93,7 @@ export default function CategoriesPage() {
         // leaving the admin to guess why nothing happened.
         setDeleteError(data.error || "Couldn't delete this category. Please try again.");
       }
-    } catch (err) {
+    } catch {
       setDeleteError("Couldn't delete this category. Please try again.");
     } finally {
       setDeleting(false);

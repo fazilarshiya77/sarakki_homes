@@ -41,7 +41,7 @@ export default async function EditPropertyPage({
     id: property.id,
     title: property.title,
     categoryId: property.categoryId,
-    builderId: property.builderId,
+    builderId: property.builderId ?? "",
     type: property.type,
     price: property.price,
     priceValueLakh: String(property.priceValueLakh),

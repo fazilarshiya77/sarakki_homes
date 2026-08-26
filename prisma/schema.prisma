@@ -73,8 +73,12 @@ model Property {
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
 
-  builderId String
-  builder   Builder @relation(fields: [builderId], references: [id])
+  // Optional: a listing can exist before a builder is confirmed/
+  // assigned (or simply have none, e.g. an individual resale). Was a
+  // required FK — relaxed so the wizard's Builder field can offer a
+  // real "None" option instead of forcing a pick.
+  builderId String?
+  builder   Builder? @relation(fields: [builderId], references: [id], onDelete: SetNull)
 
   // Auction details (optional)
   auctionInfo AuctionInfo?

@@ -193,7 +193,7 @@ export function Sidebar() {
                 {session.user.name}
               </span>
               <span className="text-[10.5px] text-white/45 uppercase tracking-wide font-medium">
-                {(session.user as any).role || "SALES_EXECUTIVE"}
+                {session.user.role || "SALES_EXECUTIVE"}
               </span>
             </div>
           </div>

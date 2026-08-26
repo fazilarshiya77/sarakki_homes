@@ -11,7 +11,6 @@ import {
   Calendar,
   Clock,
   UserCheck,
-  ClipboardList,
   ChevronRight,
   Loader2,
   Trash2,
@@ -91,6 +90,9 @@ export default function EnquiriesPage() {
   };
 
   useEffect(() => {
+    // Standard fetch-on-mount — setState happens inside fetchEnquiries
+    // after its own await, not synchronously in this effect body.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchEnquiries();
     // Staff list for the assignment dropdown below — a lightweight
     // read of who exists, no CRUD (that's /admin/staff).
@@ -177,75 +179,115 @@ export default function EnquiriesPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
-        {/* Enquiries List Panel */}
-        <div className="xl:col-span-2 space-y-4">
+        {/* Enquiries Table */}
+        <div className="xl:col-span-2 crm-card overflow-hidden">
           {loading ? (
-            <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary crm-body-text font-semibold bg-crm-card/25 border border-crm-border/20 rounded-sm">
+            <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary crm-body-text font-semibold">
               <Loader2 size={24} className="animate-spin text-crm-gold-bright" />
               <span>Fetching client enquiries...</span>
             </div>
           ) : enquiries.length === 0 ? (
-            <div className="py-24 text-center crm-body-text bg-crm-card/25 border border-dashed border-crm-border/20 rounded-sm">
+            <div className="py-24 text-center crm-body-text">
               No enquiries active. All client submissions show up here automatically.
             </div>
           ) : (
-            <div className="space-y-3">
-              {enquiries.map((enq) => {
-                const isActive = selectedEnquiry?.id === enq.id;
-                const badgeClass = STATUS_BADGE_CLASS[enq.status] ?? STATUS_BADGE_CLASS.NEW;
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse crm-table-text">
+                <thead>
+                  <tr className="border-b border-crm-border bg-crm-bg/70 text-crm-text-muted font-semibold">
+                    <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Name</th>
+                    <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Contact</th>
+                    <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Property</th>
+                    <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Type</th>
+                    <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Status</th>
+                    <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Assigned</th>
+                    <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Submitted</th>
+                    <th className="p-4 uppercase tracking-wider text-[11px] font-bold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {enquiries.map((enq) => {
+                    const isActive = selectedEnquiry?.id === enq.id;
+                    const badgeClass = STATUS_BADGE_CLASS[enq.status] ?? STATUS_BADGE_CLASS.NEW;
 
-                return (
-                  <motion.div
-                    key={enq.id}
-                    layoutId={`card_${enq.id}`}
-                    onClick={() => openDetails(enq)}
-                    className={cn(
-                      "flex items-center justify-between p-5 rounded-sm border cursor-pointer transition-all duration-300 bg-crm-card/25 hover:bg-crm-card/75",
-                      isActive ? "border-crm-gold-bright/40" : "border-crm-border/20"
-                    )}
-                  >
-                    <div className="space-y-1.5 flex-1 min-w-0 pr-4">
-                      <div className="flex items-center gap-3">
-                        <span className="crm-table-text font-semibold text-crm-text truncate">
-                          {enq.customer.name}
-                        </span>
-                        <span className={cn("px-2 py-0.5 rounded-full border text-[11px] font-semibold tracking-wide uppercase", badgeClass)}>
-                          {STATUS_LABEL[enq.status] ?? enq.status}
-                        </span>
-                        {enq.enquiryType === "Consultation" && (
-                          <span className="px-2 py-0.5 rounded-full border border-crm-gold/30 bg-crm-gold/10 text-crm-gold text-[11px] font-semibold tracking-wide uppercase">
-                            Consultation
-                          </span>
+                    return (
+                      <tr
+                        key={enq.id}
+                        onClick={() => openDetails(enq)}
+                        className={cn(
+                          "border-b border-crm-border/70 cursor-pointer transition-colors duration-150 hover:bg-crm-gold/[0.035]",
+                          isActive && "bg-crm-gold/[0.05]"
                         )}
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-crm-text-secondary">
-                        <Building size={12} className="shrink-0" />
-                        <span className="truncate">{enq.property.title}</span>
-                      </div>
-                      <p className="text-xs text-crm-text-secondary line-clamp-1 italic mt-1.5">
-                        &ldquo;{enq.message}&rdquo;
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-4 shrink-0">
-                      {enq.assignedTo && (
-                        <span className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-crm-gold">
-                          <UserCheck size={11} />
-                          {enq.assignedTo.name}
-                        </span>
-                      )}
-                      <span className="text-xs font-semibold text-crm-text-secondary">
-                        {new Date(enq.createdAt).toLocaleDateString("en-IN", {
-                          timeZone: "Asia/Kolkata",
-                          day: "numeric",
-                          month: "short",
-                        })}
-                      </span>
-                      <ChevronRight size={14} className="text-crm-text-secondary/40" />
-                    </div>
-                  </motion.div>
-                );
-              })}
+                      >
+                        <td className="p-4 max-w-[160px]">
+                          <span className="block font-semibold text-crm-text truncate">{enq.customer.name}</span>
+                          {enq.contactMethod && (
+                            <span className="block text-xs text-crm-text-muted mt-0.5">
+                              Prefers {enq.contactMethod}
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-4 max-w-[190px]">
+                          <span className="block truncate">{enq.customer.phone}</span>
+                          <span className="block text-xs text-crm-text-muted truncate mt-0.5">
+                            {enq.customer.email}
+                          </span>
+                        </td>
+                        <td className="p-4 max-w-[180px]">
+                          <div className="flex items-center gap-1.5 text-crm-text-secondary">
+                            <Building size={12} className="shrink-0" />
+                            <span className="truncate">{enq.property.title}</span>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          {enq.enquiryType === "Consultation" ? (
+                            <span className="px-2 py-0.5 rounded-full border border-crm-gold/30 bg-crm-gold/10 text-crm-gold text-[11px] font-semibold tracking-wide uppercase whitespace-nowrap">
+                              Consultation
+                            </span>
+                          ) : (
+                            <span className="text-xs text-crm-text-muted">{enq.enquiryType}</span>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <span className={cn("px-2.5 py-1 rounded-full border text-[11px] font-bold tracking-wide uppercase whitespace-nowrap", badgeClass)}>
+                            {STATUS_LABEL[enq.status] ?? enq.status}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          {enq.assignedTo ? (
+                            <span className="flex items-center gap-1 text-xs font-semibold text-crm-gold whitespace-nowrap">
+                              <UserCheck size={11} />
+                              {enq.assignedTo.name}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-crm-text-muted">Unassigned</span>
+                          )}
+                        </td>
+                        <td className="p-4 text-xs text-crm-text-secondary whitespace-nowrap">
+                          {new Date(enq.createdAt).toLocaleDateString("en-IN", {
+                            timeZone: "Asia/Kolkata",
+                            day: "numeric",
+                            month: "short",
+                          })}
+                        </td>
+                        <td className="p-4 text-right">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openDetails(enq);
+                            }}
+                            title="View details"
+                            aria-label="View details"
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-sm border border-crm-border hover:border-crm-gold/50 hover:bg-crm-gold/5 text-crm-text-secondary hover:text-crm-text transition-all duration-200"
+                          >
+                            <ChevronRight size={14} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
@@ -459,6 +501,6 @@ export default function EnquiriesPage() {
 }
 
 // Simple Helper function
-function cn(...classes: any[]) {
+function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }

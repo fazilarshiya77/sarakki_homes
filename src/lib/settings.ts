@@ -37,7 +37,7 @@ const FALLBACK: SiteSettings = {
     whatsappHref:
       "https://wa.me/919845000000?text=" + encodeURIComponent(DEFAULT_WHATSAPP_MESSAGE),
     whatsappNumber: "919845000000",
-    instagramHref: "#",
+    instagramHref: "https://www.instagram.com/himabasavaiah/",
   },
   metaTitle: "Sarakki Homes | Premium Real Estate Consultancy, Bengaluru",
   metaDesc:

@@ -35,8 +35,6 @@ const AUCTION_LIST_INCLUDE = {
   auctionInfo: true,
 } satisfies Prisma.PropertyInclude;
 
-type DbAuctionListProperty = Prisma.PropertyGetPayload<{ include: typeof AUCTION_LIST_INCLUDE }>;
-
 // Server-only formatting (this module imports prisma) -- can't cause a
 // hydration mismatch by itself, but pinned to Asia/Kolkata so the date is
 // actually IST rather than whatever timezone the Node process happens to

@@ -11,6 +11,8 @@ import {
   Check,
   AlertTriangle,
   CheckCircle2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 interface StaffMember {
@@ -64,6 +66,7 @@ export default function StaffPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState("SALES_EXECUTIVE");
   const [submitting, setSubmitting] = useState(false);
 
@@ -72,6 +75,7 @@ export default function StaffPage() {
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
   const [editPassword, setEditPassword] = useState("");
+  const [showEditPassword, setShowEditPassword] = useState(false);
   const [editRole, setEditRole] = useState("SALES_EXECUTIVE");
   const [savingEdit, setSavingEdit] = useState(false);
 
@@ -101,6 +105,9 @@ export default function StaffPage() {
   };
 
   useEffect(() => {
+    // Standard fetch-on-mount — setState happens inside fetchStaff after
+    // its own await, not synchronously in this effect body.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchStaff(false);
   }, []);
 
@@ -333,13 +340,23 @@ export default function StaffPage() {
                                   </div>
                                   <div className="space-y-1.5">
                                     <label className={labelClass}>New Password</label>
-                                    <input
-                                      type="password"
-                                      value={editPassword}
-                                      onChange={(e) => setEditPassword(e.target.value)}
-                                      placeholder="Leave blank to keep current"
-                                      className={inputClass}
-                                    />
+                                    <div className="relative">
+                                      <input
+                                        type={showEditPassword ? "text" : "password"}
+                                        value={editPassword}
+                                        onChange={(e) => setEditPassword(e.target.value)}
+                                        placeholder="Leave blank to keep current"
+                                        className={`${inputClass} pr-11`}
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={() => setShowEditPassword((v) => !v)}
+                                        aria-label={showEditPassword ? "Hide password" : "Show password"}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-crm-text-secondary hover:text-crm-text transition-colors"
+                                      >
+                                        {showEditPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2.5">
@@ -491,13 +508,23 @@ export default function StaffPage() {
 
             <div className="space-y-1.5">
               <label className={labelClass}>Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Minimum 8 characters"
-                className={inputClass}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Minimum 8 characters"
+                  className={`${inputClass} pr-11`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-crm-text-secondary hover:text-crm-text transition-colors"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
               <p className="text-xs text-crm-text-secondary/70">
                 Shared with the staff member privately &mdash; they can change it later.
               </p>

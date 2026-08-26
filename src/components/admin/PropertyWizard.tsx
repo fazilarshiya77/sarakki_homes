@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, type FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -11,7 +10,6 @@ import {
   ChevronLeft,
   Loader2,
   Building,
-  DollarSign,
   Gavel,
   Image as ImageIcon,
   CheckCircle2,
@@ -20,6 +18,7 @@ import {
   Eye,
   ChevronDown,
   X,
+  Plus,
 } from "lucide-react";
 import { PropertyImageManager, type ManagedImage } from "@/components/admin/PropertyImageManager";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
@@ -57,15 +56,10 @@ const propertySchema = z.object({
     .min(1, "Property name is required.")
     .refine((v) => v.trim().length >= 3, "Property name must be at least 3 characters."),
   categoryId: z.string().min(1, "Category is required."),
-  // NOTE: unlike Location/Address/Description below, Builder genuinely
-  // can't be relaxed to optional — Property.builderId is a required,
-  // non-nullable foreign key in the database (not just a plain string
-  // column), so submitting an empty value here doesn't save a blank
-  // property, it fails the write outright with a foreign-key error.
-  // Marked required (with a "*") in the UI to match, which is also the
-  // actual fix for a real bug: the field was already enforced as
-  // required here but had no asterisk, contradicting itself.
-  builderId: z.string().min(1, "Please select a builder."),
+  // Property.builderId is now a nullable FK (was required — relaxed in
+  // the schema specifically so this field could have a real "None"
+  // option instead of forcing a pick every time).
+  builderId: z.string().optional(),
   type: z.string().min(1, "Property type is required."),
   // Was two separate fields (a free-text display string + this numeric
   // value) that both had to be filled in sync by hand -- collapsed into
@@ -122,12 +116,26 @@ const propertySchema = z.object({
   slug: z.string().optional(),
 });
 
-type PropertyFormData = z.infer<typeof propertySchema>;
+type PropertyFormData = z.output<typeof propertySchema>;
+
+// What the edit page (src/app/admin/properties/[id]/edit/page.tsx)
+// actually passes: every registered form field, always populated as a
+// string (even "" — see that page's initialData mapping, never
+// undefined) plus a few read-only extras the form itself never
+// registers (id, images is managed outside react-hook-form — see
+// galleryImages state below). Deliberately NOT `Partial<PropertyFormData>`
+// — RHF infers defaultValues' type from `initialData || {...}` together
+// with the resolver's own type, and an optional-everything shape there
+// conflicts with the resolver's required fields.
+interface PropertyWizardInitialData extends PropertyFormData {
+  id?: string;
+  images?: { url: string }[];
+}
 
 interface PropertyWizardProps {
   categories: Array<{ id: string; title: string }>;
   builders: Array<{ id: string; name: string }>;
-  initialData?: any;
+  initialData?: PropertyWizardInitialData;
 }
 
 // Was 6 always-shown steps (Basic Info / Auction Info / Property Details
@@ -155,10 +163,19 @@ const ALL_STEPS = [
 
 type StepKey = (typeof ALL_STEPS)[number]["key"];
 
-export function PropertyWizard({ categories, builders, initialData }: PropertyWizardProps) {
+export function PropertyWizard({ categories, builders: initialBuilders, initialData }: PropertyWizardProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  // Local, mutable copy of the builders list — lets "+ Add Builder"
+  // (below) create one inline and have it show up in the select
+  // immediately, without leaving the wizard or reloading the page. The
+  // server-fetched `initialBuilders` prop is just the seed.
+  const [builders, setBuilders] = useState(initialBuilders);
+  const [addingBuilder, setAddingBuilder] = useState(false);
+  const [newBuilderName, setNewBuilderName] = useState("");
+  const [builderSaving, setBuilderSaving] = useState(false);
+  const [builderError, setBuilderError] = useState("");
   // SEO fields (title/description/slug overrides) folded into the
   // Review step as a collapsed-by-default section instead of their own
   // wizard step — every one of them already has a working default
@@ -195,7 +212,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
     setValue,
     trigger,
     formState: { errors },
-  } = useForm<any>({
+  } = useForm({
     resolver: zodResolver(propertySchema),
     defaultValues: initialData || {
       title: "",
@@ -220,16 +237,30 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
         physicalPossession: false,
         legalStatus: "Title Verified",
       },
-      beds: "0",
-      baths: "0",
+      // "" not "0" — a pre-filled "0" sat in the field requiring the
+      // admin to select-and-delete it before typing the real number;
+      // empty + a "0" placeholder lets them just click and type.
+      beds: "",
+      baths: "",
       area: "",
-      areaSqft: "0",
-      imageUrl: "",
+      areaSqft: "",
       seoTitle: "",
       seoDescription: "",
       slug: "",
     },
   });
+
+  // Derived from handleSubmit's own signature rather than declared as
+  // `z.output<typeof propertySchema>` and asserted to match — RHF's
+  // resolver-inferred field type and a hand-derived zod type turned out
+  // to be structurally close but not identical (a known sharp edge with
+  // optional-with-default nested fields like auctionInfo.
+  // physicalPossession), which surfaced as "two different types with
+  // this name exist, but they are unrelated" the moment useForm was
+  // given an explicit generic. Reading the type back off handleSubmit
+  // keeps onSubmit/onInvalid always in sync with whatever RHF actually
+  // produces.
+  type FormValues = Parameters<Parameters<typeof handleSubmit>[0]>[0];
 
   const propertyType = watch("type");
   const formValues = watch();
@@ -254,7 +285,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
   // Everything else on the merged "Property Details" step (Builder,
   // Location, Address, Google Maps Location, Description, Bedrooms/
   // Bathrooms/Area) is optional and must never hold up navigation.
-  const DETAILS_STEP_FIELDS = ["title", "type", "categoryId", "builderId", "priceValueLakh"] as const;
+  const DETAILS_STEP_FIELDS = ["title", "type", "categoryId", "priceValueLakh"] as const;
 
   const handleNext = async () => {
     // Basic step validation before moving forward. This used to do its
@@ -286,7 +317,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
   // if validation fails at submit time for any reason, jumping back
   // there and naming the fields is always the right, visible fix rather
   // than a submit button that quietly does nothing.
-  const onInvalid = (formErrors: Record<string, any>) => {
+  const onInvalid = (formErrors: FieldErrors<FormValues>) => {
     const labels: Record<string, string> = {
       title: "Property Name",
       categoryId: "Category",
@@ -315,7 +346,37 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
     setCurrentStep((prev) => Math.max(prev - 1, 0));
   };
 
-  const onSubmit = async (data: any) => {
+  // Inline "+ Add Builder" — reuses the same POST /api/admin/builders
+  // the standalone Builders page uses (@/app/admin/builders), so the
+  // new builder shows up there too, not just in this wizard's session.
+  const handleAddBuilder = async () => {
+    const name = newBuilderName.trim();
+    if (!name) return;
+    setBuilderSaving(true);
+    setBuilderError("");
+    try {
+      const res = await fetch("/api/admin/builders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      const data = await res.json();
+      if (res.ok && data.builder) {
+        setBuilders((prev) => [...prev, data.builder].sort((a, b) => a.name.localeCompare(b.name)));
+        setValue("builderId", data.builder.id, { shouldDirty: true });
+        setNewBuilderName("");
+        setAddingBuilder(false);
+      } else {
+        setBuilderError(data.error || "Couldn't add that builder. Please try again.");
+      }
+    } catch {
+      setBuilderError("Couldn't add that builder. Please try again.");
+    } finally {
+      setBuilderSaving(false);
+    }
+  };
+
+  const onSubmit = async (data: FormValues) => {
     setLoading(true);
     setErrorMessage("");
 
@@ -373,7 +434,7 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
         setErrorMessage(errData.error || "Failed to submit property. Please try again.");
         setLoading(false);
       }
-    } catch (err) {
+    } catch {
       setErrorMessage("An unexpected error occurred. Please try again.");
       setLoading(false);
     }
@@ -508,13 +569,68 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
                     </select>
                   </Field>
 
-                  <Field label="Builder" required error={errors.builderId}>
-                    <select {...register("builderId")} className="crm-select">
-                      <option value="">Select Builder</option>
-                      {builders.map((b) => (
-                        <option key={b.id} value={b.id}>{b.name}</option>
-                      ))}
-                    </select>
+                  <Field label="Builder">
+                    <div className="flex items-center gap-2">
+                      <select {...register("builderId")} className="crm-select flex-1">
+                        <option value="">None</option>
+                        {builders.map((b) => (
+                          <option key={b.id} value={b.id}>{b.name}</option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setAddingBuilder((v) => !v)}
+                        title="Add a new builder"
+                        aria-label="Add a new builder"
+                        className="crm-btn-secondary shrink-0 !px-3"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+
+                    {addingBuilder && (
+                      <div className="mt-2 flex items-start gap-2">
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            value={newBuilderName}
+                            onChange={(e) => setNewBuilderName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleAddBuilder();
+                              }
+                            }}
+                            placeholder="New builder name"
+                            className="crm-input"
+                            autoFocus
+                          />
+                          {builderError && <p className="mt-1 text-[13px] text-red-600">{builderError}</p>}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleAddBuilder}
+                          disabled={builderSaving || !newBuilderName.trim()}
+                          className="crm-btn-gold shrink-0"
+                        >
+                          {builderSaving ? <Loader2 size={14} className="animate-spin" /> : <span>Add</span>}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAddingBuilder(false);
+                            setNewBuilderName("");
+                            setBuilderError("");
+                          }}
+                          disabled={builderSaving}
+                          title="Cancel"
+                          aria-label="Cancel adding a new builder"
+                          className="crm-btn-secondary shrink-0 !px-3"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    )}
                   </Field>
                 </FieldGroup>
 
@@ -587,11 +703,11 @@ export function PropertyWizard({ categories, builders, initialData }: PropertyWi
 
                 <FieldGroup title="Measurements">
                   <Field label="Bedrooms">
-                    <input type="number" {...register("beds")} className="crm-input" />
+                    <input type="number" {...register("beds")} className="crm-input" placeholder="0" />
                   </Field>
 
                   <Field label="Bathrooms">
-                    <input type="number" {...register("baths")} className="crm-input" />
+                    <input type="number" {...register("baths")} className="crm-input" placeholder="0" />
                   </Field>
 
                   <Field label="Area Display Text" error={errors.area}>
@@ -887,7 +1003,7 @@ function Field({
   label: string;
   children: React.ReactNode;
   span2?: boolean;
-  error?: any;
+  error?: { message?: string };
   required?: boolean;
 }) {
   return (
@@ -916,6 +1032,6 @@ function ReviewStat({ label, value }: { label: string; value: string }) {
 }
 
 // Simple Helper function
-function cn(...classes: any[]) {
+function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }

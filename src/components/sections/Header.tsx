@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, MessageCircle, X, Phone, MapPin, Clock, Mail, Globe, Map, ChevronDown } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { CATEGORIES } from "@/lib/data";
+import { CATEGORIES, LEGAL_SERVICES } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
@@ -19,35 +19,32 @@ const LINKS = [
 
 // Nav items that expand into a category dropdown instead of navigating
 // directly. Keyed by label so both the desktop hover panel and the mobile
-// accordion can share one data source. "Properties" links each category to
-// a pre-filtered listing (the live inventory); "Services" links to the
-// descriptive category pages — same six categories, different destination,
-// on purpose.
+// accordion can share one data source. "Properties" links each property
+// investment category to a pre-filtered listing (the live inventory);
+// "Services" links to the legal/documentation service pages — a
+// completely separate list (LEGAL_SERVICES), not the same six categories.
 const NAV_DROPDOWNS: Record<
   string,
   { items: { label: string; href: string }[]; viewAllHref: string; viewAllLabel: string }
 > = {
   Properties: {
-    items: [
-      // Bank Auction Properties gets its own dedicated, richer listing
-      // experience (filters, grid/list, search) — every other category
-      // still links to the generic listing pre-filtered by category.
-      ...CATEGORIES.map((category) => ({
-        label: category.title,
-        href:
-          category.slug === "bank-auctions"
-            ? "/properties/bank-auctions"
-            : `/properties?category=${category.slug}`,
-      })),
-      { label: "Auction Properties", href: "/properties/bank-auctions" },
-    ],
+    // Bank Auction Properties gets its own dedicated, richer listing
+    // experience (filters, grid/list, search) — every other category
+    // still links to the generic listing pre-filtered by category.
+    items: CATEGORIES.map((category) => ({
+      label: category.title,
+      href:
+        category.slug === "bank-auctions"
+          ? "/properties/bank-auctions"
+          : `/properties?category=${category.slug}`,
+    })),
     viewAllHref: "/properties",
     viewAllLabel: "View All Properties →",
   },
   Services: {
-    items: CATEGORIES.map((category) => ({
-      label: category.title,
-      href: `/services/${category.slug}`,
+    items: LEGAL_SERVICES.map((service) => ({
+      label: service.title,
+      href: `/services/${service.slug}`,
     })),
     viewAllHref: "/services",
     viewAllLabel: "View All Services →",
@@ -213,21 +210,31 @@ export function Header({ solid = false }: { solid?: boolean }) {
                   </Link>
 
                   {/* Dropdown panel — no gap between trigger and panel so
-                      hover intent survives the move down into the panel. */}
-                  <div className="invisible absolute left-1/2 top-full z-50 w-72 -translate-x-1/2 translate-y-1 pt-3 opacity-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/nav:visible group-hover/nav:translate-y-0 group-hover/nav:opacity-100">
+                      hover intent survives the move down into the panel.
+                      Services now lists 12 items (vs Properties' 7), so it
+                      gets a wider two-column grid instead of the single
+                      w-72 column — a dozen stacked links would run well
+                      past the viewport height and the longest label
+                      ("No Brokerage for New Properties + 1% Cash Back")
+                      would wrap awkwardly at 288px. */}
+                  <div
+                    className={cn(
+                      "invisible absolute left-1/2 top-full z-50 -translate-x-1/2 translate-y-1 pt-3 opacity-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/nav:visible group-hover/nav:translate-y-0 group-hover/nav:opacity-100",
+                      dropdown.items.length > 8 ? "w-[34rem]" : "w-72"
+                    )}
+                  >
                     <div className="rounded-lg border border-border bg-background/95 p-2 shadow-soft-lg backdrop-blur-xl">
-                      {dropdown.items.map((item) => (
-                        // Keyed by label, not href — "Auction Properties" is
-                        // a deliberate extra entry pointing at the same
-                        // filtered URL as "Bank Auction Properties".
-                        <Link
-                          key={item.label}
-                          href={item.href}
-                          className="block rounded-sm px-4 py-2.5 text-sm text-foreground/75 transition-colors duration-200 hover:bg-surface hover:text-foreground"
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
+                      <div className={dropdown.items.length > 8 ? "grid grid-cols-2 gap-x-1" : undefined}>
+                        {dropdown.items.map((item) => (
+                          <Link
+                            key={item.label}
+                            href={item.href}
+                            className="block rounded-sm px-4 py-2.5 text-sm leading-snug text-foreground/75 transition-colors duration-200 hover:bg-surface hover:text-foreground"
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
                       <div className="mt-1 border-t border-border pt-1">
                         <Link
                           href={dropdown.viewAllHref}

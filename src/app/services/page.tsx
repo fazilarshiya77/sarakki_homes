@@ -4,13 +4,13 @@ import { Footer } from "@/components/sections/Footer";
 import { Container, Section } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { RevealGroup } from "@/components/ui/RevealOnScroll";
-import { ServiceCard } from "@/components/service/ServiceCard";
-import { CATEGORIES } from "@/lib/data";
+import { LegalServiceCard } from "@/components/service/LegalServiceCard";
+import { LEGAL_SERVICES } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Services | Sarakki Homes",
   description:
-    "Six ways to invest with Sarakki Homes — bank auctions, rental income, chance deals, resale, upcoming projects, and ready-to-move properties, every one legally vetted.",
+    "Legal, registration, and documentation services from Sarakki Homes — E-Khata, Sale Deeds, Khata and BESCOM transfers, Encumbrance Certificates, and more, every one handled end to end.",
 };
 
 export default function ServicesPage() {
@@ -22,11 +22,12 @@ export default function ServicesPage() {
           <Container>
             <Eyebrow>Our Services</Eyebrow>
             <h1 className="mt-4 max-w-2xl font-display text-4xl leading-[1.1] tracking-[-0.01em] md:text-5xl">
-              Six ways to invest, one standard of care.
+              Every document, handled properly.
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">
-              Whichever route fits your goals, every property we present has
-              already been through the same legal and financial scrutiny.
+              From E-Khata to Sale Deeds, transfers to loan paperwork — we
+              manage the legal and civic groundwork behind every property
+              transaction, so nothing is left to chance.
             </p>
           </Container>
         </Section>
@@ -34,8 +35,8 @@ export default function ServicesPage() {
         <Section>
           <Container>
             <RevealGroup className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {CATEGORIES.map((category) => (
-                <ServiceCard key={category.slug} slug={category.slug} />
+              {LEGAL_SERVICES.map((service) => (
+                <LegalServiceCard key={service.slug} slug={service.slug} />
               ))}
             </RevealGroup>
           </Container>

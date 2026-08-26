@@ -24,7 +24,11 @@ export async function GET() {
 
     const payload = canSeeRevenue
       ? leads
-      : leads.map(({ dealValueLakh, commissionPct, commissionLakh, ...rest }) => rest);
+      : // Destructured-and-discarded on purpose — this is how the three
+        // revenue fields get stripped from the response for a viewer
+        // without CAN.VIEW_REVENUE, not dead variables.
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        leads.map(({ dealValueLakh, commissionPct, commissionLakh, ...rest }) => rest);
 
     return NextResponse.json({ leads: payload, canViewRevenue: canSeeRevenue });
   } catch (error: unknown) {

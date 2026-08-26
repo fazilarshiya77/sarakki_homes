@@ -16,6 +16,8 @@ import {
   FileSignature,
   Compass,
   LineChart,
+  Zap,
+  PiggyBank,
 } from "lucide-react";
 
 export const CONTACT = {
@@ -23,7 +25,7 @@ export const CONTACT = {
   phoneHref: "tel:+919845000000",
   whatsappHref:
     "https://wa.me/919845000000?text=Hi%20Sarakki%20Homes%2C%20I%27d%20like%20to%20book%20a%20consultation.",
-  instagramHref: "#",
+  instagramHref: "https://www.instagram.com/himabasavaiah/",
 };
 
 export const STATS: {
@@ -143,6 +145,223 @@ export const CATEGORIES = [
     idealFor: ["Buyers needing to move in immediately", "Anyone who has been burned by construction delays before"],
     icon: Home,
     tone: "gold" as MediaTone,
+  },
+];
+
+// The "Our Services" section — legal/registration/documentation
+// services Sarakki Homes helps clients with, plus two brokerage-terms
+// offers. Deliberately a SEPARATE list from CATEGORIES above: those are
+// property investment categories tied to the live Property table
+// (categoryId FK, admin CRM, /properties filtering) — these are
+// standalone service pages with no property inventory attached. Keeping
+// them apart means this list can be edited freely without touching
+// anything in the property/CRM pipeline.
+export const LEGAL_SERVICES = [
+  {
+    slug: "e-khata",
+    title: "E-Khata",
+    description: "Digital Khata issuance and verification for BBMP properties.",
+    heroTagline: "Your property, officially on record — digitally.",
+    longDescription:
+      "An E-Khata is the digital version of your property's Khata certificate, issued by BBMP as part of Bengaluru's move to online civic records. We handle the application, document verification, and follow-up with the ward office so your property is correctly and promptly reflected in the digital record.",
+    highlights: [
+      "End-to-end BBMP application handling",
+      "Document verification before submission, so nothing bounces back",
+      "Regular follow-up with the ward office until issuance",
+      "Essential groundwork for resale, loans, and future Khata transfers",
+    ],
+    idealFor: ["Owners converting from paper Khata to E-Khata", "Buyers who want E-Khata confirmed before purchase"],
+    icon: FileCheck2,
+    tone: "warm" as MediaTone,
+  },
+  {
+    slug: "sale-agreement",
+    title: "Sale Agreement",
+    description: "Legally sound sale agreements that protect both buyer and seller.",
+    heroTagline: "The terms, written the way they should be.",
+    longDescription:
+      "A Sale Agreement sets out the price, timeline, and conditions of a property transaction before the final Sale Deed is registered. We draft and review these agreements to make sure every clause — payment schedule, possession date, penalty terms — is clear and enforceable, so nothing is left to interpretation later.",
+    highlights: [
+      "Drafted or reviewed by legal professionals, not templates",
+      "Payment, possession, and penalty terms clearly defined",
+      "Protects both parties before money changes hands",
+      "Forms the legal basis for the eventual Sale Deed",
+    ],
+    idealFor: ["Buyers finalising terms before registration", "Sellers who want binding, enforceable commitments"],
+    icon: FileSignature,
+    tone: "gold" as MediaTone,
+  },
+  {
+    slug: "sale-deed",
+    title: "Sale Deed",
+    description: "Registration-ready Sale Deeds, drafted and verified end to end.",
+    heroTagline: "The document that actually transfers ownership.",
+    longDescription:
+      "The Sale Deed is the legal instrument that transfers ownership from seller to buyer — it's what gets registered at the Sub-Registrar's office. We prepare the deed, verify supporting documents (title chain, encumbrance, tax receipts), and accompany you through registration so the transfer is clean and dispute-free.",
+    highlights: [
+      "Full title chain and encumbrance verification before drafting",
+      "Stamp duty and registration guidance",
+      "In-person support at the Sub-Registrar's office",
+      "Certified copies handed over after registration",
+    ],
+    idealFor: ["Buyers completing a purchase", "Sellers finalising a transfer"],
+    icon: Stamp,
+    tone: "charcoal" as MediaTone,
+  },
+  {
+    slug: "rental-agreement",
+    title: "Rental Agreement",
+    description: "Clear, compliant rental agreements for landlords and tenants.",
+    heroTagline: "Set the terms before you hand over the keys.",
+    longDescription:
+      "A well-drafted Rental Agreement protects both landlord and tenant — rent, deposit, notice period, and maintenance responsibilities, all spelled out and registered where required. We draft agreements suited to Karnataka's rental laws and handle e-stamping and registration.",
+    highlights: [
+      "Rent, deposit, and notice terms clearly documented",
+      "Compliant with Karnataka rental regulations",
+      "E-stamping and registration handled for you",
+      "Renewal and exit terms defined upfront",
+    ],
+    idealFor: ["Landlords leasing out a property", "Tenants who want a fair, documented agreement"],
+    icon: KeyRound,
+    tone: "emerald" as MediaTone,
+  },
+  {
+    slug: "khata-transfer",
+    title: "Khata Transfer",
+    description: "Transfer property records into the new owner's name, correctly.",
+    heroTagline: "Make the record match the reality.",
+    longDescription:
+      "After a sale, gift, or inheritance, the Khata must be transferred into the new owner's name for property tax and civic records to be accurate. We prepare and submit the transfer application with the required documents and track it through to completion.",
+    highlights: [
+      "Application prepared with the correct supporting documents",
+      "Tracked through to civic-body approval",
+      "Required before you can pay property tax in your own name",
+      "Handled for sale, gift, and inheritance transfers alike",
+    ],
+    idealFor: ["New owners after a purchase, gift, or inheritance", "Anyone whose Khata still shows a previous owner's name"],
+    icon: RefreshCcw,
+    tone: "warm" as MediaTone,
+  },
+  {
+    slug: "bescom-name-transfer",
+    title: "BESCOM Name Transfer",
+    description: "Transfer the electricity connection into your name, hassle-free.",
+    heroTagline: "One less office to visit yourself.",
+    longDescription:
+      "Buying or inheriting a property doesn't automatically move the electricity connection into your name — that's a separate application to BESCOM. We handle the paperwork and follow-up so your name is correctly reflected on the meter and billing records.",
+    highlights: [
+      "Application and document submission handled for you",
+      "Follow-up with the BESCOM sub-division office",
+      "Avoids billing disputes tied to a previous owner's name",
+      "Typically completed alongside Khata transfer",
+    ],
+    idealFor: ["New property owners", "Anyone still receiving bills in a previous owner's name"],
+    icon: Zap,
+    tone: "gold" as MediaTone,
+  },
+  {
+    slug: "encumbrance-certificate",
+    title: "Encumbrance Certificate",
+    description: "Verified proof that a property is free of legal or financial liabilities.",
+    heroTagline: "Know exactly what you're buying into.",
+    longDescription:
+      "An Encumbrance Certificate (EC) confirms whether a property carries any registered mortgages, liens, or legal claims over a chosen period. We obtain and independently verify the EC before you commit to a purchase — one of the most important checks in any property transaction.",
+    highlights: [
+      "Obtained directly from the Sub-Registrar's office",
+      "Cross-checked against the property's title history",
+      "Covers whatever time period a lender or buyer requires",
+      "A standard requirement for most home loan approvals",
+    ],
+    idealFor: ["Buyers verifying a property before purchase", "Lenders requiring an EC as part of loan processing"],
+    icon: ShieldCheck,
+    tone: "charcoal" as MediaTone,
+  },
+  {
+    slug: "gift-deed",
+    title: "Gift Deed",
+    description: "Transfer property to a family member, legally and without dispute.",
+    heroTagline: "Give with clarity, not complication.",
+    longDescription:
+      "A Gift Deed transfers property ownership without any monetary exchange — typically between family members. We draft the deed, confirm it meets registration requirements, and guide both parties through stamp duty and registration, so the transfer holds up legally.",
+    highlights: [
+      "Drafted to meet Karnataka registration requirements",
+      "Stamp duty guidance specific to gift transfers",
+      "Reduces the risk of future family disputes",
+      "Registration support at the Sub-Registrar's office",
+    ],
+    idealFor: ["Parents transferring property to children", "Family members formalising an existing arrangement"],
+    icon: Handshake,
+    tone: "emerald" as MediaTone,
+  },
+  {
+    slug: "will-deed",
+    title: "Will Deed",
+    description: "Record your property wishes clearly, to prevent disputes later.",
+    heroTagline: "Put it in writing, properly.",
+    longDescription:
+      "A Will sets out how your property should be distributed after your lifetime — the single most effective way to prevent inheritance disputes among family members. We help draft and, where you choose, register a Will Deed that clearly states your intentions in legally sound language.",
+    highlights: [
+      "Drafted in clear, legally sound language",
+      "Optional registration for added certainty",
+      "Reduces ambiguity that leads to family disputes",
+      "Can be updated as circumstances change",
+    ],
+    idealFor: ["Property owners planning succession", "Families wanting to avoid future inheritance disputes"],
+    icon: Scale,
+    tone: "warm" as MediaTone,
+  },
+  {
+    slug: "bank-loan-agreement",
+    title: "Bank Loan Agreement",
+    description: "Guidance through loan documentation, so approval isn't delayed by paperwork.",
+    heroTagline: "Financing, without the fine-print anxiety.",
+    longDescription:
+      "A home loan comes with its own stack of paperwork — sanction letters, mortgage deeds, disbursement schedules. We coordinate with your bank, review the loan agreement terms, and make sure every document the lender needs is in order, so financing doesn't become the bottleneck.",
+    highlights: [
+      "Coordination with your bank's loan officer",
+      "Loan agreement and mortgage deed review",
+      "Documentation checklist so approval isn't delayed",
+      "Support across major banks and NBFCs",
+    ],
+    idealFor: ["Buyers financing a purchase with a home loan", "Anyone refinancing or restructuring an existing loan"],
+    icon: Landmark,
+    tone: "gold" as MediaTone,
+  },
+  {
+    slug: "no-brokerage-cashback",
+    title: "No Brokerage for New Properties + 1% Cash Back",
+    description: "Buy a new project through us — pay zero brokerage, and get 1% cash back.",
+    heroTagline: "We get paid by the builder, not by you.",
+    longDescription:
+      "On select new projects, Sarakki Homes charges the buyer no brokerage at all — and passes back 1% of the property value as cash back at closing. It's how we work directly with builders on new launches, without adding to your cost.",
+    highlights: [
+      "Zero brokerage charged to the buyer",
+      "1% cash back credited at closing",
+      "Applies to select new project launches",
+      "Full legal and RERA verification, same as every listing",
+    ],
+    idealFor: ["Buyers considering a new project purchase", "Anyone comparing costs across brokers"],
+    icon: PiggyBank,
+    tone: "gold" as MediaTone,
+    featured: true,
+  },
+  {
+    slug: "new-project-a-category-builders",
+    title: "New Projects by A-Category Builders",
+    description: "Early access to new launches from Bengaluru's most reputed builders.",
+    heroTagline: "Get in before the public launch.",
+    longDescription:
+      "We work directly with A-category, RERA-registered builders to give our clients early access to new project launches — often at pre-launch pricing, before the general public. Every project is vetted for builder track record, approvals, and construction quality before we bring it to you.",
+    highlights: [
+      "Early / pre-launch access to vetted projects",
+      "Only RERA-registered, A-category builders",
+      "Builder track record and approval verification",
+      "Direct coordination with the builder's sales team",
+    ],
+    idealFor: ["Buyers wanting early access to new launches", "Investors comparing upcoming projects by builder reputation"],
+    icon: Building2,
+    tone: "emerald" as MediaTone,
+    featured: true,
   },
 ];
 
@@ -276,17 +495,6 @@ export interface Property {
   blocks?: number;
   availability?: number;
 }
-
-const STANDARD_BANKS = ["HDFC Bank", "SBI", "ICICI Bank", "Axis Bank", "LIC Housing Finance"];
-
-const STANDARD_DOCS = [
-  "Sale Deed",
-  "Encumbrance Certificate (EC)",
-  "Khata Certificate",
-  "RTC (Record of Rights)",
-  "Property Tax Receipts",
-  "Approved Building Plan",
-];
 
 // Real property listings are admin-managed (see /admin/properties) and
 // live in the database — src/lib/properties.ts fetches them via Prisma.

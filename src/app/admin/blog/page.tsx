@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileText, Loader2, Plus, Calendar, CheckCircle2, XCircle } from "lucide-react";
+import { FileText, Loader2, Calendar, CheckCircle2, XCircle } from "lucide-react";
 
 interface Blog {
   id: string;
@@ -37,6 +37,9 @@ export default function BlogManagerPage() {
   };
 
   useEffect(() => {
+    // Standard fetch-on-mount -- setState happens inside fetchBlogs
+    // after its own await, not synchronously in this effect body.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchBlogs();
   }, []);
 

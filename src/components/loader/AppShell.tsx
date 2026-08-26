@@ -24,7 +24,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // hero moment the loader is building toward. Runs in a layout effect
   // (before paint) so a repeat visit never flashes the loader first.
   useLayoutEffect(() => {
+    // Intentional: a lazy useState initializer would run on the server
+    // too (there's no window/sessionStorage there), so this genuinely
+    // has to be a client-only effect — the setState here is what keeps
+    // the initial render matching SSR output, not a bug to remove.
     if (window.location.hash || sessionStorage.getItem(INTRO_SEEN_KEY) === "1") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
     }
   }, []);

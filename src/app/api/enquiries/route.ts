@@ -20,7 +20,7 @@ function badRequest(error: string) {
 }
 
 export async function POST(req: Request) {
-  let body: any;
+  let body: Record<string, unknown>;
   try {
     body = await req.json();
   } catch {
@@ -39,7 +39,10 @@ export async function POST(req: Request) {
   const name = typeof body.name === "string" ? body.name.trim() : "";
   const phoneRaw = typeof body.phone === "string" ? body.phone.trim() : "";
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-  const contactMethod = CONTACT_METHODS.includes(body.contactMethod) ? (body.contactMethod as ContactMethod) : "";
+  const contactMethod =
+    typeof body.contactMethod === "string" && (CONTACT_METHODS as readonly string[]).includes(body.contactMethod)
+      ? (body.contactMethod as ContactMethod)
+      : "";
   const message = typeof body.message === "string" ? body.message.trim().slice(0, 2000) : "";
   const preferredDate = typeof body.preferredDate === "string" ? body.preferredDate.trim().slice(0, 40) : "";
   const preferredTime = typeof body.preferredTime === "string" ? body.preferredTime.trim().slice(0, 40) : "";

@@ -2,29 +2,18 @@
 
 import { useState } from "react";
 import { CalendarCheck, MessageCircle, PhoneCall, Sparkles } from "lucide-react";
-import { Button, buttonClasses } from "@/components/ui/Button";
+import { buttonClasses } from "@/components/ui/Button";
 import { ButtonFX } from "@/components/ui/ButtonFX";
 import { useSiteSettings } from "@/components/providers/SettingsProvider";
 import { ConsultationModal } from "@/components/property/ConsultationModal";
 
 export function EnquiryPanel({ propertyId, propertyTitle }: { propertyId: string; propertyTitle: string }) {
   const { contact } = useSiteSettings();
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState("");
   const [consultOpen, setConsultOpen] = useState(false);
 
   const scheduleVisitHref = `https://wa.me/${contact.whatsappNumber}?text=${encodeURIComponent(
     `Hi Sarakki Homes, I'd like to schedule a visit for "${propertyTitle}".`
   )}`;
-
-  const submitEnquiry = (e: React.FormEvent) => {
-    e.preventDefault();
-    const text = `Hi Sarakki Homes, I'm enquiring about "${propertyTitle}".\nName: ${name || "-"}\nPhone: ${
-      phone || "-"
-    }\nMessage: ${message || "-"}`;
-    window.open(`https://wa.me/${contact.whatsappNumber}?text=${encodeURIComponent(text)}`, "_blank");
-  };
 
   return (
     <div className="rounded-md border border-border bg-card p-7 shadow-soft">
@@ -75,36 +64,6 @@ export function EnquiryPanel({ propertyId, propertyTitle }: { propertyId: string
           Schedule a Visit
         </a>
       </div>
-
-      <form onSubmit={submitEnquiry} className="mt-7 flex flex-col gap-3 border-t border-border pt-6">
-        <p className="text-xs uppercase tracking-[0.1em] text-muted-foreground">
-          Or send a quick WhatsApp message
-        </p>
-        <input
-          type="text"
-          placeholder="Your name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="rounded-sm border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:border-accent-gold-dark"
-        />
-        <input
-          type="tel"
-          placeholder="Phone number"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="rounded-sm border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:border-accent-gold-dark"
-        />
-        <textarea
-          placeholder="Your message (optional)"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          rows={3}
-          className="resize-none rounded-sm border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:border-accent-gold-dark"
-        />
-        <Button type="submit" variant="primary" className="w-full">
-          Send Enquiry
-        </Button>
-      </form>
 
       <ConsultationModal
         open={consultOpen}

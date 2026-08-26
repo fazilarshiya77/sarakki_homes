@@ -7,7 +7,6 @@ import {
   LEAD_SOURCES,
   LEAD_PURPOSES,
   PROPERTY_TYPES,
-  POSSESSION_OPTIONS,
   PRIORITIES,
 } from "@/lib/crm";
 
@@ -73,8 +72,8 @@ export function AddLeadModal({
       });
       onCreated();
       onClose();
-    } catch (err: any) {
-      setError(err.message || "Something went wrong.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setSaving(false);
     }

@@ -37,6 +37,9 @@ export default function TasksPage() {
   };
 
   useEffect(() => {
+    // Standard fetch-on-mount — setState happens inside fetchTasks after
+    // its own await, not synchronously in this effect body.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchTasks();
   }, []);
 

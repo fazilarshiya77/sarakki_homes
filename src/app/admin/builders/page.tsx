@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Hammer, Loader2, Trash2 } from "lucide-react";
+import { Hammer, Loader2, Trash2 } from "lucide-react";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 
 interface Builder {
   id: string;
@@ -14,6 +15,9 @@ export default function BuildersPage() {
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Builder | null>(null);
+  const [deleteError, setDeleteError] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   const fetchBuilders = async () => {
     setLoading(true);
@@ -29,6 +33,9 @@ export default function BuildersPage() {
   };
 
   useEffect(() => {
+    // Standard fetch-on-mount -- setState happens inside fetchBuilders
+    // after its own await, not synchronously in this effect body.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchBuilders();
   }, []);
 
@@ -51,6 +58,26 @@ export default function BuildersPage() {
       console.error(err);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      const res = await fetch(`/api/admin/builders/${deleteTarget.id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (res.ok) {
+        setDeleteTarget(null);
+        fetchBuilders();
+      } else {
+        setDeleteError(data.error || "Couldn't delete this builder. Please try again.");
+      }
+    } catch {
+      setDeleteError("Couldn't delete this builder. Please try again.");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -81,13 +108,27 @@ export default function BuildersPage() {
             <div className="divide-y divide-border/10">
               {builders.map((b) => (
                 <div key={b.id} className="flex items-center justify-between p-4 crm-table-text">
-                  <span className="font-semibold text-crm-text flex items-center gap-2">
-                    <Hammer size={12} className="text-crm-gold" />
-                    {b.name}
+                  <span className="font-semibold text-crm-text flex items-center gap-2 min-w-0">
+                    <Hammer size={12} className="text-crm-gold shrink-0" />
+                    <span className="truncate">{b.name}</span>
                   </span>
-                  <span className="text-crm-text-secondary">
-                    {b._count.properties} properties listed
-                  </span>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-crm-text-secondary">
+                      {b._count.properties} properties listed
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDeleteError("");
+                        setDeleteTarget(b);
+                      }}
+                      title="Delete builder"
+                      aria-label={`Delete ${b.name}`}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-sm border border-crm-border text-crm-text-muted hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -124,6 +165,23 @@ export default function BuildersPage() {
           </form>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title={`Delete "${deleteTarget?.name}"?`}
+        message={
+          deleteError ||
+          "This removes the builder permanently. It only works if no properties are currently assigned to it — change those to a different builder (or \"None\") first."
+        }
+        confirmLabel="Delete"
+        tone="danger"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => {
+          setDeleteTarget(null);
+          setDeleteError("");
+        }}
+      />
     </div>
   );
 }

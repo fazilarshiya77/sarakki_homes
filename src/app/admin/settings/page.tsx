@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Settings, Save, Loader2, Sparkles } from "lucide-react";
+import { Settings, Save, Loader2 } from "lucide-react";
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { CATEGORIES } from "@/lib/data";
+import { LEGAL_SERVICES } from "@/lib/data";
 import { getAllPublishedSlugs } from "@/lib/properties";
 
 // TODO: replace with the real production domain once the site is hosted —
@@ -23,8 +23,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const serviceRoutes: MetadataRoute.Sitemap = CATEGORIES.map((category) => ({
-    url: `${BASE_URL}/services/${category.slug}`,
+  const serviceRoutes: MetadataRoute.Sitemap = LEGAL_SERVICES.map((service) => ({
+    url: `${BASE_URL}/services/${service.slug}`,
     changeFrequency: "monthly",
     priority: 0.6,
   }));

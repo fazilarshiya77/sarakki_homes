@@ -4,9 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import {
   Building2,
-  TrendingUp,
   MessageSquare,
-  Users,
   Eye,
   Plus,
   ArrowUpRight,

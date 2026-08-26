@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -16,7 +17,6 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
-  Eye,
   Copy,
   Archive,
   Loader2,
@@ -37,8 +37,10 @@ interface Property {
   status: string;
   featured: string;
   views: number;
+  categoryId: string;
+  builderId: string | null;
   category: { title: string; slug: string };
-  builder: { name: string };
+  builder: { name: string } | null;
   images: Array<{ url: string }>;
 }
 
@@ -98,6 +100,10 @@ function PropertiesListPageInner() {
     const raw = sessionStorage.getItem("sh_crm_publish_toast");
     if (raw) {
       sessionStorage.removeItem("sh_crm_publish_toast");
+      // Intentional: reading sessionStorage (an external system) is
+      // exactly what an effect is for; this can't be computed at
+      // render time.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPublishToast(raw);
     }
   }, []);
@@ -133,7 +139,14 @@ function PropertiesListPageInner() {
   };
 
   useEffect(() => {
+    // Standard fetch-on-filter-change — setState happens inside
+    // fetchProperties after its own await, not synchronously here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProperties();
+    // fetchProperties itself isn't memoized, so it's intentionally left
+    // out of the deps array (including it would re-run this effect
+    // every render).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch, statusFilter, categoryFilter, sort, page]);
 
   useEffect(() => {
@@ -175,8 +188,8 @@ function PropertiesListPageInner() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               ...prop,
-              categoryId: (prop as any).categoryId,
-              builderId: (prop as any).builderId,
+              categoryId: prop.categoryId,
+              builderId: prop.builderId,
               status: "ARCHIVED",
             }),
           });
@@ -205,8 +218,8 @@ function PropertiesListPageInner() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...property,
-          categoryId: (property as any).categoryId,
-          builderId: (property as any).builderId,
+          categoryId: property.categoryId,
+          builderId: property.builderId,
           featured: nextFeatured,
         }),
       });
@@ -266,8 +279,8 @@ function PropertiesListPageInner() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               ...prop,
-              categoryId: (prop as any).categoryId,
-              builderId: (prop as any).builderId,
+              categoryId: prop.categoryId,
+              builderId: prop.builderId,
               status: newStatus,
             }),
           });
@@ -471,7 +484,7 @@ function PropertiesListPageInner() {
               <>
                 <p className="crm-section-heading !text-base">No properties yet</p>
                 <p className="crm-body-text max-w-sm">
-                  Add your first listing to start building the portfolio — it'll appear here and can be published to the website whenever you're ready.
+                  Add your first listing to start building the portfolio — it&apos;ll appear here and can be published to the website whenever you&apos;re ready.
                 </p>
               </>
             )}
@@ -541,10 +554,12 @@ function PropertiesListPageInner() {
                       <td className="p-4">
                         <div className="h-10 w-14 rounded-sm bg-crm-bg overflow-hidden relative border border-crm-border shrink-0">
                           {prop.images[0] ? (
-                            <img
+                            <Image
                               src={prop.images[0].url}
                               alt={prop.title}
-                              className="h-full w-full object-cover"
+                              fill
+                              sizes="56px"
+                              className="object-cover"
                             />
                           ) : (
                             <div className="h-full w-full bg-crm-border/40" />
@@ -756,6 +771,6 @@ function publicUrlFor(prop: Property): string {
     : `/properties/${prop.slug}`;
 }
 
-function cn(...classes: any[]) {
+function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }

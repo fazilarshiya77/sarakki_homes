@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Star,
@@ -18,7 +19,10 @@ import {
   CheckSquare,
   History,
   Check,
+  Trash2,
+  type LucideIcon,
 } from "lucide-react";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import {
   STAGES,
   STAGE_LABELS,
@@ -71,10 +75,10 @@ type Tab = "notes" | "tasks" | "timeline";
 
 const inputClass =
   "w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-2.5 px-3 text-sm text-crm-text outline-none focus:border-crm-gold-bright/40";
-const labelClass = "text-[10px] font-semibold uppercase tracking-wider text-crm-text-secondary";
 
 export default function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
   const { data: session } = useSession();
   const role = (session?.user as { role?: string } | undefined)?.role;
   const canViewRevenue = role === "ADMIN" || role === "MANAGER";
@@ -86,6 +90,9 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   const [taskForm, setTaskForm] = useState({ title: "", assignedTo: "", priority: "MEDIUM", dueDate: "" });
   const [savingTask, setSavingTask] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   const fetchLead = async () => {
     try {
@@ -100,6 +107,9 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   };
 
   useEffect(() => {
+    // Standard fetch-on-mount — setState happens inside fetchLead after
+    // its own await, not synchronously in this effect body.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchLead();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
@@ -176,6 +186,28 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     }
   };
 
+  // A lead that turned out to be a duplicate, spam, or a bad number had
+  // no way to leave the pipeline before this — it's the API route
+  // (already existed) that was missing UI. Guarded by the shared
+  // ConfirmDialog, same as every other permanent-delete action in the CRM.
+  const handleDelete = async () => {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      const res = await fetch(`/api/admin/leads/${id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        router.push("/admin/leads");
+      } else {
+        setDeleteError(data.error || "Couldn't delete this lead. Please try again.");
+      }
+    } catch {
+      setDeleteError("Couldn't delete this lead. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const updateTaskStatus = async (taskId: string, status: string) => {
     try {
       await fetch(`/api/admin/tasks/${taskId}`, {
@@ -245,16 +277,30 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
           </div>
         </div>
 
-        <select
-          value={lead.stage}
-          onChange={(e) => patchLead({ stage: e.target.value })}
-          disabled={updating}
-          className="rounded-sm border border-crm-gold-bright/40 bg-crm-bg/40 py-2.5 px-4 text-sm font-semibold text-crm-text outline-none cursor-pointer"
-        >
-          {STAGES.map((s) => (
-            <option key={s} value={s}>{STAGE_LABELS[s]}</option>
-          ))}
-        </select>
+        <div className="flex items-center gap-2">
+          <select
+            value={lead.stage}
+            onChange={(e) => patchLead({ stage: e.target.value })}
+            disabled={updating}
+            className="rounded-sm border border-crm-gold-bright/40 bg-crm-bg/40 py-2.5 px-4 text-sm font-semibold text-crm-text outline-none cursor-pointer"
+          >
+            {STAGES.map((s) => (
+              <option key={s} value={s}>{STAGE_LABELS[s]}</option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => {
+              setDeleteError("");
+              setDeleteOpen(true);
+            }}
+            title="Delete lead"
+            aria-label="Delete lead"
+            className="inline-flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-sm border border-crm-border text-crm-text-muted hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
@@ -530,6 +576,23 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={deleteOpen}
+        title={`Delete "${lead.name}"?`}
+        message={
+          deleteError ||
+          "This permanently removes the lead, its notes, tasks, and activity history. This cannot be undone."
+        }
+        confirmLabel="Delete"
+        tone="danger"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => {
+          setDeleteOpen(false);
+          setDeleteError("");
+        }}
+      />
     </div>
   );
 }
@@ -551,7 +614,7 @@ function TabButton({
 }: {
   active: boolean;
   onClick: () => void;
-  icon: any;
+  icon: LucideIcon;
   label: string;
 }) {
   return (

@@ -134,7 +134,10 @@ export async function POST(req: Request) {
         address: body.address,
         mapQuery: body.mapQuery,
         categoryId: body.categoryId,
-        builderId: body.builderId,
+        // "" (the wizard's "None" option) is not a valid Builder id —
+        // Prisma needs an actual null to clear/skip the relation, not
+        // an empty string, which would fail the foreign-key write.
+        builderId: body.builderId || null,
       },
     });
 

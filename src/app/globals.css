@@ -300,6 +300,17 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Suppress Edge/IE's own built-in password reveal-eye and clear-x
+   icons. Several password fields (e.g. CRM staff create/edit) now ship
+   their own show/hide toggle button — without this, Edge stacks its
+   native icon right on top of/next to ours inside the same input,
+   which looks like a doubled-up control. Chrome/Firefox never had this
+   icon, so this is a no-op there. */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
 /* Ambient color field — a whisper of gold top-right and emerald bottom-left
    so frosted-glass surfaces have something to refract on light sections.
    Extremely subtle per DESIGN_SYSTEM.md §2 (no decorative gradients). */

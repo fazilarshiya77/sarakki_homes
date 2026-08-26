@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Mail, MapPin, PhoneCall } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { InstagramIcon } from "@/components/ui/SocialIcons";
-import { CATEGORIES } from "@/lib/data";
+import { LEGAL_SERVICES } from "@/lib/data";
 import { getSiteSettings } from "@/lib/settings";
 
 const COMPANY_LINKS = [
@@ -44,17 +44,30 @@ export async function Footer() {
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent-gold">
               Services
             </p>
+            {/* LEGAL_SERVICES now has 12 entries (up from 6 categories) —
+                listing all of them here would tower over the Company
+                column beside it, so this shows the most commonly needed
+                ones with a "View All" link through to the full list,
+                same pattern as "Company" isn't every page on the site. */}
             <ul className="mt-5 flex flex-col gap-3">
-              {CATEGORIES.map((category) => (
-                <li key={category.slug}>
+              {LEGAL_SERVICES.slice(0, 7).map((service) => (
+                <li key={service.slug}>
                   <Link
-                    href={`/services/${category.slug}`}
+                    href={`/services/${service.slug}`}
                     className="text-sm text-background/70 transition-colors duration-300 hover:text-background"
                   >
-                    {category.title}
+                    {service.title}
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  href="/services"
+                  className="text-sm font-semibold text-accent-gold transition-colors duration-300 hover:text-accent-gold-bright"
+                >
+                  View All Services →
+                </Link>
+              </li>
             </ul>
           </div>
 

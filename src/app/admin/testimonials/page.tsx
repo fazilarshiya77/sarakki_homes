@@ -59,6 +59,9 @@ export default function TestimonialsPage() {
   };
 
   useEffect(() => {
+    // Standard fetch-on-mount — setState happens inside fetchTestimonials
+    // after its own await, not synchronously in this effect body.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchTestimonials();
   }, []);
 
@@ -367,7 +370,7 @@ export default function TestimonialsPage() {
         <div className="rounded-sm border border-crm-border/20 bg-crm-card/25 p-6 backdrop-blur-md space-y-4">
           <div>
             <span className="crm-section-heading uppercase tracking-wider text-crm-text-secondary">Add Testimonial</span>
-            <p className="text-xs text-crm-text-secondary mt-0.5">Register a new client review. New reviews publish immediately — unpublish it from the list if it's not ready to go live.</p>
+            <p className="text-xs text-crm-text-secondary mt-0.5">Register a new client review. New reviews publish immediately — unpublish it from the list if it&apos;s not ready to go live.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

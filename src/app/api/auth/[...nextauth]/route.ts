@@ -147,7 +147,7 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = (user as any).role;
+        token.role = user.role;
       }
       return token;
     },
@@ -157,7 +157,7 @@ export const authOptions: AuthOptions = {
           ...session.user,
           id: token.id as string,
           role: token.role as string,
-        } as any;
+        };
       }
       return session;
     },

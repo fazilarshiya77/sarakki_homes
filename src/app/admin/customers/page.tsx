@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import {
   User,
-  Phone,
-  Mail,
   Building,
   Calendar,
   ChevronDown,
@@ -50,6 +48,9 @@ export default function CustomersPage() {
   };
 
   useEffect(() => {
+    // Standard fetch-on-mount -- setState happens inside fetchCustomers
+    // after its own await, not synchronously in this effect body.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCustomers();
   }, []);
 
