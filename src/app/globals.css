@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+/* Reserves the vertical scrollbar's width at all times, whether or not
+   a scrollbar is actually needed/visible. Without this, any modal that
+   locks scroll (ConsultationModal, etc. — `document.body.style.overflow
+   = "hidden"`) makes the scrollbar disappear the instant it opens,
+   which shifts every element on the page sideways by the scrollbar's
+   width and forces the browser to reflow/repaint the entire page — the
+   visible "the whole screen keeps re-rendering" jank reported when a
+   consultation popup opened. Reserving the gutter permanently means
+   toggling `overflow: hidden` never changes the available width, so
+   nothing reflows. Standard CSS, supported by every current browser. */
+html {
+  scrollbar-gutter: stable;
+}
+
 :root {
   /* Color tokens — DESIGN_SYSTEM.md §2 (v2: Forest/Ivory/Champagne system) */
   --background: #F5F1E8;

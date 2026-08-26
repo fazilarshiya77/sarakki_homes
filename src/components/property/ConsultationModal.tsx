@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, Loader2, X } from "lucide-react";
 import { buttonClasses } from "@/components/ui/Button";
@@ -59,6 +60,20 @@ export function ConsultationModal({
   }, [open]);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // `document` doesn't exist during SSR, so the portal target can only be
+  // resolved after mount — this also naturally avoids a hydration
+  // mismatch (server output never includes the portal, first client
+  // render matches it, then this flips true and the portal attaches).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    // Intentional: this is the standard client-only-portal mount flag —
+    // `document.body` genuinely doesn't exist yet during SSR, so there
+    // is no value to compute during render here; it can only become
+    // available after the first client commit.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
   const reset = () => {
     setName("");
     setPhone("");
@@ -116,7 +131,23 @@ export function ConsultationModal({
     }
   };
 
-  return (
+  if (!mounted) return null;
+
+  // Rendered via a portal straight to <body>, NOT inline where this
+  // component happens to be used. Every trigger (PropertyCard,
+  // BankAuctionCard/ListItem, EnquiryPanel, AuctionEnquiryPanel) sits
+  // inside a `motion.article`/`motion.div` that Framer Motion gives an
+  // inline `transform` for its own entrance animation — and per the CSS
+  // spec, any ancestor with a `transform` becomes the *containing
+  // block* for `position: fixed` descendants. Left inline, this
+  // "fixed inset-0" modal was actually positioning/stacking relative to
+  // that small card, not the real viewport — which is exactly why it
+  // rendered at the wrong offset and appeared BEHIND the site header
+  // (z-50) despite this modal's z-[200], on any viewport short enough
+  // for the two to overlap. A portal to `document.body` sidesteps the
+  // whole class of bug: nothing here is ever nested inside a
+  // transformed ancestor again.
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
@@ -124,7 +155,7 @@ export function ConsultationModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25, ease: "easeOut" }}
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4 py-8"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/55 backdrop-blur-md px-4 py-8"
           onClick={handleClose}
         >
           {/* No `scale` in this transform — animating scale on a tall,
@@ -297,6 +328,7 @@ export function ConsultationModal({
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
