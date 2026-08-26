@@ -8,6 +8,7 @@ import { Menu, MessageCircle, X, Phone, MapPin, Clock, Mail, Globe, Map, Chevron
 import { Container } from "@/components/ui/Container";
 import { CATEGORIES, LEGAL_SERVICES } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 const LINKS = [
   { label: "Properties", href: "/properties" },
@@ -93,16 +94,25 @@ export function Header({ solid = false }: { solid?: boolean }) {
     };
   }, [solid]);
 
-  // Close the mobile menu on route change (link click) and lock body scroll
-  // while it's open, same pattern as the intro Loader.
+  // Lock body scroll while the mobile menu or the contact modal is open
+  // (see src/lib/useScrollLock.ts — compensates with padding-right
+  // instead of a permanent scrollbar-gutter, so it has no footprint
+  // when neither is open).
+  useScrollLock(menuOpen || modalOpen);
+
+  // Esc closes whichever of the two is currently open — same convention
+  // as the brochure lightbox and the consultation modal elsewhere on
+  // the site.
   useEffect(() => {
-    if (!menuOpen) return;
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prevOverflow;
+    if (!menuOpen && !modalOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setMenuOpen(false);
+      setModalOpen(false);
     };
-  }, [menuOpen]);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen, modalOpen]);
 
   const isSolid = solid || scrolled || menuOpen;
 

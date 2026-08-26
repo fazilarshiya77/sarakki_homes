@@ -8,6 +8,7 @@ import { PropertyCard } from "@/components/property/PropertyCard";
 import { BrochureShowcase } from "@/components/property/BrochureShowcase";
 import { getPropertiesByCategory } from "@/lib/properties";
 import { getCategoryBySlug, getPublishedBrochures, getAllCategorySlugs } from "@/lib/brochures";
+import { cn } from "@/lib/utils";
 
 // Category content (title/tagline/description) and its brochures are
 // admin-managed and can change anytime — re-fetch at most once a minute
@@ -87,7 +88,7 @@ export default async function CategoryPage({
         {/* Property listings — same PropertyCard used everywhere else on
             the site; the brochure section above is deliberately a
             visually separate section, never mixed into this grid. */}
-        <Section className="bg-[#EDE6D6]">
+        <Section className={cn("bg-[#EDE6D6]", brochures.length > 0 && "!pt-0")}>
           <Container>
             {properties.length === 0 ? (
               <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed border-border py-24 text-center">

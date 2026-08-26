@@ -69,8 +69,15 @@ export function BrochureShowcase({ brochures }: { brochures: PublicBrochure[] })
 
   if (brochures.length === 0) return null;
 
+  // Sits directly between the category intro and the property grid —
+  // Section's default py-16/py-24 on both this section AND the grid
+  // section below it was stacking into a huge empty gap (each side
+  // contributing its own top+bottom padding). Tightened to a single
+  // reasonable gap instead of double padding (the grid section below
+  // also drops its own top padding when brochures are present — see
+  // the pages that render this component).
   return (
-    <Section className="bg-surface">
+    <Section className="bg-surface !pb-10 md:!pb-14">
       <Container>
         <RevealOnScroll>
           <Eyebrow>Resource Library</Eyebrow>

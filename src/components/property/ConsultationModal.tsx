@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, Loader2, X } from "lucide-react";
 import { buttonClasses } from "@/components/ui/Button";
 import { ButtonFX } from "@/components/ui/ButtonFX";
+import { useScrollLock } from "@/lib/useScrollLock";
 
 const CONTACT_METHODS = ["Phone", "WhatsApp", "Email"] as const;
 
@@ -50,14 +51,9 @@ export function ConsultationModal({
   // instant before the click registers can carry into the page behind
   // the fixed overlay, which reads as the whole popup "fluctuating" as
   // it animates in against a page that's still moving underneath it.
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [open]);
+  // (See src/lib/useScrollLock.ts for why this compensates with
+  // padding-right instead of a permanent scrollbar-gutter.)
+  useScrollLock(open);
   const [errorMessage, setErrorMessage] = useState("");
 
   // `document` doesn't exist during SSR, so the portal target can only be
@@ -93,6 +89,19 @@ export function ConsultationModal({
     // immediately would flash the fields empty while it's still closing.
     setTimeout(reset, 250);
   };
+
+  // Esc closes the modal — same convention as the brochure lightbox
+  // elsewhere on the site. Declared after handleClose so it never
+  // references it before it's assigned.
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

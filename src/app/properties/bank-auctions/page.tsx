@@ -7,6 +7,7 @@ import { BankAuctionExplorer } from "@/components/property/BankAuctionExplorer";
 import { BrochureShowcase } from "@/components/property/BrochureShowcase";
 import { getBankAuctionProperties } from "@/lib/auctions";
 import { getPublishedBrochures } from "@/lib/brochures";
+import { cn } from "@/lib/utils";
 
 // Auction listings are admin-managed and can change frequently — re-fetch at
 // most once a minute rather than only at build time.
@@ -48,7 +49,7 @@ export default async function BankAuctionsPage() {
             it's visible without scrolling past listings first. */}
         <BrochureShowcase brochures={brochures} />
 
-        <Section className="bg-[#EDE6D6]">
+        <Section className={cn("bg-[#EDE6D6]", brochures.length > 0 && "!pt-0")}>
           <Container>
             <BankAuctionExplorer properties={properties} />
           </Container>
