@@ -75,10 +75,31 @@ function PropertiesListPageInner() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 350);
   const [statusFilter, setStatusFilter] = useState(() => searchParams.get("status") || "");
-  const [categoryFilter, setCategoryFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState(() => searchParams.get("category") || "");
   const [sort, setSort] = useState("newest");
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [page, setPage] = useState(1);
+
+  // A `useState` lazy initializer (statusFilter/categoryFilter above)
+  // only runs on this component's very first mount. Next.js's App
+  // Router does NOT remount a client component when navigating between
+  // two URLs that resolve to the same page (e.g. the Dashboard's
+  // "Auction Listings" card linking to `?category=bank-auctions` after
+  // this page has already been visited once this session, such as via
+  // the "Total Properties" card) — so those initializers silently miss
+  // every deep-link after the first. This effect re-applies the URL's
+  // filters on every navigation, not just the first.
+  useEffect(() => {
+    // Intentional: this effect exists specifically to synchronize
+    // component state FROM the external searchParams object whenever
+    // it changes — exactly the "external system" case set-state-in-
+    // effect expects, not a value computable during render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setStatusFilter(searchParams.get("status") || "");
+    setCategoryFilter(searchParams.get("category") || "");
+    setPage(1);
+  }, [searchParams]);
+
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [publishToast, setPublishToast] = useState<string | null>(null);
   const [confirmState, setConfirmState] = useState<{

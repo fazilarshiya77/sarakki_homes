@@ -228,24 +228,32 @@ export function DashboardClient({
             value: stats.totalProperties,
             desc: `${stats.publishedProperties} live · ${stats.draftProperties} draft`,
             icon: Building2,
+            href: "/admin/properties",
           },
           {
             label: "Today's Enquiries",
             value: stats.todayEnquiries,
             desc: `${stats.totalEnquiries} lifetime enquiries`,
             icon: MessageSquare,
+            href: "/admin/enquiries",
           },
           {
             label: "Auction Listings",
             value: stats.bankAuctions,
             desc: `${stats.chanceDeals} chance deals active`,
             icon: FileCheck,
+            // Same query-param filter the Properties page's own "Category"
+            // dropdown writes (value is the category slug) — lands
+            // straight on the bank-auctions listings, not just the
+            // unfiltered list.
+            href: "/admin/properties?category=bank-auctions",
           },
           {
             label: "Property Views",
             value: stats.views,
             desc: "Updated in real-time",
             icon: Eye,
+            href: "/admin/properties",
           },
         ].map((card, idx) => {
           const Icon = card.icon;
@@ -255,22 +263,26 @@ export function DashboardClient({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: idx * 0.05 }}
               key={card.label}
-              className="crm-card p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(36,30,25,0.09)]"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-xs uppercase tracking-wider font-semibold text-crm-text-muted">
-                  {card.label}
-                </span>
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-crm-gold/12 text-crm-gold">
-                  <Icon size={14} strokeWidth={1.75} />
+              <Link
+                href={card.href}
+                className="crm-card block p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-crm-gold/40 hover:shadow-[0_16px_36px_rgba(36,30,25,0.09)]"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs uppercase tracking-wider font-semibold text-crm-text-muted">
+                    {card.label}
+                  </span>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-crm-gold/12 text-crm-gold">
+                    <Icon size={14} strokeWidth={1.75} />
+                  </div>
                 </div>
-              </div>
-              <div className="mt-4 flex items-baseline gap-2">
-                <span className="font-crm-display text-3xl font-bold tracking-tight text-crm-text">{card.value}</span>
-              </div>
-              <p className="text-xs text-crm-text-secondary mt-2 font-medium">
-                {card.desc}
-              </p>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="font-crm-display text-3xl font-bold tracking-tight text-crm-text">{card.value}</span>
+                </div>
+                <p className="text-xs text-crm-text-secondary mt-2 font-medium">
+                  {card.desc}
+                </p>
+              </Link>
             </motion.div>
           );
         })}
