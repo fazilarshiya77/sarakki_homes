@@ -228,59 +228,9 @@ export function ImportPropertiesModal({
             )}
           </div>
 
-          {/* -------------------- STEP 1: INSTRUCTIONS -------------------- */}
+          {/* -------------------- STEP 1: UPLOAD -------------------- */}
           {step === "instructions" && (
             <div className="space-y-6">
-              <ol className="space-y-4 text-base text-crm-text">
-                <li className="flex gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-crm-gold/15 text-sm font-bold text-crm-gold">1</span>
-                  <div>
-                    <p className="font-semibold">Download the template</p>
-                    <p className="text-sm text-crm-text-secondary mt-0.5">
-                      It has the correct column headings and an example row already filled in.
-                    </p>
-                    {/* A file download from an API route, not a page
-                        navigation — next/link's client-side routing
-                        doesn't apply here. */}
-                    {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-                    <a
-                      href="/api/admin/properties/import/template"
-                      className="crm-btn-secondary mt-3 inline-flex"
-                    >
-                      <Download size={14} />
-                      <span>Download</span>
-                    </a>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-crm-gold/15 text-sm font-bold text-crm-gold">2</span>
-                  <div>
-                    <p className="font-semibold">Fill it in and upload it here</p>
-                    <p className="text-sm text-crm-text-secondary mt-0.5">
-                      Fill in as many properties as you like — hundreds is fine. Leave a cell blank if you don&apos;t have that information yet.
-                    </p>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-crm-gold/15 text-sm font-bold text-crm-gold">3</span>
-                  <div>
-                    <p className="font-semibold">Check the preview</p>
-                    <p className="text-sm text-crm-text-secondary mt-0.5">
-                      We&apos;ll show you exactly what will be created or updated before anything is saved.
-                    </p>
-                  </div>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-crm-gold/15 text-sm font-bold text-crm-gold">4</span>
-                  <div>
-                    <p className="font-semibold">Confirm the import</p>
-                    <p className="text-sm text-crm-text-secondary mt-0.5">
-                      Photos are added separately, after import, on each property&apos;s own page — just like always.
-                    </p>
-                  </div>
-                </li>
-              </ol>
-
               {uploadError && (
                 <div className="flex items-start gap-2 rounded-sm border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-500">
                   <AlertTriangle size={16} className="shrink-0 mt-0.5" />
