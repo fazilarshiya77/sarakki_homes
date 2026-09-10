@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole, CAN } from "@/lib/authz";
+import { revalidateCategoryPage } from "@/lib/brochures";
 
 const GENERIC_ERROR = "Something went wrong. Please try again.";
 
@@ -19,10 +20,19 @@ export async function PUT(
 
   try {
     const body = await req.json();
-    const existing = await prisma.brochure.findUnique({ where: { id } });
+    const existing = await prisma.brochure.findUnique({
+      where: { id },
+      include: { category: { select: { slug: true } } },
+    });
     if (!existing) return NextResponse.json({ error: "Brochure not found." }, { status: 404 });
 
     const data: Record<string, unknown> = {};
+    // Revalidate the category the brochure started in — covers every
+    // edit (title, description, publish toggle, reorder, file swap),
+    // not just a category change. If the category itself changes below,
+    // the new one is added too so both the old and new public pages
+    // drop their stale cached copy.
+    const slugsToRevalidate = new Set<string>([existing.category.slug]);
 
     if (body.title !== undefined) {
       const title = String(body.title).trim();
@@ -33,6 +43,7 @@ export async function PUT(
       const category = await prisma.category.findUnique({ where: { id: body.categoryId } });
       if (!category) return NextResponse.json({ error: "That category could not be found." }, { status: 400 });
       data.categoryId = body.categoryId;
+      slugsToRevalidate.add(category.slug);
     }
     if (body.fileUrl !== undefined) {
       const fileUrl = String(body.fileUrl).trim();
@@ -54,6 +65,8 @@ export async function PUT(
       },
     });
 
+    for (const slug of slugsToRevalidate) revalidateCategoryPage(slug);
+
     return NextResponse.json({ brochure });
   } catch (error: unknown) {
     console.error("[api/admin/brochures/[id]] PUT failed:", error);
@@ -71,7 +84,10 @@ export async function DELETE(
   const { id } = await params;
 
   try {
-    const brochure = await prisma.brochure.findUnique({ where: { id } });
+    const brochure = await prisma.brochure.findUnique({
+      where: { id },
+      include: { category: { select: { slug: true } } },
+    });
     if (!brochure) return NextResponse.json({ error: "Brochure not found." }, { status: 404 });
 
     // No "still in use elsewhere" guard needed — unlike Builder/Category,
@@ -88,6 +104,8 @@ export async function DELETE(
         details: `Deleted brochure "${brochure.title}"`,
       },
     });
+
+    revalidateCategoryPage(brochure.category.slug);
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

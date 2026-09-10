@@ -1,5 +1,24 @@
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { safeDbCall } from "@/lib/db-safe";
+
+/** Revalidates whichever public page actually serves this category, so
+ *  a brochure add/edit/delete/publish-toggle in the CRM shows up on the
+ *  site immediately instead of waiting out that page's `revalidate`
+ *  window (up to 60s — see `export const revalidate` on the category
+ *  pages). bank-auctions has its own dedicated route rather than the
+ *  generic /properties/category/[slug]; every caller must go through
+ *  this helper rather than hardcoding the path, or a bank-auctions
+ *  brochure change would silently revalidate the wrong URL.
+ *
+ *  Only valid to call from a Route Handler or Server Action (Next.js
+ *  restriction on `revalidatePath`) — never from a page/Server
+ *  Component's render path, which is why this lives here rather than
+ *  being invoked directly by the public pages that only ever *read*
+ *  brochures via the functions below. */
+export function revalidateCategoryPage(slug: string) {
+  revalidatePath(slug === "bank-auctions" ? "/properties/bank-auctions" : `/properties/category/${slug}`);
+}
 
 /** Public-facing shape — deliberately its own type, not reused from the
  *  admin Brochure API responses, since the public site never needs

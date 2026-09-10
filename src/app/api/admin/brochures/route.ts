@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole, CAN } from "@/lib/authz";
+import { revalidateCategoryPage } from "@/lib/brochures";
 
 const GENERIC_ERROR = "Something went wrong. Please try again.";
 
@@ -78,6 +79,8 @@ export async function POST(req: Request) {
         details: `Added brochure "${title}" to category "${category.title}"`,
       },
     });
+
+    revalidateCategoryPage(category.slug);
 
     return NextResponse.json({ brochure });
   } catch (error: unknown) {
