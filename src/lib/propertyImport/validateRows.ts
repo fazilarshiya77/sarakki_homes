@@ -1,26 +1,24 @@
 import {
-  COLUMN_DEFS,
-  PROPERTY_ID_HEADER,
+  DEFAULT_CATEGORY_TITLE,
+  DEFAULT_PRICE_TEXT,
+  DEFAULT_TYPE,
   PROPERTY_STATUS_VALUES,
-  PROPERTY_TYPE_VALUES,
 } from "./columnMapping";
+import { firstNumber, parseBathrooms, parseBhk, parsePrice, parseSqft } from "./fieldResolver";
 import type { RawImportRow } from "./workbook";
 
-// Every field that isn't one of the 4 always-required ones is `... | null`,
-// where **null means "the Excel cell was blank"**. On an UPDATE that means
-// "leave this field exactly as it is" (same principle as images never
-// being touched) — so an admin can export, change only the Price column,
-// and re-import without wiping every field they left alone. On a CREATE,
-// null falls back to the same safe default the manual "Add Property" form
-// uses (0 / "" / UNPUBLISHED / not-featured).
+// A null on any of these means "the sheet didn't give this" — on an
+// UPDATE that means "leave the field exactly as it is" (same principle
+// as images never being touched); on a CREATE it falls back to the same
+// safe default the manual "Add Property" form uses.
 export interface ValidatedRowData {
   title: string;
-  type: string;
-  categoryId: string;
-  categoryName: string;
+  type: string | null;
+  categoryId: string | null;
+  categoryName: string | null;
   builderId: string | null;
-  builderName: string;
-  price: string;
+  builderName: string | null;
+  price: string | null;
   priceValueLakh: number | null;
   location: string | null;
   address: string | null;
@@ -36,26 +34,28 @@ export interface ValidatedRowData {
 
 export interface ValidRow {
   rowNumber: number;
+  sourceLabel: string;
   action: "create" | "update";
-  /** Only present for action: "update" — the Property.id (uuid) to write to. */
   targetId?: string;
-  propertyId: string; // existing SH-xxxx for update, "" for a new row
+  propertyId: string;
   data: ValidatedRowData;
+  /** Non-blocking assumptions made about this row (guessed category,
+   *  created-as-new because no ID, etc.) — surfaced in the preview so
+   *  nothing is a silent surprise. */
+  notes: string[];
 }
 
 export interface ErrorRow {
   rowNumber: number;
+  sourceLabel: string;
   propertyId: string;
   propertyName: string;
   errors: string[];
 }
 
 export interface ReferenceData {
-  /** lowercase, trimmed title -> {id, title} */
   categories: Map<string, { id: string; title: string }>;
-  /** lowercase, trimmed name -> {id, name} */
   builders: Map<string, { id: string; name: string }>;
-  /** propertyId (e.g. "SH-1001") -> Property.id (uuid) */
   existingPropertyIds: Map<string, string>;
 }
 
@@ -64,102 +64,56 @@ export interface ValidationResult {
   errorRows: ErrorRow[];
   newCount: number;
   updateCount: number;
+  /** De-duplicated, counted summary of the assumptions above, for the
+   *  preview screen. */
+  assumptions: string[];
 }
 
-// Blank -> null (meaning "not provided" — see ValidatedRowData). A
-// non-blank value that isn't a number -> ok:false so the row is reported
-// as an error instead of silently becoming 0.
-function num(raw: string): { value: number | null; ok: boolean } {
-  if (raw.trim() === "") return { value: null, ok: true };
-  const cleaned = raw.replace(/,/g, "").trim();
-  const parsed = Number(cleaned);
-  if (Number.isNaN(parsed) || !Number.isFinite(parsed) || parsed < 0) return { value: null, ok: false };
-  return { value: parsed, ok: true };
+/** "rental income properties" and "rental income" should match the same
+ *  category — try the value as-is, then with a trailing
+ *  "property"/"properties" trimmed off each side. */
+function matchByName<T>(map: Map<string, T>, raw: string): T | undefined {
+  const norm = (s: string) =>
+    s.toLowerCase().replace(/\bproperties?\b/g, "").replace(/[^a-z0-9]/g, "");
+  const direct = map.get(raw.toLowerCase().trim());
+  if (direct) return direct;
+  const target = norm(raw);
+  for (const [key, val] of map) {
+    if (norm(key) === target) return val;
+  }
+  return undefined;
 }
 
-/** Blank cell -> null ("leave unchanged on update / default on create"). */
-function str(raw: string): string | null {
-  const t = raw.trim();
-  return t === "" ? null : t;
-}
-
-/** Shared by both the preview and commit API routes so they can never
- *  disagree about what's valid — preview shows exactly what commit will
- *  do, and commit re-validates from the same raw rows rather than
- *  trusting whatever the browser sends back. */
 export function validateAndResolveRows(rawRows: RawImportRow[], ref: ReferenceData): ValidationResult {
   const validRows: ValidRow[] = [];
   const errorRows: ErrorRow[] = [];
-  const seenIdsInFile = new Map<string, number>(); // propertyId -> first row number seen
+  const seenIdsInFile = new Map<string, number>();
+  const assumptionCounts = new Map<string, number>();
+  const bump = (key: string) => assumptionCounts.set(key, (assumptionCounts.get(key) ?? 0) + 1);
 
-  for (const row of rawRows) {
+  const defaultCategory = matchByName(ref.categories, DEFAULT_CATEGORY_TITLE);
+
+  rawRows.forEach((row, idx) => {
+    const rowNumber = idx + 1; // position among data rows, for the error report
+    const v = row.values;
     const errors: string[] = [];
-    const get = (header: string) => (row.values[header] ?? "").trim();
+    const notes: string[] = [];
 
-    const propertyIdRaw = get(PROPERTY_ID_HEADER);
-    const title = get("Property Name");
-    const typeRaw = get("Property Type");
-    const categoryRaw = get("Category");
-    const builderRaw = get("Builder");
-    const price = get("Price");
+    const title = (v.title ?? "").trim();
+    const propertyIdRaw = (v.propertyId ?? "").trim();
 
-    // --- Required fields (the 4 the client named) -----------------------
-    if (!title) errors.push("Missing Property Name.");
-    if (!typeRaw) errors.push("Missing Property Type.");
-    if (!categoryRaw) errors.push("Missing Category.");
-    if (!price) errors.push("Missing Price.");
-
-    // --- Property Type enum ----------------------------------------------
-    const matchedType = PROPERTY_TYPE_VALUES.find((v) => v.toLowerCase() === typeRaw.toLowerCase());
-    if (typeRaw && !matchedType) {
-      errors.push(`Invalid Property Type "${typeRaw}". Must be one of: ${PROPERTY_TYPE_VALUES.join(", ")}.`);
+    if (!title) {
+      errorRows.push({
+        rowNumber,
+        sourceLabel: row.sourceLabel,
+        propertyId: propertyIdRaw,
+        propertyName: "",
+        errors: ["No property name found in this row."],
+      });
+      return;
     }
 
-    // --- Category / Builder matching (never auto-created) ----------------
-    const matchedCategory = categoryRaw ? ref.categories.get(categoryRaw.toLowerCase()) : undefined;
-    if (categoryRaw && !matchedCategory) {
-      errors.push(`Category "${categoryRaw}" does not exist.`);
-    }
-    let builderId: string | null = null;
-    if (builderRaw) {
-      const matchedBuilder = ref.builders.get(builderRaw.toLowerCase());
-      if (!matchedBuilder) {
-        errors.push(`Builder "${builderRaw}" does not exist.`);
-      } else {
-        builderId = matchedBuilder.id;
-      }
-    }
-
-    // --- Numbers -----------------------------------------------------------
-    const priceValueLakh = num(get("Price in Lakh"));
-    if (!priceValueLakh.ok) errors.push(`Invalid number in "Price in Lakh": "${get("Price in Lakh")}".`);
-    const beds = num(get("Bedrooms"));
-    if (!beds.ok) errors.push(`Invalid number in "Bedrooms": "${get("Bedrooms")}".`);
-    const baths = num(get("Bathrooms"));
-    if (!baths.ok) errors.push(`Invalid number in "Bathrooms": "${get("Bathrooms")}".`);
-    const areaSqft = num(get("Area (Sqft)"));
-    if (!areaSqft.ok) errors.push(`Invalid number in "Area (Sqft)": "${get("Area (Sqft)")}".`);
-
-    // --- Status / Featured (optional enums) ---------------------------------
-    const statusRaw = get("Status");
-    let status: string | null = null;
-    if (statusRaw) {
-      const matchedStatus = PROPERTY_STATUS_VALUES.find((v) => v.toLowerCase() === statusRaw.toLowerCase());
-      if (!matchedStatus) {
-        errors.push(`Invalid Status "${statusRaw}". Must be one of: ${PROPERTY_STATUS_VALUES.join(", ")}.`);
-      } else {
-        status = matchedStatus;
-      }
-    }
-    const featuredRaw = get("Featured");
-    let featured: string | null = null;
-    if (featuredRaw) {
-      if (/^yes$/i.test(featuredRaw)) featured = "true";
-      else if (/^no$/i.test(featuredRaw)) featured = "false";
-      else errors.push(`Invalid Featured value "${featuredRaw}". Must be "Yes" or "No".`);
-    }
-
-    // --- Identify create vs. update, and catch in-file duplicates ----------
+    // --- create vs. update -------------------------------------------------
     let action: "create" | "update" = "create";
     let targetId: string | undefined;
     if (propertyIdRaw) {
@@ -167,7 +121,7 @@ export function validateAndResolveRows(rawRows: RawImportRow[], ref: ReferenceDa
       if (firstSeenAt !== undefined) {
         errors.push(`Duplicate Property ID "${propertyIdRaw}" — already used in row ${firstSeenAt}.`);
       } else {
-        seenIdsInFile.set(propertyIdRaw, row.rowNumber);
+        seenIdsInFile.set(propertyIdRaw, rowNumber);
       }
       const existingDbId = ref.existingPropertyIds.get(propertyIdRaw);
       if (!existingDbId) {
@@ -176,39 +130,157 @@ export function validateAndResolveRows(rawRows: RawImportRow[], ref: ReferenceDa
         action = "update";
         targetId = existingDbId;
       }
+    } else {
+      bump("no-id");
     }
 
+    // --- category --------------------------------------------------------
+    let categoryId: string | null = null;
+    let categoryName: string | null = null;
+    const categoryRaw = (v.category ?? "").trim();
+    if (categoryRaw) {
+      const matched = matchByName(ref.categories, categoryRaw);
+      if (matched) {
+        categoryId = matched.id;
+        categoryName = matched.title;
+      } else if (action === "create") {
+        if (!defaultCategory) {
+          errors.push(
+            `Category "${categoryRaw}" doesn't exist, and the fallback category "${DEFAULT_CATEGORY_TITLE}" isn't set up either.`
+          );
+        } else {
+          categoryId = defaultCategory.id;
+          categoryName = defaultCategory.title;
+          notes.push(`Category "${categoryRaw}" not found — imported into "${defaultCategory.title}".`);
+          bump("category-guessed");
+        }
+      } else {
+        notes.push(`Category "${categoryRaw}" not found — kept its current category.`);
+        bump("category-kept");
+      }
+    } else if (action === "create") {
+      if (!defaultCategory) {
+        errors.push(`No Category given and the fallback category "${DEFAULT_CATEGORY_TITLE}" isn't set up.`);
+      } else {
+        categoryId = defaultCategory.id;
+        categoryName = defaultCategory.title;
+        bump("category-defaulted");
+      }
+    }
+
+    // --- builder (optional, never blocks) --------------------------------
+    let builderId: string | null = null;
+    let builderName: string | null = null;
+    const builderRaw = (v.builder ?? "").trim();
+    if (builderRaw) {
+      const matched = matchByName(ref.builders, builderRaw);
+      if (matched) {
+        builderId = matched.id;
+        builderName = matched.name;
+      } else {
+        notes.push(`Builder "${builderRaw}" not found — left unset.`);
+        bump("builder-missing");
+      }
+    }
+
+    // --- price ----------------------------------------------------------
+    const priceRaw = (v.price ?? "").trim();
+    let price: string | null = null;
+    let priceValueLakh: number | null = null;
+    if (priceRaw) {
+      const parsed = parsePrice(priceRaw);
+      price = parsed.display;
+      priceValueLakh = parsed.lakh;
+    } else if (action === "create") {
+      price = DEFAULT_PRICE_TEXT;
+      bump("price-missing");
+    }
+    // An explicit numeric "price in lakh" column always wins if present.
+    const explicitLakh = firstNumber((v.priceValueLakh ?? "").trim());
+    if (explicitLakh !== null && explicitLakh >= 0) priceValueLakh = explicitLakh;
+
+    // --- everything else (all optional, all lenient) -------------------
+    const type = (v.type ?? "").trim() || (action === "create" ? DEFAULT_TYPE : null);
+
+    const beds = v.beds != null ? parseBhk(v.beds) : null;
+    const baths = v.baths != null ? parseBathrooms(v.baths) : null;
+    const area = (v.area ?? "").trim() || null;
+    let areaSqft = v.areaSqft != null ? parseSqft(v.areaSqft) : null;
+    if (areaSqft === null && area) areaSqft = parseSqft(area);
+
+    const location = (v.location ?? "").trim() || null;
+    const address = (v.address ?? "").trim() || null;
+    const mapQuery = (v.mapQuery ?? "").trim() || null;
+
+    const descBase = (v.description ?? "").trim();
+    const description = [descBase, row.extra.trim()].filter(Boolean).join("\n\n") || null;
+
+    let status: string | null = null;
+    const statusRaw = (v.status ?? "").trim();
+    if (statusRaw) {
+      status = PROPERTY_STATUS_VALUES.find((s) => s.toLowerCase() === statusRaw.toLowerCase()) ?? null;
+    }
+
+    let featured: string | null = null;
+    const featuredRaw = (v.featured ?? "").trim();
+    if (/^(yes|true|y|1)$/i.test(featuredRaw)) featured = "true";
+    else if (/^(no|false|n|0)$/i.test(featuredRaw)) featured = "false";
+
     if (errors.length > 0) {
-      errorRows.push({ rowNumber: row.rowNumber, propertyId: propertyIdRaw, propertyName: title, errors });
-      continue;
+      errorRows.push({
+        rowNumber,
+        sourceLabel: row.sourceLabel,
+        propertyId: propertyIdRaw,
+        propertyName: title,
+        errors,
+      });
+      return;
     }
 
     validRows.push({
-      rowNumber: row.rowNumber,
+      rowNumber,
+      sourceLabel: row.sourceLabel,
       action,
       targetId,
       propertyId: propertyIdRaw,
+      notes,
       data: {
         title,
-        type: matchedType!,
-        categoryId: matchedCategory!.id,
-        categoryName: matchedCategory!.title,
+        type,
+        categoryId,
+        categoryName,
         builderId,
-        builderName: builderRaw,
+        builderName,
         price,
-        priceValueLakh: priceValueLakh.value,
-        location: str(get("Location")),
-        address: str(get("Address")),
-        mapQuery: str(get("Google Maps Location")),
-        beds: beds.value === null ? null : Math.round(beds.value),
-        baths: baths.value === null ? null : Math.round(baths.value),
-        area: str(get("Area")),
-        areaSqft: areaSqft.value === null ? null : Math.round(areaSqft.value),
-        description: str(get("Description")),
+        priceValueLakh,
+        location,
+        address,
+        mapQuery,
+        beds,
+        baths,
+        area,
+        areaSqft,
+        description,
         status,
         featured,
       },
     });
+  });
+
+  const label: Record<string, (n: number) => string> = {
+    "no-id": (n) => `${n} row${n === 1 ? "" : "s"} have no Property ID — created as new (re-uploading this file later would add them again).`,
+    "category-defaulted": (n) => `${n} row${n === 1 ? "" : "s"} had no Category — imported into "${DEFAULT_CATEGORY_TITLE}".`,
+    "category-guessed": (n) => `${n} row${n === 1 ? "" : "s"} had a Category that doesn't exist — imported into "${DEFAULT_CATEGORY_TITLE}".`,
+    "category-kept": (n) => `${n} existing propert${n === 1 ? "y" : "ies"} had an unknown Category — their category was left unchanged.`,
+    "builder-missing": (n) => `${n} row${n === 1 ? "" : "s"} named a Builder that doesn't exist — left unset.`,
+    "price-missing": (n) => `${n} row${n === 1 ? "" : "s"} had no Price — set to "${DEFAULT_PRICE_TEXT}".`,
+  };
+  const assumptions: string[] = [];
+  for (const [key, n] of assumptionCounts) {
+    assumptions.push(label[key] ? label[key](n) : `${n} rows: ${key}`);
+  }
+  if (validRows.some((r) => r.action === "create")) {
+    assumptions.push("New properties are created as UNPUBLISHED drafts — nothing shows on the website until you publish it.");
   }
 
   return {
@@ -216,9 +288,6 @@ export function validateAndResolveRows(rawRows: RawImportRow[], ref: ReferenceDa
     errorRows,
     newCount: validRows.filter((r) => r.action === "create").length,
     updateCount: validRows.filter((r) => r.action === "update").length,
+    assumptions,
   };
 }
-
-// Re-exported so API routes/UI don't need to reach into columnMapping.ts
-// directly for these.
-export { COLUMN_DEFS, PROPERTY_ID_HEADER };

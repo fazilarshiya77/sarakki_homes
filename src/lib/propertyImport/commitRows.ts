@@ -64,8 +64,10 @@ export async function commitRowsChunk(rows: ValidRow[], userId: string): Promise
         }
         existingSlugs.add(slug);
 
-        // For a brand-new property a blank cell (null) falls back to the
-        // exact same default the manual "Add Property" form uses.
+        // For a brand-new property anything the sheet didn't give (null)
+        // falls back to the exact same default the manual "Add Property"
+        // form uses. `categoryId` is guaranteed non-null for a create by
+        // validateAndResolveRows (matched, or the fallback category).
         const d = row.data;
         const created = await prisma.property.create({
           data: {
@@ -73,9 +75,9 @@ export async function commitRowsChunk(rows: ValidRow[], userId: string): Promise
             slug,
             title: d.title,
             location: d.location ?? "",
-            price: d.price,
+            price: d.price ?? "Price on request",
             priceValueLakh: d.priceValueLakh ?? 0,
-            type: d.type,
+            type: d.type ?? "Resale",
             status: d.status ?? "UNPUBLISHED", // safest default for a new listing, per spec §12
             featured: d.featured ?? "false",
             beds: d.beds ?? 0,
@@ -85,7 +87,7 @@ export async function commitRowsChunk(rows: ValidRow[], userId: string): Promise
             description: d.description ?? "",
             address: d.address ?? "",
             mapQuery: d.mapQuery ?? "",
-            categoryId: d.categoryId,
+            categoryId: d.categoryId!,
             builderId: d.builderId,
           },
         });
@@ -107,12 +109,14 @@ export async function commitRowsChunk(rows: ValidRow[], userId: string): Promise
         // write at all, so existing Cover Image / Gallery photos are
         // always left completely alone.
         const d = row.data;
-        const updateData: Prisma.PropertyUpdateInput = {
-          title: d.title,
-          price: d.price,
-          type: d.type,
-          category: { connect: { id: d.categoryId } },
-        };
+        // title is the one field always present (a row with no name is
+        // rejected earlier); everything else is written only when the
+        // sheet actually gave it, so an update never blanks a field the
+        // upload left out.
+        const updateData: Prisma.PropertyUpdateInput = { title: d.title };
+        if (d.price !== null) updateData.price = d.price;
+        if (d.type !== null) updateData.type = d.type;
+        if (d.categoryId !== null) updateData.category = { connect: { id: d.categoryId } };
         if (d.priceValueLakh !== null) updateData.priceValueLakh = d.priceValueLakh;
         if (d.location !== null) updateData.location = d.location;
         if (d.address !== null) updateData.address = d.address;

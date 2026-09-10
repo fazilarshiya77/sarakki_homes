@@ -55,6 +55,15 @@ export const PROPERTY_STATUS_VALUES = [
   "AUCTION_CLOSED",
 ] as const;
 
+// Fallbacks used when an uploaded sheet simply doesn't have these
+// columns at all (common with the free-form listing sheets the client
+// keeps). New rows imported this way always land as UNPUBLISHED drafts —
+// nothing reaches the public website until staff review and publish it —
+// so a guessed category/type is safe to correct afterwards.
+export const DEFAULT_CATEGORY_TITLE = "Resale Properties";
+export const DEFAULT_TYPE = "Resale";
+export const DEFAULT_PRICE_TEXT = "Price on request";
+
 // The identifier column — if a row has a value here that matches an
 // existing property, it's an UPDATE; if blank, it's a CREATE; if it has a
 // value that matches NOTHING, that's a validation error (never silently

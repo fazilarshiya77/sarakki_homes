@@ -30,6 +30,7 @@ interface ValidRow {
 }
 interface ErrorRow {
   rowNumber: number;
+  sourceLabel: string;
   propertyId: string;
   propertyName: string;
   errors: string[];
@@ -39,6 +40,7 @@ interface PreviewResult {
   errorRows: ErrorRow[];
   newCount: number;
   updateCount: number;
+  assumptions: string[];
 }
 interface CommitRowResult {
   rowNumber: number;
@@ -178,12 +180,12 @@ export function ImportPropertiesModal({
   };
 
   const downloadErrorReport = () => {
-    const rows: string[][] = [["Row Number", "Property ID", "Property Name", "Error"]];
+    const rows: string[][] = [["Location", "Property ID", "Property Name", "Error"]];
     for (const e of preview?.errorRows ?? []) {
-      rows.push([String(e.rowNumber), e.propertyId, e.propertyName, e.errors.join(" | ")]);
+      rows.push([e.sourceLabel, e.propertyId, e.propertyName, e.errors.join(" | ")]);
     }
     for (const r of commitResults.filter((r) => !r.ok)) {
-      rows.push([String(r.rowNumber), r.propertyId, r.propertyName, r.error || "Failed to save."]);
+      rows.push([`Row ${r.rowNumber}`, r.propertyId, r.propertyName, r.error || "Failed to save."]);
     }
     downloadCsv("property-import-errors.csv", rows);
   };
@@ -287,15 +289,26 @@ export function ImportPropertiesModal({
                 </div>
               </div>
 
+              {preview.assumptions.length > 0 && (
+                <div className="rounded-sm border border-crm-gold/20 bg-crm-gold/5 p-4">
+                  <p className="text-sm font-semibold text-crm-text mb-2">Please note:</p>
+                  <ul className="space-y-1.5 text-sm text-crm-text-secondary list-disc pl-5">
+                    {preview.assumptions.map((a, i) => (
+                      <li key={i}>{a}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {preview.errorRows.length > 0 && (
                 <div className="rounded-sm border border-red-500/20 bg-red-500/5 p-4 max-h-56 overflow-y-auto scrollbar-thin">
                   <p className="text-sm font-semibold text-red-500 mb-2">
-                    These rows will be skipped — fix them in Excel and upload again if you want them included:
+                    These rows will be skipped — fix them and upload again if you want them included:
                   </p>
                   <ul className="space-y-2 text-sm text-crm-text">
-                    {preview.errorRows.map((e) => (
-                      <li key={e.rowNumber}>
-                        <span className="font-semibold">Row {e.rowNumber}</span>
+                    {preview.errorRows.map((e, i) => (
+                      <li key={i}>
+                        <span className="font-semibold">{e.sourceLabel}</span>
                         {e.propertyName ? ` (${e.propertyName})` : ""}: {e.errors.join(" ")}
                       </li>
                     ))}
