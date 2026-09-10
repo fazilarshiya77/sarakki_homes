@@ -215,7 +215,7 @@ export function ImportPropertiesModal({
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-crm-gold/10 text-crm-gold">
                 <FileSpreadsheet size={20} />
               </div>
-              <h2 className="text-xl font-bold text-crm-text">Import Properties from Excel</h2>
+              <h2 className="text-xl font-bold text-crm-text">Import Properties</h2>
             </div>
             {(step === "instructions" || step === "preview" || step === "done") && (
               <button
@@ -235,7 +235,7 @@ export function ImportPropertiesModal({
                 <li className="flex gap-3">
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-crm-gold/15 text-sm font-bold text-crm-gold">1</span>
                   <div>
-                    <p className="font-semibold">Download the Excel template</p>
+                    <p className="font-semibold">Download the template</p>
                     <p className="text-sm text-crm-text-secondary mt-0.5">
                       It has the correct column headings and an example row already filled in.
                     </p>
@@ -248,7 +248,7 @@ export function ImportPropertiesModal({
                       className="crm-btn-secondary mt-3 inline-flex"
                     >
                       <Download size={14} />
-                      <span>Download Excel Template</span>
+                      <span>Download</span>
                     </a>
                   </div>
                 </li>
@@ -292,7 +292,6 @@ export function ImportPropertiesModal({
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                   onChange={handleFileChange}
                   className="hidden"
                   id="import-file-input"
@@ -302,8 +301,8 @@ export function ImportPropertiesModal({
                   className="flex flex-col items-center justify-center gap-2 rounded-sm border-2 border-dashed border-crm-gold/30 bg-crm-gold/5 py-10 cursor-pointer hover:bg-crm-gold/10 transition-colors"
                 >
                   <Upload size={28} className="text-crm-gold" />
-                  <span className="text-base font-semibold text-crm-text">Click to upload your Excel file</span>
-                  <span className="text-sm text-crm-text-secondary">.xlsx or .xls</span>
+                  <span className="text-base font-semibold text-crm-text">Click to upload your file</span>
+                  <span className="text-sm text-crm-text-secondary">Excel (.xlsx) or CSV works best</span>
                 </label>
               </div>
             </div>

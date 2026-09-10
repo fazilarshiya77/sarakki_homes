@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     const parsed = await parseUploadedWorkbook(buffer);
     if (!parsed) {
       return NextResponse.json(
-        { error: "That file couldn't be read. Please upload the .xlsx file exported from this CRM or the downloaded template." },
+        { error: "That file couldn't be read. Please upload an Excel (.xlsx) or CSV file — the template downloaded from this page works." },
         { status: 400 }
       );
     }

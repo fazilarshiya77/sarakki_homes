@@ -1,3 +1,4 @@
+import { Readable } from "stream";
 import ExcelJS from "exceljs";
 import { ALL_HEADERS, COLUMN_DEFS, PROPERTY_ID_HEADER } from "./columnMapping";
 
@@ -10,20 +11,28 @@ export interface RawImportRow {
   values: Record<string, string>;
 }
 
-/** Reads the first worksheet of an uploaded workbook into header-keyed rows.
- *  Never throws on a malformed row — a genuinely unreadable file (not an
- *  .xlsx/.xls at all) is the only thing that surfaces as an error, since
- *  everything else is meant to be caught by validation and shown to the
- *  admin as a fixable row error instead of a hard failure. */
+/** Reads the first sheet of an uploaded file into header-keyed rows.
+ *  Accepts whatever the admin picks — an .xlsx workbook or a plain .csv
+ *  (Excel, Google Sheets, and Numbers all export both). Anything that
+ *  isn't a readable spreadsheet at all returns null, which the caller
+ *  turns into a friendly "couldn't read that file" message; everything
+ *  short of that is left for row-level validation to report as a
+ *  fixable problem rather than a hard failure. */
 export async function parseUploadedWorkbook(buffer: ArrayBuffer): Promise<{
   rows: RawImportRow[];
   headerRow: string[];
 } | null> {
-  const workbook = new ExcelJS.Workbook();
+  let workbook = new ExcelJS.Workbook();
   try {
     await workbook.xlsx.load(buffer);
   } catch {
-    return null;
+    // Not a valid .xlsx — try reading it as CSV before giving up.
+    try {
+      workbook = new ExcelJS.Workbook();
+      await workbook.csv.read(Readable.from(Buffer.from(buffer)));
+    } catch {
+      return null;
+    }
   }
 
   const sheet = workbook.worksheets[0];

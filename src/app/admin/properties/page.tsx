@@ -398,14 +398,14 @@ function PropertiesListPageInner() {
           </Link>
           <button onClick={() => setImportOpen(true)} className="crm-btn-secondary">
             <Upload size={14} />
-            <span>Import Excel</span>
+            <span>Upload File</span>
           </button>
           {/* A file download from an API route, not a page navigation —
               next/link's client-side routing doesn't apply here. */}
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/api/admin/properties/export" className="crm-btn-secondary">
             <Download size={14} />
-            <span>Export Excel</span>
+            <span>Download</span>
           </a>
         </div>
       </div>
