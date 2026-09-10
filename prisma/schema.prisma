@@ -36,6 +36,7 @@ model Category {
   tone            String     @default("warm")
   properties      Property[]
   brochures       Brochure[]
+  requirementOf   Enquiry[]
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 }
@@ -196,9 +197,22 @@ model Enquiry {
   preferredDate String?
   preferredTime String?
 
+  // What the client is actually asking for, captured by staff after
+  // talking to them — separate from `property` above, which is just
+  // whichever single listing they clicked "Consultation" on (or none,
+  // for a general contact-form enquiry). Structured (bedrooms +
+  // category) specifically so the CRM can count/show which live
+  // listings actually match, not just store it as more free text.
+  // Both optional — filling this in is never required to process an
+  // enquiry.
+  requirementBedrooms   Int?
+  requirementCategoryId String?
+  requirementCategory   Category? @relation(fields: [requirementCategoryId], references: [id], onDelete: SetNull)
+
   @@index([status])
   @@index([createdAt])
   @@index([enquiryType])
+  @@index([requirementCategoryId])
 }
 
 model Customer {

@@ -44,6 +44,10 @@ export const CAN = {
   DELETE_CONTENT: ["ADMIN", "MANAGER"] as Role[],
   /** Leads, tasks, enquiries, customers — the sales workflow. */
   MANAGE_CRM: ["ADMIN", "MANAGER", "SALES_EXECUTIVE"] as Role[],
+  /** Read-only reference data (category titles) needed by both content
+   *  editors and sales staff — e.g. picking a category when logging an
+   *  enquiry's requirement. Not sensitive, so broader than MANAGE_CONTENT. */
+  VIEW_CATEGORIES: ["ADMIN", "MANAGER", "CONTENT_MANAGER", "SALES_EXECUTIVE"] as Role[],
   /** Revenue figures and commission data. */
   VIEW_REVENUE: ["ADMIN", "MANAGER"] as Role[],
   /** Any authenticated staff member. */

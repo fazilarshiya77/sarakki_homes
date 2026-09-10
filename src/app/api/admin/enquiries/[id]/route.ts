@@ -28,6 +28,10 @@ export async function PUT(
         // touch this field" when the key is truly absent from the
         // request body.
         staffId: body.staffId !== undefined ? body.staffId : undefined,
+        // Same "only touch what's actually sent" rule as staffId above —
+        // these are edited independently of status/notes in the side panel.
+        requirementBedrooms: body.requirementBedrooms !== undefined ? body.requirementBedrooms : undefined,
+        requirementCategoryId: body.requirementCategoryId !== undefined ? body.requirementCategoryId : undefined,
       },
     });
 

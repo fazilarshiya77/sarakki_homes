@@ -36,12 +36,27 @@ interface Enquiry {
   contactMethod: string | null;
   preferredDate: string | null;
   preferredTime: string | null;
+  // What the client is actually asking for, captured by staff — separate
+  // from `property` above (whichever single listing, if any, they clicked
+  // through on). Optional: filling this in is never required.
+  requirementBedrooms: number | null;
+  requirementCategoryId: string | null;
+  requirementCategory: { id: string; title: string; slug: string } | null;
+  // Computed server-side: how many PUBLISHED listings currently match
+  // (beds + category). Null when no requirement has been logged yet.
+  matchingPropertiesCount: number | null;
 }
 
 interface StaffOption {
   id: string;
   name: string;
   role: string;
+}
+
+interface CategoryOption {
+  id: string;
+  title: string;
+  slug: string;
 }
 
 const STATUS_BADGE_CLASS: Record<string, string> = {
@@ -63,6 +78,7 @@ const STATUS_LABEL: Record<string, string> = {
 export default function EnquiriesPage() {
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
   const [staff, setStaff] = useState<StaffOption[]>([]);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEnquiry, setSelectedEnquiry] = useState<Enquiry | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -73,6 +89,8 @@ export default function EnquiriesPage() {
   const [editNotes, setEditNotes] = useState("");
   const [editStatus, setEditStatus] = useState("");
   const [editStaffId, setEditStaffId] = useState("");
+  const [editRequirementBedrooms, setEditRequirementBedrooms] = useState("");
+  const [editRequirementCategoryId, setEditRequirementCategoryId] = useState("");
 
   const fetchEnquiries = async () => {
     setLoading(true);
@@ -100,6 +118,11 @@ export default function EnquiriesPage() {
       .then((res) => res.json())
       .then((data) => setStaff(data.users || []))
       .catch(() => {});
+    // Category list for the Requirements editor's dropdown.
+    fetch("/api/admin/categories")
+      .then((res) => res.json())
+      .then((data) => setCategories(data.categories || []))
+      .catch(() => {});
   }, []);
 
   const openDetails = (enq: Enquiry) => {
@@ -107,6 +130,8 @@ export default function EnquiriesPage() {
     setEditNotes(enq.notes || "");
     setEditStatus(enq.status);
     setEditStaffId(enq.staffId || "");
+    setEditRequirementBedrooms(enq.requirementBedrooms != null ? String(enq.requirementBedrooms) : "");
+    setEditRequirementCategoryId(enq.requirementCategoryId || "");
   };
 
   const handleUpdate = async () => {
@@ -121,24 +146,16 @@ export default function EnquiriesPage() {
           status: editStatus,
           notes: editNotes,
           staffId: editStaffId || null,
+          requirementBedrooms: editRequirementBedrooms ? Number(editRequirementBedrooms) : null,
+          requirementCategoryId: editRequirementCategoryId || null,
         }),
       });
 
       if (res.ok) {
-        const assignedStaff = staff.find((s) => s.id === editStaffId);
-        setEnquiries(
-          enquiries.map((e) =>
-            e.id === selectedEnquiry.id
-              ? {
-                  ...e,
-                  status: editStatus,
-                  notes: editNotes,
-                  staffId: editStaffId || null,
-                  assignedTo: assignedStaff ? { id: assignedStaff.id, name: assignedStaff.name } : null,
-                }
-              : e
-          )
-        );
+        // Refetch rather than patch locally — the matching-properties
+        // count is computed server-side and there's no cheap way to
+        // recompute it client-side without duplicating that query logic.
+        await fetchEnquiries();
         setSelectedEnquiry(null);
       }
     } catch (err) {
@@ -178,9 +195,12 @@ export default function EnquiriesPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
-        {/* Enquiries Table */}
-        <div className="xl:col-span-2 crm-card overflow-hidden">
+      <div className={cn("grid grid-cols-1 gap-8 items-start", selectedEnquiry && "xl:grid-cols-3")}>
+        {/* Enquiries Table — full width until a row is selected; the
+            side panel below only claims a column once it actually has
+            something to show, instead of permanently reserving a third
+            of the screen and forcing the table into a horizontal scroll. */}
+        <div className={cn("crm-card overflow-hidden", selectedEnquiry && "xl:col-span-2")}>
           {loading ? (
             <div className="py-24 flex flex-col items-center justify-center gap-3 text-crm-text-secondary crm-body-text font-semibold">
               <Loader2 size={24} className="animate-spin text-crm-gold-bright" />
@@ -198,6 +218,7 @@ export default function EnquiriesPage() {
                     <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Name</th>
                     <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Contact</th>
                     <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Property</th>
+                    <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Requirements</th>
                     <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Type</th>
                     <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Status</th>
                     <th className="p-4 uppercase tracking-wider text-[11px] font-bold">Assigned</th>
@@ -238,6 +259,28 @@ export default function EnquiriesPage() {
                             <Building size={12} className="shrink-0" />
                             <span className="truncate">{enq.property.title}</span>
                           </div>
+                        </td>
+                        <td className="p-4 max-w-[200px]">
+                          {enq.requirementBedrooms != null || enq.requirementCategory ? (
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-crm-text-secondary truncate">
+                                {enq.requirementBedrooms != null ? `${enq.requirementBedrooms} BHK` : "Any BHK"}
+                                {enq.requirementCategory ? ` · ${enq.requirementCategory.title}` : ""}
+                              </span>
+                              {enq.matchingPropertiesCount != null && (
+                                <span
+                                  className={cn(
+                                    "text-[11px] font-semibold whitespace-nowrap",
+                                    enq.matchingPropertiesCount > 0 ? "text-emerald-500" : "text-crm-text-muted"
+                                  )}
+                                >
+                                  {enq.matchingPropertiesCount} matching {enq.matchingPropertiesCount === 1 ? "listing" : "listings"}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-crm-text-muted">Not logged</span>
+                          )}
                         </td>
                         <td className="p-4">
                           {enq.enquiryType === "Consultation" ? (
@@ -436,6 +479,52 @@ export default function EnquiriesPage() {
                     <option value="CONVERTED">Converted</option>
                     <option value="CLOSED">Closed</option>
                   </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="crm-label">
+                    Client Requirements
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <select
+                      value={editRequirementBedrooms}
+                      onChange={(e) => setEditRequirementBedrooms(e.target.value)}
+                      className="crm-select"
+                    >
+                      <option value="">Any BHK</option>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <option key={n} value={n}>
+                          {n} BHK
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      value={editRequirementCategoryId}
+                      onChange={(e) => setEditRequirementCategoryId(e.target.value)}
+                      className="crm-select"
+                    >
+                      <option value="">Any category</option>
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {selectedEnquiry.matchingPropertiesCount != null && (
+                    <p className="text-xs text-crm-text-secondary pt-0.5">
+                      <span
+                        className={cn(
+                          "font-semibold",
+                          selectedEnquiry.matchingPropertiesCount > 0 ? "text-emerald-500" : "text-crm-text-muted"
+                        )}
+                      >
+                        {selectedEnquiry.matchingPropertiesCount} live listing
+                        {selectedEnquiry.matchingPropertiesCount === 1 ? "" : "s"}
+                      </span>{" "}
+                      currently match{selectedEnquiry.matchingPropertiesCount === 1 ? "es" : ""} this requirement.
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-1.5">

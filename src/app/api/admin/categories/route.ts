@@ -5,7 +5,7 @@ import { requireRole, CAN } from "@/lib/authz";
 const GENERIC_ERROR = "Something went wrong. Please try again.";
 
 export async function GET() {
-  const auth = await requireRole(CAN.MANAGE_CONTENT);
+  const auth = await requireRole(CAN.VIEW_CATEGORIES);
   if (!auth.ok) return auth.response;
 
   try {
