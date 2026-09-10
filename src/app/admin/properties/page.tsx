@@ -22,8 +22,11 @@ import {
   Loader2,
   CheckCircle2,
   XCircle,
+  Upload,
+  Download,
 } from "lucide-react";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { ImportPropertiesModal } from "@/components/admin/ImportPropertiesModal";
 import { useDebounce } from "@/lib/useDebounce";
 
 interface Property {
@@ -109,6 +112,7 @@ function PropertiesListPageInner() {
   } | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
   const limit = PAGE_SIZE;
   const hasActiveFilters = Boolean(search || statusFilter || categoryFilter);
 
@@ -387,11 +391,30 @@ function PropertiesListPageInner() {
           </p>
         </div>
 
-        <Link href="/admin/properties/create" className="crm-btn-gold">
-          <Plus size={14} />
-          <span>Add Property</span>
-        </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link href="/admin/properties/create" className="crm-btn-gold">
+            <Plus size={14} />
+            <span>Add Property</span>
+          </Link>
+          <button onClick={() => setImportOpen(true)} className="crm-btn-secondary">
+            <Upload size={14} />
+            <span>Import Excel</span>
+          </button>
+          {/* A file download from an API route, not a page navigation —
+              next/link's client-side routing doesn't apply here. */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <a href="/api/admin/properties/export" className="crm-btn-secondary">
+            <Download size={14} />
+            <span>Export Excel</span>
+          </a>
+        </div>
       </div>
+
+      <ImportPropertiesModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={fetchProperties}
+      />
 
       {/* Filters & Search Toolbar */}
       <div className="flex flex-col md:flex-row items-center gap-4 crm-card p-4">
