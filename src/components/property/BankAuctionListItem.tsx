@@ -12,7 +12,13 @@ import { useSiteSettings } from "@/components/providers/SettingsProvider";
 import { buildAuctionWhatsAppLink, type AuctionProperty } from "@/lib/auctionHelpers";
 
 /** The information-dense row for comparing many listings at once — same
- *  data as the grid card, laid out horizontally so it scans quickly. */
+ *  data as the grid card, laid out horizontally so it scans quickly.
+ *  Row layout only from `lg` (1024px), not `sm` (640px): the image,
+ *  reserve-price/date block, and action buttons are all fixed-width
+ *  (shrink-0) — at tablet width (768-820px) forcing all three into one
+ *  row alongside the flexible title/location column produced a real,
+ *  measured horizontal overflow. Below `lg` this stays a stacked card,
+ *  which fits comfortably at every tablet and phone width tested. */
 export function BankAuctionListItem({ property }: { property: AuctionProperty }) {
   const { contact } = useSiteSettings();
   const detailHref = `/properties/bank-auctions/${property.propertyId}`;
@@ -25,9 +31,9 @@ export function BankAuctionListItem({ property }: { property: AuctionProperty })
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="group flex flex-col gap-5 rounded-lg border border-border bg-card p-5 shadow-[0_1px_3px_rgba(20,20,20,0.06),0_16px_40px_rgba(20,20,20,0.07)] transition-all duration-500 hover:-translate-y-1 hover:border-accent-gold/30 hover:shadow-[0_1px_3px_rgba(20,20,20,0.08),0_24px_55px_rgba(20,20,20,0.13)] sm:flex-row sm:items-center"
+      className="group flex flex-col gap-5 rounded-lg border border-border bg-card p-5 shadow-[0_1px_3px_rgba(20,20,20,0.06),0_16px_40px_rgba(20,20,20,0.07)] transition-all duration-500 hover:-translate-y-1 hover:border-accent-gold/30 hover:shadow-[0_1px_3px_rgba(20,20,20,0.08),0_24px_55px_rgba(20,20,20,0.13)] lg:flex-row lg:items-center"
     >
-      <Link href={detailHref} className="relative block h-40 w-full shrink-0 overflow-hidden rounded-sm sm:h-28 sm:w-40">
+      <Link href={detailHref} className="relative block h-40 w-full shrink-0 overflow-hidden rounded-sm lg:h-28 lg:w-40">
         {hasImage ? (
           <Image
             src={property.images[0]}
@@ -68,7 +74,7 @@ export function BankAuctionListItem({ property }: { property: AuctionProperty })
         </p>
       </div>
 
-      <div className="flex shrink-0 items-center gap-6 border-t border-border pt-4 sm:border-t-0 sm:border-l sm:pl-6 sm:pt-0">
+      <div className="flex shrink-0 items-center gap-6 border-t border-border pt-4 lg:border-t-0 lg:border-l lg:pl-6 lg:pt-0">
         <div>
           <p className="text-[14px] font-semibold uppercase tracking-wider text-muted-foreground">Reserve Price</p>
           <p className="mt-0.5 font-body text-xl font-bold tracking-tight text-foreground">{property.reservePrice || "Not specified"}</p>

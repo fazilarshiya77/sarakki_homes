@@ -90,8 +90,8 @@ export function PropertyOverview({ property }: { property: Property }) {
       {property.subFlats && property.subFlats.length > 0 && (
         <div className="pt-6 border-t border-border space-y-4">
           <h2 className="text-xs font-bold uppercase tracking-wider text-accent-gold-dark">Available Flat Configurations</h2>
-          <div className="overflow-hidden rounded-sm border border-border bg-card/40">
-            <table className="w-full text-left border-collapse text-xs">
+          <div className="overflow-x-auto rounded-sm border border-border bg-card/40">
+            <table className="w-full min-w-[480px] text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-border bg-surface/50 text-muted-foreground font-semibold">
                   <th className="p-4 uppercase tracking-wider font-semibold">Configuration</th>

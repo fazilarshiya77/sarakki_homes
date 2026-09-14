@@ -156,7 +156,14 @@ export function Header({ solid = false }: { solid?: boolean }) {
             Sarakki Homes
           </Link>
 
-          <nav className="hidden items-center gap-10 md:flex">
+          {/* Desktop nav only from `lg` (1024px), not `md` (768px) — at
+              tablet width, 5 links (2 with dropdown chevrons) plus the
+              logo and Consult Us button don't fit in the header's own
+              max-w-5xl box, which was forcing a real horizontal
+              overflow on every page at 768-820px (measured directly).
+              Tablet now gets the same hamburger menu as mobile instead
+              of a cramped, clipped desktop nav. */}
+          <nav className="hidden items-center gap-10 lg:flex">
             {LINKS.map((link) => {
               const dropdown = NAV_DROPDOWNS[link.label];
               // Hash links (Testimonials/FAQ) resolve to the homepage
@@ -284,7 +291,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((v) => !v)}
               className={cn(
-                "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300 md:hidden",
+                "flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-300 lg:hidden",
                 isSolid
                   ? "text-foreground hover:bg-surface"
                   : "text-background hover:bg-background/10"
@@ -302,7 +309,7 @@ export function Header({ solid = false }: { solid?: boolean }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -12, scale: 0.98 }}
               transition={{ duration: 0.35, ease: EASE }}
-              className="mt-3 flex flex-col gap-1 rounded-lg border border-border bg-background/95 p-3 shadow-soft-lg backdrop-blur-xl md:hidden"
+              className="mt-3 flex flex-col gap-1 rounded-lg border border-border bg-background/95 p-3 shadow-soft-lg backdrop-blur-xl lg:hidden"
             >
               {LINKS.map((link) => {
                 const dropdown = NAV_DROPDOWNS[link.label];

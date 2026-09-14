@@ -234,14 +234,14 @@ export function ConsultationModal({
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <input
                       type="text"
                       required
                       placeholder="Full name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="col-span-2 rounded-sm border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:border-accent-gold-dark"
+                      className="rounded-sm border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:border-accent-gold-dark sm:col-span-2"
                     />
                     <input
                       type="tel"
@@ -281,7 +281,7 @@ export function ConsultationModal({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div>
                       <p className="mb-1.5 text-xs text-muted-foreground">Preferred date (optional)</p>
                       <input

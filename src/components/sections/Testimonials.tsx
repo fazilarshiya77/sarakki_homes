@@ -465,11 +465,17 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
               </div>
             </div>
 
-            {/* Navigation Handles on sides */}
+            {/* Navigation Handles on sides — `hidden lg:flex` rather than
+                always-on: this -60px offset sits outside the book's own
+                box, and at tablet width (768-1023px) the Container's
+                narrower padding leaves no room for it, clipping the
+                button against the viewport edge (measured directly).
+                The book is still fully navigable below `lg` via the
+                spread-indicator dots below and by tapping a page. */}
             {currentLeaf > 0 && (
               <button
                 onClick={flipBackward}
-                className="absolute left-[-60px] top-[calc(50%-22px)] h-11 w-11 rounded-full border border-border bg-[#F7F3EA] shadow-soft flex items-center justify-center hover:bg-[#EEE0C8] hover:-translate-x-0.5 transition-all text-[#171715] z-40"
+                className="absolute left-[-60px] top-[calc(50%-22px)] hidden h-11 w-11 items-center justify-center rounded-full border border-border bg-[#F7F3EA] shadow-soft transition-all hover:-translate-x-0.5 hover:bg-[#EEE0C8] lg:flex text-[#171715] z-40"
                 aria-label="Previous Page"
               >
                 <ChevronLeft size={20} />
@@ -478,7 +484,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
             {currentLeaf < 5 && (
               <button
                 onClick={flipForward}
-                className="absolute right-[-60px] top-[calc(50%-22px)] h-11 w-11 rounded-full border border-border bg-[#F7F3EA] shadow-soft flex items-center justify-center hover:bg-[#EEE0C8] hover:translate-x-0.5 transition-all text-[#171715] z-40"
+                className="absolute right-[-60px] top-[calc(50%-22px)] hidden h-11 w-11 items-center justify-center rounded-full border border-border bg-[#F7F3EA] shadow-soft transition-all hover:translate-x-0.5 hover:bg-[#EEE0C8] lg:flex text-[#171715] z-40"
                 aria-label="Next Page"
               >
                 <ChevronRight size={20} />
