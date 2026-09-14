@@ -42,32 +42,50 @@ export function FAQ() {
           </h2>
         </RevealOnScroll>
 
-        <RevealOnScroll delay={0.1} className="mt-20 flex flex-col">
+        <RevealOnScroll delay={0.1} className="mt-16 flex flex-col gap-4">
           {FAQS.map((faq, i) => {
             const isOpen = open === i;
             return (
-              <div key={faq.question} className="border-b border-border/70">
+              <div
+                key={faq.question}
+                className={cn(
+                  "rounded-xl border bg-card shadow-soft transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                  isOpen ? "border-accent-gold/40 shadow-soft-lg" : "border-border/60 hover:border-accent-gold-dark/30 hover:shadow-soft-lg"
+                )}
+              >
                 <button
                   onClick={() => setOpen(isOpen ? null : i)}
-                  className="group flex w-full items-center justify-between gap-8 py-7 text-left"
+                  className="group flex w-full items-center gap-5 px-6 py-6 text-left md:gap-6 md:px-8"
                   aria-expanded={isOpen}
                 >
                   <span
                     className={cn(
-                      "font-display text-xl font-medium leading-snug transition-colors duration-300 md:text-2xl",
+                      "shrink-0 font-display text-sm tabular-nums transition-colors duration-300",
+                      isOpen ? "text-accent-gold-dark" : "text-muted-foreground/50 group-hover:text-accent-gold-dark"
+                    )}
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+
+                  <span
+                    className={cn(
+                      "flex-1 font-display text-xl font-medium leading-snug transition-colors duration-300 md:text-2xl",
                       isOpen ? "text-accent-emerald" : "text-foreground group-hover:text-accent-emerald"
                     )}
                   >
                     {faq.question}
                   </span>
-                  <Plus
-                    size={18}
-                    strokeWidth={1.75}
+
+                  <span
                     className={cn(
-                      "shrink-0 text-muted-foreground transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                      isOpen && "rotate-45 text-accent-gold"
+                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                      isOpen
+                        ? "rotate-45 border-accent-gold bg-accent-gold text-foreground"
+                        : "border-border text-muted-foreground group-hover:border-accent-gold-dark/40 group-hover:text-accent-gold-dark"
                     )}
-                  />
+                  >
+                    <Plus size={16} strokeWidth={1.75} />
+                  </span>
                 </button>
                 <AnimatePresence initial={false}>
                   {isOpen && (
@@ -78,9 +96,12 @@ export function FAQ() {
                       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                       className="overflow-hidden"
                     >
-                      <p className="max-w-2xl pb-8 text-base leading-relaxed text-muted-foreground">
-                        {faq.answer}
-                      </p>
+                      <div className="flex gap-5 px-6 pb-7 md:gap-6 md:px-8">
+                        <span className="w-[1.6rem] shrink-0" aria-hidden="true" />
+                        <p className="max-w-2xl border-t border-border/60 pt-5 text-base leading-relaxed text-muted-foreground">
+                          {faq.answer}
+                        </p>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>

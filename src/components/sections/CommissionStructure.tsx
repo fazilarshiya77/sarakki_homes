@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 // Same value, just declared locally instead.
 const HERO_POSTER = "/media/hero-poster.jpg";
 
-const MotionLink = motion(Link);
+const MotionLink = motion.create(Link);
 
 // A figure is either a plain percentage ("2%") or prose ("No Brokerage").
 // Only the numeric ones count up — text like "No Brokerage" gets its own

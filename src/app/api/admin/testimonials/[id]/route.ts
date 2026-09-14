@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole, CAN } from "@/lib/authz";
 
@@ -38,6 +38,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     // immediately instead of waiting out the 60s ISR window.
     revalidatePath("/");
     revalidatePath("/process");
+    revalidateTag("testimonials", { expire: 0 });
 
     return NextResponse.json({ testimonial });
   } catch (error: unknown) {
@@ -64,6 +65,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
     revalidatePath("/");
     revalidatePath("/process");
+    revalidateTag("testimonials", { expire: 0 });
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole, CAN } from "@/lib/authz";
 
@@ -191,6 +191,7 @@ export async function PUT(
     revalidatePath(`/properties/${existing.slug}`);
     if (property.slug !== existing.slug) revalidatePath(`/properties/${property.slug}`);
     revalidatePath(`/properties/bank-auctions/${property.propertyId}`);
+    revalidateTag("properties", { expire: 0 });
 
     return NextResponse.json({ property });
   } catch (error: unknown) {
@@ -237,6 +238,7 @@ export async function DELETE(
     revalidatePath("/properties");
     revalidatePath("/properties/bank-auctions");
     revalidatePath(`/properties/${existing.slug}`);
+    revalidateTag("properties", { expire: 0 });
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

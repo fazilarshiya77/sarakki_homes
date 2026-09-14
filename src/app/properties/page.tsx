@@ -30,10 +30,11 @@ export default async function PropertiesPage() {
           this page was flagged for. Tightened throughout; still generous,
           just not tripled. */}
       <main className="flex flex-1 flex-col pt-20">
-        <Section className="relative flex min-h-[220px] items-center overflow-hidden !py-10 bg-surface">
-          <Container className="relative">
-            <Eyebrow>Explore Properties</Eyebrow>
-            <h1 className="relative mt-3 max-w-2xl font-display text-4xl leading-[1.1] tracking-[-0.01em] md:text-5xl">
+        <Section className="relative flex min-h-[220px] items-center justify-center overflow-hidden !py-14 bg-accent-emerald-dark">
+          <div aria-hidden className="emerald-shimmer" />
+          <Container className="relative flex flex-col items-center text-center">
+            <Eyebrow light>Explore Properties</Eyebrow>
+            <h1 className="relative mt-3 max-w-2xl font-display text-4xl leading-[1.1] tracking-[-0.01em] text-background md:text-5xl">
               Every property here has already been through our scrutiny.
             </h1>
           </Container>

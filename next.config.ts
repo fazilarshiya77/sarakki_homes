@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Drops the `X-Powered-By: Next.js` response header — minor
+  // fingerprinting info a scanner doesn't need, no functional effect.
+  poweredByHeader: false,
   // lucide-react (imported in 40+ components, individual icons named from
   // its barrel file) and framer-motion (used on nearly every section) are
   // both large packages that are NOT in Next.js's own default

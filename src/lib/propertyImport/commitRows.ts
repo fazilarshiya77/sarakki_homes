@@ -78,7 +78,11 @@ export async function commitRowsChunk(rows: ValidRow[], userId: string): Promise
             price: d.price ?? "Price on request",
             priceValueLakh: d.priceValueLakh ?? 0,
             type: d.type ?? "Resale",
-            status: d.status ?? "UNPUBLISHED", // safest default for a new listing, per spec §12
+            // Client decision: imported properties should appear on the
+            // website immediately rather than sit as an unreviewed draft
+            // (previously defaulted to UNPUBLISHED here) — an explicit
+            // Status column in the sheet still overrides this per row.
+            status: d.status ?? "PUBLISHED",
             featured: d.featured ?? "false",
             beds: d.beds ?? 0,
             baths: d.baths ?? 0,

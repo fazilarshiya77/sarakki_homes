@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole, CAN } from "@/lib/authz";
 
@@ -54,6 +54,7 @@ export async function POST(req: Request) {
     // so a newly added review appears immediately, not after 60s.
     revalidatePath("/");
     revalidatePath("/process");
+    revalidateTag("testimonials", { expire: 0 });
 
     return NextResponse.json({ testimonial });
   } catch (error: unknown) {

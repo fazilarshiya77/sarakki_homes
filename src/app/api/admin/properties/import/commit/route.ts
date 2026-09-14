@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { requireRole, CAN } from "@/lib/authz";
 import { commitRowsChunk } from "@/lib/propertyImport/commitRows";
 import type { ValidRow } from "@/lib/propertyImport/validateRows";
@@ -37,6 +37,7 @@ export async function POST(req: Request) {
       for (const r of results) {
         if (r.ok && r.slug) revalidatePath(`/properties/${r.slug}`);
       }
+      revalidateTag("properties", { expire: 0 });
     }
 
     return NextResponse.json({ results });

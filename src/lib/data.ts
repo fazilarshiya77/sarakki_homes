@@ -18,6 +18,7 @@ import {
   LineChart,
   Zap,
   PiggyBank,
+  DoorOpen,
 } from "lucide-react";
 
 export const CONTACT = {
@@ -145,6 +146,23 @@ export const CATEGORIES = [
     idealFor: ["Buyers needing to move in immediately", "Anyone who has been burned by construction delays before"],
     icon: Home,
     tone: "gold" as MediaTone,
+  },
+  {
+    title: "Rental Properties",
+    slug: "rental-properties",
+    description: "Verified homes available for direct rent — for tenants, not investors.",
+    heroTagline: "A home to live in, not to own — yet.",
+    longDescription:
+      "Not every move needs a purchase. We list verified rental homes across Bengaluru's key residential corridors — landlord ownership and tenancy terms checked upfront — so tenants move in with the same confidence our buyers get at closing.",
+    highlights: [
+      "Landlord ownership and rental terms verified before listing",
+      "Support with rental agreement drafting and registration",
+      "Flexible lease terms across established neighborhoods",
+      "Transparent brokerage — no hidden charges at move-in",
+    ],
+    idealFor: ["Tenants relocating to Bengaluru for work", "Anyone testing a neighborhood before buying"],
+    icon: DoorOpen,
+    tone: "charcoal" as MediaTone,
   },
 ];
 
@@ -435,6 +453,10 @@ export const COMMISSION_STRUCTURE: CommissionEntry[] = [
     note: "1% Cash Back after payment of 20%.",
     featured: true,
   },
+  // Deliberately no entry for "rental-properties" here — this array is
+  // verbatim client-approved commission terms (see comment above), and no
+  // brokerage figure for this category has been provided by the client
+  // yet. Add one only once that figure is confirmed.
 ];
 
 export interface AuctionInfo {

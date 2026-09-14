@@ -162,29 +162,29 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
               <div
                 onClick={flipForward}
                 style={{ pointerEvents: frontFacePointerEvents(0) }}
-                className="page-face-right absolute inset-0 bg-[#083C35] border border-[#C6A15B]/30 shadow-[inset_-2px_0_10px_rgba(0,0,0,0.4)] p-12 flex flex-col justify-between items-center text-center backface-hidden rounded-r-md"
+                className="page-face-right absolute inset-0 bg-gradient-to-br from-[#D9B978] via-[#C6A15B] to-[#A8874F] border border-[#083C35]/30 shadow-[inset_-2px_0_10px_rgba(0,0,0,0.15)] p-12 flex flex-col justify-between items-center text-center backface-hidden rounded-r-md"
               >
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,rgba(0,0,0,0.15)_100%)] mix-blend-overlay pointer-events-none" />
-                <div className="absolute inset-4 border border-[#C6A15B]/20 pointer-events-none rounded-sm" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,rgba(0,0,0,0.08)_100%)] mix-blend-overlay pointer-events-none" />
+                <div className="absolute inset-4 border border-[#083C35]/25 pointer-events-none rounded-sm" />
 
-                <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-[#C6A15B]/30" />
-                <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-[#C6A15B]/30" />
-                <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-[#C6A15B]/30" />
-                <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-[#C6A15B]/30" />
+                <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-[#083C35]/40" />
+                <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-[#083C35]/40" />
+                <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-[#083C35]/40" />
+                <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-[#083C35]/40" />
 
-                <span className="text-xs uppercase tracking-[0.2em] text-[#C6A15B]/60 font-semibold mt-8">Exclusive Portfolio</span>
+                <span className="text-xs uppercase tracking-[0.2em] text-[#083C35]/70 font-semibold mt-8">Exclusive Portfolio</span>
 
                 <div className="flex flex-col items-center">
-                  <h3 className="font-display text-4xl text-[#F7F3EA] tracking-wider font-bold">
+                  <h3 className="font-display text-4xl text-[#083C35] tracking-wider font-bold">
                     SARAKKI HOMES
                   </h3>
-                  <div className="w-12 h-[1px] bg-[#C6A15B]/40 my-6" />
-                  <p className="font-display text-lg italic text-[#C6A15B] tracking-wide">
+                  <div className="w-12 h-[1px] bg-[#083C35]/40 my-6" />
+                  <p className="font-display text-lg italic text-[#083C35] tracking-wide">
                     Trusted Property Stories
                   </p>
                 </div>
 
-                <span className="text-[14px] uppercase tracking-[0.15em] text-[#F7F3EA]/40 mb-8 hover:text-[#C6A15B] transition-colors">
+                <span className="text-[14px] uppercase tracking-[0.15em] text-[#083C35]/50 mb-8 hover:text-[#083C35] transition-colors">
                   Click to Open Portfolio →
                 </span>
               </div>
@@ -439,27 +439,27 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
               <div
                 onClick={flipBackward}
                 style={{ pointerEvents: backFacePointerEvents(4) }}
-                className="page-face-left absolute inset-0 bg-[#083C35] border border-[#C6A15B]/30 shadow-[inset_2px_0_10px_rgba(0,0,0,0.4)] p-12 flex flex-col justify-between items-center text-center backface-hidden rotate-y-180 rounded-l-md"
+                className="page-face-left absolute inset-0 bg-gradient-to-bl from-[#D9B978] via-[#C6A15B] to-[#A8874F] border border-[#083C35]/30 shadow-[inset_2px_0_10px_rgba(0,0,0,0.15)] p-12 flex flex-col justify-between items-center text-center backface-hidden rotate-y-180 rounded-l-md"
               >
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,rgba(0,0,0,0.15)_100%)] mix-blend-overlay pointer-events-none" />
-                <div className="absolute inset-4 border border-[#C6A15B]/20 pointer-events-none rounded-sm" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.15)_0%,rgba(0,0,0,0.08)_100%)] mix-blend-overlay pointer-events-none" />
+                <div className="absolute inset-4 border border-[#083C35]/25 pointer-events-none rounded-sm" />
 
-                <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-[#C6A15B]/30" />
-                <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-[#C6A15B]/30" />
-                <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-[#C6A15B]/30" />
-                <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-[#C6A15B]/30" />
+                <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-[#083C35]/40" />
+                <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-[#083C35]/40" />
+                <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-[#083C35]/40" />
+                <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-[#083C35]/40" />
 
-                <span className="text-[#C6A15B]/40 text-[14px] uppercase tracking-[0.2em] font-semibold mt-8">End of Portfolio</span>
+                <span className="text-[#083C35]/50 text-[14px] uppercase tracking-[0.2em] font-semibold mt-8">End of Portfolio</span>
 
                 <div className="flex flex-col items-center">
-                  <span className="h-6 w-6 rounded-full border border-[#C6A15B]/40 flex items-center justify-center text-[#C6A15B] font-display text-xs mb-4">S</span>
-                  <p className="font-display text-base tracking-[0.1em] text-[#F7F3EA]/80 font-bold uppercase">
+                  <span className="h-6 w-6 rounded-full border border-[#083C35]/40 flex items-center justify-center text-[#083C35] font-display text-xs mb-4">S</span>
+                  <p className="font-display text-base tracking-[0.1em] text-[#083C35]/85 font-bold uppercase">
                     Sarakki Homes
                   </p>
-                  <p className="text-[14px] text-muted-foreground mt-2">© 2026 All Rights Reserved.</p>
+                  <p className="text-[14px] text-[#083C35]/60 mt-2">© 2026 All Rights Reserved.</p>
                 </div>
 
-                <span className="text-[14px] uppercase tracking-[0.15em] text-[#F7F3EA]/40 mb-8 hover:text-[#C6A15B] transition-colors">
+                <span className="text-[14px] uppercase tracking-[0.15em] text-[#083C35]/50 mb-8 hover:text-[#083C35] transition-colors">
                   ← Go Back
                 </span>
               </div>
@@ -508,19 +508,19 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
           <div className="relative w-full aspect-[4/5] rounded-md border border-black/10 bg-[#F7F3EA] shadow-[0_20px_50px_rgba(0,0,0,0.12)] overflow-hidden p-8 flex flex-col justify-between select-none">
             
             {mobilePage === 0 && (
-              <div className="absolute inset-0 bg-[#083C35] p-8 flex flex-col justify-between items-center text-center">
-                <div className="absolute inset-4 border border-[#C6A15B]/20 pointer-events-none rounded-sm" />
-                <span className="text-[14px] uppercase tracking-[0.15em] text-[#C6A15B]/60 font-semibold mt-4">Exclusive Portfolio</span>
+              <div className="absolute inset-0 bg-gradient-to-br from-[#D9B978] via-[#C6A15B] to-[#A8874F] p-8 flex flex-col justify-between items-center text-center">
+                <div className="absolute inset-4 border border-[#083C35]/25 pointer-events-none rounded-sm" />
+                <span className="text-[14px] uppercase tracking-[0.15em] text-[#083C35]/70 font-semibold mt-4">Exclusive Portfolio</span>
                 <div className="flex flex-col items-center">
-                  <h3 className="font-display text-3xl text-[#F7F3EA] tracking-wider font-bold">
+                  <h3 className="font-display text-3xl text-[#083C35] tracking-wider font-bold">
                     SARAKKI HOMES
                   </h3>
-                  <div className="w-10 h-[1px] bg-[#C6A15B]/40 my-4" />
-                  <p className="font-display text-sm italic text-[#C6A15B] tracking-wide">
+                  <div className="w-10 h-[1px] bg-[#083C35]/40 my-4" />
+                  <p className="font-display text-sm italic text-[#083C35] tracking-wide">
                     Trusted Property Stories
                   </p>
                 </div>
-                <span className="text-[13px] uppercase tracking-[0.12em] text-[#F7F3EA]/40 mb-4" onClick={nextMobile}>
+                <span className="text-[13px] uppercase tracking-[0.12em] text-[#083C35]/50 mb-4" onClick={nextMobile}>
                   Tap Next to Open Portfolio →
                 </span>
               </div>
@@ -624,17 +624,17 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
             )}
 
             {mobilePage === 8 && (
-              <div className="absolute inset-0 bg-[#083C35] p-8 flex flex-col justify-between items-center text-center">
-                <div className="absolute inset-4 border border-[#C6A15B]/20 pointer-events-none rounded-sm" />
-                <span className="text-[#C6A15B]/40 text-[13px] uppercase tracking-[0.15em] font-semibold mt-4">End of Portfolio</span>
+              <div className="absolute inset-0 bg-gradient-to-bl from-[#D9B978] via-[#C6A15B] to-[#A8874F] p-8 flex flex-col justify-between items-center text-center">
+                <div className="absolute inset-4 border border-[#083C35]/25 pointer-events-none rounded-sm" />
+                <span className="text-[#083C35]/50 text-[13px] uppercase tracking-[0.15em] font-semibold mt-4">End of Portfolio</span>
                 <div className="flex flex-col items-center">
-                  <span className="h-5 w-5 rounded-full border border-[#C6A15B]/40 flex items-center justify-center text-[#C6A15B] font-display text-[14px] mb-3">S</span>
-                  <p className="font-display text-sm tracking-[0.1em] text-[#F7F3EA]/80 font-bold uppercase">
+                  <span className="h-5 w-5 rounded-full border border-[#083C35]/40 flex items-center justify-center text-[#083C35] font-display text-[14px] mb-3">S</span>
+                  <p className="font-display text-sm tracking-[0.1em] text-[#083C35]/85 font-bold uppercase">
                     Sarakki Homes
                   </p>
-                  <p className="text-[13px] text-muted-foreground mt-1">© 2026 All Rights Reserved.</p>
+                  <p className="text-[13px] text-[#083C35]/60 mt-1">© 2026 All Rights Reserved.</p>
                 </div>
-                <span className="text-[13px] uppercase tracking-[0.12em] text-[#F7F3EA]/40 mb-4" onClick={() => setMobilePage(0)}>
+                <span className="text-[13px] uppercase tracking-[0.12em] text-[#083C35]/50 mb-4" onClick={() => setMobilePage(0)}>
                   ← Restart Portfolio
                 </span>
               </div>

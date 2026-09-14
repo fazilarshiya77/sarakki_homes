@@ -535,6 +535,49 @@ body {
     transform: scale(0.55) translateY(-9px);
   }
 }
+
+/* Dark-emerald section shimmer — a single restrained light sheen sweeping
+   across the background on a long loop (idle most of the time, per the
+   "never over-animated" motion rule), not a constant glint. Pure CSS
+   (no framer-motion) since it decorates a Server Component section that
+   has no other need for client-side JS. Host element needs `position:
+   relative; overflow: hidden`. */
+.emerald-shimmer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.emerald-shimmer::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  bottom: -50%;
+  left: -35%;
+  width: 35%;
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.09), transparent);
+  transform: translateX(-100%) skewX(-12deg);
+  animation: emerald-shimmer-sweep 5.5s ease-in-out infinite;
+}
+
+@keyframes emerald-shimmer-sweep {
+  0% {
+    transform: translateX(-100%) skewX(-12deg);
+  }
+  30%,
+  100% {
+    transform: translateX(340%) skewX(-12deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .emerald-shimmer::before {
+    animation: none;
+    display: none;
+  }
+}
+
 /* Category Cards Hover Micro-Animations (Premium & Restrained) */
 .group .icon-bank-auctions,
 .group .icon-rental-income,

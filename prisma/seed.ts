@@ -175,6 +175,24 @@ async function main() {
       ]),
       tone: "gold",
     },
+    {
+      title: "Rental Properties",
+      slug: "rental-properties",
+      description: "Verified homes available for direct rent — for tenants, not investors.",
+      heroTagline: "A home to live in, not to own — yet.",
+      longDescription: "Not every move needs a purchase. We list verified rental homes across Bengaluru's key residential corridors — landlord ownership and tenancy terms checked upfront — so tenants move in with the same confidence our buyers get at closing.",
+      highlights: JSON.stringify([
+        "Landlord ownership and rental terms verified before listing",
+        "Support with rental agreement drafting and registration",
+        "Flexible lease terms across established neighborhoods",
+        "Transparent brokerage — no hidden charges at move-in",
+      ]),
+      idealFor: JSON.stringify([
+        "Tenants relocating to Bengaluru for work",
+        "Anyone testing a neighborhood before buying",
+      ]),
+      tone: "charcoal",
+    },
   ];
 
   const seededCategories: Record<string, string> = {};

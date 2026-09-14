@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { safeDbCall } from "@/lib/db-safe";
 
@@ -18,6 +18,12 @@ import { safeDbCall } from "@/lib/db-safe";
  *  brochures via the functions below. */
 export function revalidateCategoryPage(slug: string) {
   revalidatePath(slug === "bank-auctions" ? "/properties/bank-auctions" : `/properties/category/${slug}`);
+  // The route revalidate above only clears the Full Route Cache — it
+  // doesn't touch getPublishedBrochures' own unstable_cache entry (the
+  // Data Cache), so without this a brochure change would still be served
+  // stale for up to that cache's 60s window even on a freshly regenerated
+  // page.
+  revalidateTag("brochures", { expire: 0 });
 }
 
 /** Public-facing shape — deliberately its own type, not reused from the
@@ -46,19 +52,27 @@ export interface PublicCategory {
  *  broken section) if the category has no brochures, isn't found, or
  *  the DB is briefly unreachable — the calling page/component is
  *  expected to hide the whole brochure section on an empty array. */
+// unstable_cache here (and below) is Next's persistent Data Cache, which
+// keeps working across requests in `next dev` — unlike each page's
+// `export const revalidate`, which only feeds the Full Route Cache that
+// dev mode never populates. Without this, every local navigation re-ran
+// these queries against the production Supabase DB in ap-northeast-1, at
+// 1.3-3s+ measured round-trip per query from this project's dev network.
+const getCachedPublishedBrochures = unstable_cache(
+  async (categorySlug: string) => {
+    const rows = await prisma.brochure.findMany({
+      where: { published: true, category: { slug: categorySlug } },
+      select: { id: true, title: true, description: true, fileUrl: true, thumbnailUrl: true },
+      orderBy: { order: "asc" },
+    });
+    return rows;
+  },
+  ["published-brochures"],
+  { revalidate: 60, tags: ["brochures"] }
+);
+
 export async function getPublishedBrochures(categorySlug: string): Promise<PublicBrochure[]> {
-  return safeDbCall(
-    async () => {
-      const rows = await prisma.brochure.findMany({
-        where: { published: true, category: { slug: categorySlug } },
-        select: { id: true, title: true, description: true, fileUrl: true, thumbnailUrl: true },
-        orderBy: { order: "asc" },
-      });
-      return rows;
-    },
-    [],
-    "getPublishedBrochures"
-  );
+  return safeDbCall(() => getCachedPublishedBrochures(categorySlug), [], "getPublishedBrochures");
 }
 
 /** The DB-backed Category record (title/heroTagline/longDescription —
@@ -66,37 +80,41 @@ export async function getPublishedBrochures(categorySlug: string): Promise<Publi
  *  page's intro block. Returns null if the slug doesn't match any
  *  category or the DB is briefly unreachable, so the page can 404
  *  cleanly rather than rendering with missing copy. */
+const getCachedCategoryBySlug = unstable_cache(
+  async (slug: string) => {
+    const category = await prisma.category.findUnique({
+      where: { slug },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        description: true,
+        heroTagline: true,
+        longDescription: true,
+      },
+    });
+    return category;
+  },
+  ["category-by-slug"],
+  { revalidate: 60, tags: ["categories"] }
+);
+
 export async function getCategoryBySlug(slug: string): Promise<PublicCategory | null> {
-  return safeDbCall(
-    async () => {
-      const category = await prisma.category.findUnique({
-        where: { slug },
-        select: {
-          id: true,
-          slug: true,
-          title: true,
-          description: true,
-          heroTagline: true,
-          longDescription: true,
-        },
-      });
-      return category;
-    },
-    null,
-    "getCategoryBySlug"
-  );
+  return safeDbCall(() => getCachedCategoryBySlug(slug), null, "getCategoryBySlug");
 }
 
 /** Every category slug that actually exists in the DB — used by the
  *  category page's generateStaticParams so build-time prerendering
  *  covers whatever the admin has configured, not a hardcoded list. */
+const getCachedAllCategorySlugs = unstable_cache(
+  async () => {
+    const rows = await prisma.category.findMany({ select: { slug: true } });
+    return rows.map((r) => r.slug);
+  },
+  ["all-category-slugs"],
+  { revalidate: 60, tags: ["categories"] }
+);
+
 export async function getAllCategorySlugs(): Promise<string[]> {
-  return safeDbCall(
-    async () => {
-      const rows = await prisma.category.findMany({ select: { slug: true } });
-      return rows.map((r) => r.slug);
-    },
-    [],
-    "getAllCategorySlugs"
-  );
+  return safeDbCall(getCachedAllCategorySlugs, [], "getAllCategorySlugs");
 }

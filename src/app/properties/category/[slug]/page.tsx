@@ -63,14 +63,15 @@ export default async function CategoryPage({
       <Header solid />
       <main className="flex flex-1 flex-col pt-28">
         {/* Category introduction */}
-        <Section className="!pb-0 !pt-10 md:!pt-14">
-          <Container>
-            <Eyebrow>{category.title}</Eyebrow>
-            <h1 className="mt-4 max-w-2xl font-display text-4xl leading-[1.1] tracking-[-0.01em] md:text-5xl">
+        <Section className="relative flex min-h-[280px] items-center justify-center overflow-hidden !py-14 bg-accent-emerald-dark">
+          <div aria-hidden className="emerald-shimmer" />
+          <Container className="relative flex flex-col items-center text-center">
+            <Eyebrow light>{category.title}</Eyebrow>
+            <h1 className="mt-4 max-w-2xl font-display text-4xl leading-[1.1] tracking-[-0.01em] text-background md:text-5xl">
               {category.heroTagline || category.title}
             </h1>
             {category.longDescription && (
-              <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground">
+              <p className="mt-5 max-w-2xl text-base leading-relaxed text-background/70">
                 {category.longDescription}
               </p>
             )}

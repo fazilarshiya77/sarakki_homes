@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { safeDbCall } from "@/lib/db-safe";
 
@@ -65,17 +66,31 @@ function contactFromPhone(raw: string): SiteContact {
   };
 }
 
-// Wrapped in React's cache() so every call within the SAME request (root
-// layout's generateMetadata + layout body, Footer, LoanEligibilityCard,
-// and any page that reads it directly) shares one Prisma query instead
-// of each triggering its own round-trip to Supabase — previously up to
-// 3-4 duplicate identical queries per page load. cache() only dedupes
-// within a single request; it's not cross-request/global caching, so
-// admin-edited settings still show up on the very next request.
+// Two layers of caching, for two different problems:
+//  - React's cache() dedupes calls within the SAME request (root layout's
+//    generateMetadata + layout body, Footer, LoanEligibilityCard, and any
+//    page that reads it directly) so they share one Prisma query instead
+//    of each triggering its own round-trip — previously up to 3-4
+//    duplicate identical queries per page load.
+//  - unstable_cache (Next's persistent Data Cache) dedupes ACROSS
+//    requests, which matters because this function runs on every single
+//    public page load via the root layout. `next dev` never populates the
+//    Full Route Cache, so without this every navigation/refresh re-hit
+//    Supabase (ap-northeast-1) even for content that only changes when an
+//    admin edits Settings — measured at 1.3-3s+ per query from this
+//    project's dev network (see db-safe.ts). This keeps admin edits
+//    visible within 60s, same freshness window the site already used in
+//    production.
+const getCachedSettingsRow = unstable_cache(
+  async () => prisma.setting.findFirst(),
+  ["site-settings"],
+  { revalidate: 60, tags: ["settings"] }
+);
+
 export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
   return safeDbCall(
     async () => {
-      const row = await prisma.setting.findFirst();
+      const row = await getCachedSettingsRow();
       if (!row) return FALLBACK;
 
       const contact = contactFromPhone(row.whatsappNo || FALLBACK.contact.phoneDisplay);

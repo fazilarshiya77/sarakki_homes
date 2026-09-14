@@ -57,9 +57,11 @@ export const PROPERTY_STATUS_VALUES = [
 
 // Fallbacks used when an uploaded sheet simply doesn't have these
 // columns at all (common with the free-form listing sheets the client
-// keeps). New rows imported this way always land as UNPUBLISHED drafts —
-// nothing reaches the public website until staff review and publish it —
-// so a guessed category/type is safe to correct afterwards.
+// keeps). New rows imported this way default to PUBLISHED (see
+// commitRows.ts) and go live on the website immediately, so these
+// guessed values are what a site visitor would actually see until
+// someone corrects them in the CRM — pick the least-wrong default, not
+// just something plausible.
 export const DEFAULT_CATEGORY_TITLE = "Resale Properties";
 export const DEFAULT_TYPE = "Resale";
 export const DEFAULT_PRICE_TEXT = "Price on request";
@@ -178,7 +180,7 @@ export const COLUMN_DEFS: ColumnDef[] = [
     enumValues: [...PROPERTY_STATUS_VALUES],
     description:
       `Optional. One of: ${PROPERTY_STATUS_VALUES.join(", ")}. Leave blank to keep the existing status when ` +
-      `updating a property, or to default new properties to UNPUBLISHED (draft) until published in the CRM.`,
+      `updating a property, or to default new properties to PUBLISHED (live on the website immediately).`,
   },
   {
     header: "Featured",

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole, CAN } from "@/lib/authz";
 
@@ -20,7 +20,14 @@ export async function GET() {
         },
       });
     }
-    return NextResponse.json({ setting });
+    // SECURITY: smtpPassword is a credential, not display copy — it must
+    // never round-trip to the browser in plaintext (it was previously
+    // pre-filling the settings form's password input, readable via
+    // devtools by anyone with MANAGE_SETTINGS, not just ADMIN). The PUT
+    // handler below treats a blank submission as "leave unchanged", so
+    // omitting the real value here doesn't risk it being wiped on save.
+    const { smtpPassword, ...safeSetting } = setting;
+    return NextResponse.json({ setting: { ...safeSetting, smtpPasswordSet: Boolean(smtpPassword) } });
   } catch (error: unknown) {
     console.error("[api/admin/settings] GET failed:", error);
     return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
@@ -46,7 +53,11 @@ export async function PUT(req: Request) {
           smtpHost: body.smtpHost,
           smtpPort: body.smtpPort !== undefined ? parseInt(body.smtpPort) : existing.smtpPort,
           smtpUser: body.smtpUser,
-          smtpPassword: body.smtpPassword,
+          // A blank submission means "leave the stored password
+          // unchanged" — the GET handler no longer sends the real value
+          // back to the browser, so an untouched field arrives here
+          // empty, not as the actual current password.
+          smtpPassword: body.smtpPassword ? body.smtpPassword : existing.smtpPassword,
           whatsappNo: body.whatsappNo,
           instagramUrl: body.instagramUrl,
           linkedinUrl: body.linkedinUrl,
@@ -94,6 +105,7 @@ export async function PUT(req: Request) {
     // change appears on the live site immediately instead of waiting out
     // the revalidate window.
     revalidatePath("/", "layout");
+    revalidateTag("settings", { expire: 0 });
 
     return NextResponse.json({ setting });
   } catch (error: unknown) {

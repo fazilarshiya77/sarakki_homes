@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { requireRole, CAN } from "@/lib/authz";
@@ -206,10 +206,14 @@ export async function POST(req: Request) {
 
     // Public listings/detail pages are ISR-cached (revalidate = 60) —
     // bust that so a newly published property shows up immediately.
+    // revalidateTag clears the underlying Data Cache (src/lib/properties.ts)
+    // that the route cache above reads from — without it the page would
+    // regenerate but still serve the stale cached query result.
     revalidatePath("/");
     revalidatePath("/properties");
     revalidatePath("/properties/bank-auctions");
     revalidatePath(`/properties/${property.slug}`);
+    revalidateTag("properties", { expire: 0 });
 
     return NextResponse.json({ property });
   } catch (error: unknown) {

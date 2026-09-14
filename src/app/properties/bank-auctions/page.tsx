@@ -29,13 +29,14 @@ export default async function BankAuctionsPage() {
     <>
       <Header solid />
       <main className="flex flex-1 flex-col pt-28">
-        <Section className="!pb-0 !pt-10 md:!pt-14">
-          <Container>
-            <Eyebrow>Bank Auction Properties</Eyebrow>
-            <h1 className="mt-4 max-w-2xl font-display text-4xl leading-[1.1] tracking-[-0.01em] md:text-5xl">
+        <Section className="relative flex min-h-[280px] items-center justify-center overflow-hidden !py-14 bg-accent-emerald-dark">
+          <div aria-hidden className="emerald-shimmer" />
+          <Container className="relative flex flex-col items-center text-center">
+            <Eyebrow light>Bank Auction Properties</Eyebrow>
+            <h1 className="mt-4 max-w-2xl font-display text-4xl leading-[1.1] tracking-[-0.01em] text-background md:text-5xl">
               Explore bank auction opportunities across Bengaluru.
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground">
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-background/70">
               Bank auctions offer some of the sharpest pricing in Bengaluru&rsquo;s
               property market, but the process is unfamiliar territory for most
               buyers. Sarakki Homes shortlists these listings, verifies title

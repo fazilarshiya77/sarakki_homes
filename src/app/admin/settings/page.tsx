@@ -16,6 +16,10 @@ export default function SettingsPage() {
   const [smtpPort, setSmtpPort] = useState("587");
   const [smtpUser, setSmtpUser] = useState("");
   const [smtpPassword, setSmtpPassword] = useState("");
+  // The API never sends the real stored password back to the browser
+  // (see api/admin/settings GET) — this just tracks whether one exists,
+  // so the field can hint "already set" without ever holding the value.
+  const [smtpPasswordSet, setSmtpPasswordSet] = useState(false);
   const [whatsappNo, setWhatsappNo] = useState("+91 98450 00000");
   const [instagramUrl, setInstagramUrl] = useState("#");
   const [linkedinUrl, setLinkedinUrl] = useState("#");
@@ -35,7 +39,7 @@ export default function SettingsPage() {
           setSmtpHost(s.smtpHost || "");
           setSmtpPort(String(s.smtpPort || "587"));
           setSmtpUser(s.smtpUser || "");
-          setSmtpPassword(s.smtpPassword || "");
+          setSmtpPasswordSet(Boolean(s.smtpPasswordSet));
           setWhatsappNo(s.whatsappNo || "");
           setInstagramUrl(s.instagramUrl || "");
           setLinkedinUrl(s.linkedinUrl || "");
@@ -194,6 +198,7 @@ export default function SettingsPage() {
                   type="password"
                   value={smtpPassword}
                   onChange={(e) => setSmtpPassword(e.target.value)}
+                  placeholder={smtpPasswordSet ? "•••••••• (already set — leave blank to keep)" : ""}
                   className="w-full rounded-sm border border-crm-border/40 bg-crm-bg/40 py-3 px-4 text-[15px] text-crm-text outline-none focus:border-crm-gold-bright/40"
                 />
               </div>

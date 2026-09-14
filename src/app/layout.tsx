@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Roboto } from "next/font/google";
 import { FloatingSocialDock } from "@/components/ui/FloatingSocialDock";
 import { BuilderMarquee } from "@/components/ui/BuilderMarquee";
@@ -80,6 +81,44 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         className="min-h-full flex flex-col bg-background text-foreground font-body"
         suppressHydrationWarning
       >
+        {/* Some security-suite browser extensions (e.g. Bitdefender's
+            "Browser Integrity Shield") inject a `bis_skin_checked`
+            attribute onto every element in the page before React
+            hydrates, which React reports as a hydration mismatch even
+            though nothing in this app ever renders that attribute —
+            it's real for anyone running that extension, but harmless
+            (no visual/behavioral bug) and never reaches production
+            visitors, since Next only prints hydration warnings in dev.
+            `suppressHydrationWarning` doesn't help here — it isn't
+            recursive, and the extension touches every descendant node,
+            not just html/body. Stripping the attribute the instant it's
+            added (via MutationObserver, started as early as possible so
+            it wins the race against hydration) is the only fix that
+            actually reaches every node without hand-adding the prop
+            everywhere. */}
+        <Script id="strip-extension-attrs" strategy="beforeInteractive">
+          {`
+            (function () {
+              var ATTR = "bis_skin_checked";
+              function strip(node) {
+                if (node.nodeType === 1 && node.hasAttribute(ATTR)) {
+                  node.removeAttribute(ATTR);
+                }
+              }
+              document.querySelectorAll("[" + ATTR + "]").forEach(strip);
+              new MutationObserver(function (mutations) {
+                for (var i = 0; i < mutations.length; i++) {
+                  var m = mutations[i];
+                  if (m.type === "attributes") strip(m.target);
+                }
+              }).observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: [ATTR],
+                subtree: true,
+              });
+            })();
+          `}
+        </Script>
         <AuthProvider>
           <SettingsProvider settings={settings}>
             {children}

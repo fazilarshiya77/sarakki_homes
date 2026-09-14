@@ -24,13 +24,14 @@ export default async function ProcessPage() {
     <>
       <Header solid />
       <main className="flex flex-1 flex-col pt-28">
-        <Section className="!pb-0 !pt-10 md:!pt-14">
-          <Container>
-            <Eyebrow>Our Process</Eyebrow>
-            <h1 className="mt-4 max-w-2xl font-display text-4xl leading-[1.1] tracking-[-0.01em] md:text-5xl">
+        <Section className="relative flex min-h-[280px] items-center justify-center overflow-hidden !py-14 bg-accent-emerald-dark">
+          <div aria-hidden className="emerald-shimmer" />
+          <Container className="relative flex flex-col items-center text-center">
+            <Eyebrow light>Our Process</Eyebrow>
+            <h1 className="mt-4 max-w-2xl font-display text-4xl leading-[1.1] tracking-[-0.01em] text-background md:text-5xl">
               The complete buying journey, start to finish.
             </h1>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-background/70">
               Most agents stop at the sale. We stay engaged through legal
               verification, financing, registration, and khata transfer —
               because that&rsquo;s where deals actually go wrong.

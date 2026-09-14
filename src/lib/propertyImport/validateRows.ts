@@ -279,8 +279,8 @@ export function validateAndResolveRows(rawRows: RawImportRow[], ref: ReferenceDa
   for (const [key, n] of assumptionCounts) {
     assumptions.push(label[key] ? label[key](n) : `${n} rows: ${key}`);
   }
-  if (validRows.some((r) => r.action === "create")) {
-    assumptions.push("New properties are created as UNPUBLISHED drafts — nothing shows on the website until you publish it.");
+  if (validRows.some((r) => r.action === "create" && r.data.status === null)) {
+    assumptions.push("New properties are published to the website immediately, unless their row sets a Status.");
   }
 
   return {

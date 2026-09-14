@@ -1,7 +1,19 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import type { Property, MediaTone, PropertyCategorySlug } from "@/lib/data";
 import { safeDbCall } from "@/lib/db-safe";
+
+// Every exported query below is wrapped in unstable_cache (Next's
+// persistent Data Cache, keyed separately from route-level `revalidate`)
+// rather than relying only on each page's own `export const revalidate`.
+// That setting only populates the Full Route Cache, which `next dev`
+// never does — so every local navigation re-ran these Prisma queries from
+// scratch against the production Supabase DB in ap-northeast-1, at
+// 1.3-3s+ measured round-trip per query from this project's dev network
+// (see db-safe.ts). Wrapping here means repeat loads within the 60s
+// window are served from cache with zero DB round trip, in dev exactly
+// as in production.
 
 // The public site's `Property` shape (src/lib/data.ts) was designed around
 // a richer static dataset than what the admin CMS actually captures today
@@ -156,69 +168,86 @@ function toPublicPropertyListItem(p: DbPropertyListItem): Property {
 // separate track per the client's explicit request that the two not mix.
 const EXCLUDE_BANK_AUCTIONS = { category: { slug: { not: "bank-auctions" } } };
 
+const getCachedPublishedProperties = unstable_cache(
+  async () => {
+    const rows = await prisma.property.findMany({
+      where: { status: "PUBLISHED", ...EXCLUDE_BANK_AUCTIONS },
+      select: PROPERTY_LIST_SELECT,
+      orderBy: { createdAt: "desc" },
+    });
+    return rows;
+  },
+  ["published-properties"],
+  { revalidate: 60, tags: ["properties"] }
+);
+
 export async function getPublishedProperties(): Promise<Property[]> {
   return safeDbCall(
-    async () => {
-      const rows = await prisma.property.findMany({
-        where: { status: "PUBLISHED", ...EXCLUDE_BANK_AUCTIONS },
-        select: PROPERTY_LIST_SELECT,
-        orderBy: { createdAt: "desc" },
-      });
-      return rows.map(toPublicPropertyListItem);
-    },
+    async () => (await getCachedPublishedProperties()).map(toPublicPropertyListItem),
     [],
     "getPublishedProperties"
   );
 }
 
+const getCachedFeaturedProperties = unstable_cache(
+  async (limit: number) => {
+    const rows = await prisma.property.findMany({
+      where: { status: "PUBLISHED", featured: "true", ...EXCLUDE_BANK_AUCTIONS },
+      select: PROPERTY_LIST_SELECT,
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+
+    // "Featured" is an admin-set flag (Property.featured toggle in the
+    // CRM) — nothing requires the admin to have set it on anything yet.
+    // Before this fallback, an empty flag set meant the homepage's
+    // entire Featured Properties section (and this data feeding the
+    // FeaturedProperties intro photo collage) rendered completely
+    // blank rather than degrading. Falling back to the most recent
+    // published listings keeps the section populated with real
+    // properties either way — the CRM toggle still fully controls
+    // curation once anything is actually flagged featured.
+    if (rows.length > 0) return rows;
+
+    return prisma.property.findMany({
+      where: { status: "PUBLISHED", ...EXCLUDE_BANK_AUCTIONS },
+      select: PROPERTY_LIST_SELECT,
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+  },
+  ["featured-properties"],
+  { revalidate: 60, tags: ["properties"] }
+);
+
 export async function getFeaturedProperties(limit = 6): Promise<Property[]> {
   return safeDbCall(
-    async () => {
-      const rows = await prisma.property.findMany({
-        where: { status: "PUBLISHED", featured: "true", ...EXCLUDE_BANK_AUCTIONS },
-        select: PROPERTY_LIST_SELECT,
-        orderBy: { createdAt: "desc" },
-        take: limit,
-      });
-
-      // "Featured" is an admin-set flag (Property.featured toggle in the
-      // CRM) — nothing requires the admin to have set it on anything yet.
-      // Before this fallback, an empty flag set meant the homepage's
-      // entire Featured Properties section (and this data feeding the
-      // FeaturedProperties intro photo collage) rendered completely
-      // blank rather than degrading. Falling back to the most recent
-      // published listings keeps the section populated with real
-      // properties either way — the CRM toggle still fully controls
-      // curation once anything is actually flagged featured.
-      if (rows.length > 0) return rows.map(toPublicPropertyListItem);
-
-      const fallback = await prisma.property.findMany({
-        where: { status: "PUBLISHED", ...EXCLUDE_BANK_AUCTIONS },
-        select: PROPERTY_LIST_SELECT,
-        orderBy: { createdAt: "desc" },
-        take: limit,
-      });
-      return fallback.map(toPublicPropertyListItem);
-    },
+    async () => (await getCachedFeaturedProperties(limit)).map(toPublicPropertyListItem),
     [],
     "getFeaturedProperties"
   );
 }
+
+const getCachedPropertiesByCategory = unstable_cache(
+  async (categorySlug: string, limit: number) => {
+    const rows = await prisma.property.findMany({
+      where: { status: "PUBLISHED", category: { slug: categorySlug } },
+      select: PROPERTY_LIST_SELECT,
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+    return rows;
+  },
+  ["properties-by-category"],
+  { revalidate: 60, tags: ["properties"] }
+);
 
 export async function getPropertiesByCategory(categorySlug: string, limit = 6): Promise<Property[]> {
   // Bank auctions are served exclusively via src/lib/auctions.ts — never
   // surfaced through this generic adapter, even when explicitly requested.
   if (categorySlug === "bank-auctions") return [];
   return safeDbCall(
-    async () => {
-      const rows = await prisma.property.findMany({
-        where: { status: "PUBLISHED", category: { slug: categorySlug } },
-        select: PROPERTY_LIST_SELECT,
-        orderBy: { createdAt: "desc" },
-        take: limit,
-      });
-      return rows.map(toPublicPropertyListItem);
-    },
+    async () => (await getCachedPropertiesByCategory(categorySlug, limit)).map(toPublicPropertyListItem),
     [],
     "getPropertiesByCategory"
   );
@@ -227,16 +256,26 @@ export async function getPropertiesByCategory(categorySlug: string, limit = 6): 
 /** Returns both the mapped `Property` and its raw gallery image URLs, since
  *  the detail page needs the full photo set that `Property.gallery` doesn't
  *  carry. */
+const getCachedPropertyBySlug = unstable_cache(
+  async (slug: string) => {
+    const row = await prisma.property.findUnique({
+      where: { slug, status: "PUBLISHED" },
+      include: PROPERTY_INCLUDE,
+    });
+    if (!row || row.category.slug === "bank-auctions") return null;
+    return row;
+  },
+  ["property-by-slug"],
+  { revalidate: 60, tags: ["properties"] }
+);
+
 export async function getPropertyBySlug(
   slug: string
 ): Promise<{ property: Property; galleryImages: string[] } | null> {
   return safeDbCall(
     async () => {
-      const row = await prisma.property.findUnique({
-        where: { slug, status: "PUBLISHED" },
-        include: PROPERTY_INCLUDE,
-      });
-      if (!row || row.category.slug === "bank-auctions") return null;
+      const row = await getCachedPropertyBySlug(slug);
+      if (!row) return null;
       return { property: toPublicProperty(row), galleryImages: getGalleryImages(row) };
     },
     null,
@@ -244,36 +283,47 @@ export async function getPropertyBySlug(
   );
 }
 
+const getCachedRelatedProperties = unstable_cache(
+  async (categorySlug: string, excludeId: string, limit: number) => {
+    const rows = await prisma.property.findMany({
+      where: {
+        status: "PUBLISHED",
+        id: { not: excludeId },
+        category: { slug: categorySlug },
+      },
+      select: PROPERTY_LIST_SELECT,
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+    return rows;
+  },
+  ["related-properties"],
+  { revalidate: 60, tags: ["properties"] }
+);
+
 export async function getRelatedProperties(property: Property, limit = 3): Promise<Property[]> {
   return safeDbCall(
-    async () => {
-      const rows = await prisma.property.findMany({
-        where: {
-          status: "PUBLISHED",
-          id: { not: property.id },
-          category: { slug: property.categorySlug },
-        },
-        select: PROPERTY_LIST_SELECT,
-        orderBy: { createdAt: "desc" },
-        take: limit,
-      });
-      return rows.map(toPublicPropertyListItem);
-    },
+    async () =>
+      (await getCachedRelatedProperties(property.categorySlug, property.id, limit)).map(
+        toPublicPropertyListItem
+      ),
     [],
     "getRelatedProperties"
   );
 }
 
+const getCachedAllPublishedSlugs = unstable_cache(
+  async () => {
+    const rows = await prisma.property.findMany({
+      where: { status: "PUBLISHED", ...EXCLUDE_BANK_AUCTIONS },
+      select: { slug: true },
+    });
+    return rows.map((r) => r.slug);
+  },
+  ["all-published-slugs"],
+  { revalidate: 60, tags: ["properties"] }
+);
+
 export async function getAllPublishedSlugs(): Promise<string[]> {
-  return safeDbCall(
-    async () => {
-      const rows = await prisma.property.findMany({
-        where: { status: "PUBLISHED", ...EXCLUDE_BANK_AUCTIONS },
-        select: { slug: true },
-      });
-      return rows.map((r) => r.slug);
-    },
-    [],
-    "getAllPublishedSlugs"
-  );
+  return safeDbCall(getCachedAllPublishedSlugs, [], "getAllPublishedSlugs");
 }

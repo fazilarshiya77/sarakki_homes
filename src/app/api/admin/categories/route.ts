@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole, CAN } from "@/lib/authz";
 
@@ -50,6 +51,8 @@ export async function POST(req: Request) {
         details: `Created category: ${body.title}`,
       },
     });
+
+    revalidateTag("categories", { expire: 0 });
 
     return NextResponse.json({ category });
   } catch (error: unknown) {
