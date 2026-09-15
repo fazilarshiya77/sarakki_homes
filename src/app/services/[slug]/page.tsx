@@ -55,34 +55,24 @@ export default async function ServiceDetailPage({
               Same bottom-anchored scrim as the bank-auction detail
               hero, for headline legibility over a real photo.
 
-              Two-layer treatment rather than a single object-cover fill:
-              these source photos are only ~1200px wide, and several are
-              portrait-oriented (up to 1200x1800). A plain object-cover
-              fill forces every one of them to stretch to the full
-              viewport width (100vw — 1.6x+ upscale on a 1920px+ desktop,
-              which visibly softened the photo) and crops the portrait
-              ones down to a narrow sliver to cover a wide landscape
-              band. The blurred backdrop copy fills the section
-              edge-to-edge so there's never a bare color gutter; the
-              sharp copy on top uses object-contain, which shows the
-              whole photo at (at most) its native resolution — properly
-              "zoomed out" instead of cropped-and-upscaled. */}
+              object-cover so the photo fills the section edge-to-edge
+              with no letterboxing. quality bumped from the next/image
+              default (75) since these source files are only ~1200px
+              wide and get displayed wider than that on most desktops —
+              higher JPEG quality keeps the upscaled result as crisp as
+              the source allows. object-position top-ish keeps the
+              subject in the upper portion of the frame in view for the
+              several source photos that are portrait-oriented (up to
+              1200x1800) and get cropped down to a short landscape band. */}
           <Image
             src={`/media/services/${service.slug}.jpg`}
             alt=""
             aria-hidden="true"
             fill
             priority
+            quality={90}
             sizes="100vw"
-            className="scale-110 object-cover opacity-60 blur-2xl"
-          />
-          <Image
-            src={`/media/services/${service.slug}.jpg`}
-            alt=""
-            aria-hidden="true"
-            fill
-            sizes="100vw"
-            className="object-contain"
+            className="object-cover object-top"
           />
           <div
             className="absolute inset-0"
