@@ -744,6 +744,6 @@ export const FAQS = [
   {
     question: "Which areas of Bengaluru do you operate in?",
     answer:
-      "We're active across Bengaluru's key corridors — Whitefield, Sarjapur Road, Indiranagar, Hebbal, JP Nagar, Koramangala, and surrounding growth areas.",
+      "We operate across all of Bengaluru — urban and rural areas alike, from the city's core neighborhoods to its outskirts and surrounding growth corridors.",
   },
 ];
