@@ -53,7 +53,20 @@ export default async function ServiceDetailPage({
               chosen per service (Pexels License: free for commercial
               use, no attribution required), not a generic stand-in.
               Same bottom-anchored scrim as the bank-auction detail
-              hero, for headline legibility over a real photo. */}
+              hero, for headline legibility over a real photo.
+
+              Two-layer treatment rather than a single object-cover fill:
+              these source photos are only ~1200px wide, and several are
+              portrait-oriented (up to 1200x1800). A plain object-cover
+              fill forces every one of them to stretch to the full
+              viewport width (100vw — 1.6x+ upscale on a 1920px+ desktop,
+              which visibly softened the photo) and crops the portrait
+              ones down to a narrow sliver to cover a wide landscape
+              band. The blurred backdrop copy fills the section
+              edge-to-edge so there's never a bare color gutter; the
+              sharp copy on top uses object-contain, which shows the
+              whole photo at (at most) its native resolution — properly
+              "zoomed out" instead of cropped-and-upscaled. */}
           <Image
             src={`/media/services/${service.slug}.jpg`}
             alt=""
@@ -61,7 +74,15 @@ export default async function ServiceDetailPage({
             fill
             priority
             sizes="100vw"
-            className="object-cover"
+            className="scale-110 object-cover opacity-60 blur-2xl"
+          />
+          <Image
+            src={`/media/services/${service.slug}.jpg`}
+            alt=""
+            aria-hidden="true"
+            fill
+            sizes="100vw"
+            className="object-contain"
           />
           <div
             className="absolute inset-0"
