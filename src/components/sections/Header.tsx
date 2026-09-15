@@ -435,32 +435,39 @@ export function Header({ solid = false }: { solid?: boolean }) {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="flex items-center gap-3">
-                        <Phone size={14} className="text-[#C6A15B] shrink-0" />
+                      <div className="flex items-start gap-3">
+                        <Phone size={14} className="text-[#C6A15B] shrink-0 mt-0.5" />
                         <p>
                           <span className="text-[14px] uppercase tracking-wider text-muted-foreground block">Phone</span>
                           <span className="font-semibold font-mono text-[15px]">080-41550138</span>
                         </p>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <MessageCircle size={14} className="text-[#C6A15B] shrink-0" />
+                      <div className="flex items-start gap-3">
+                        <MessageCircle size={14} className="text-[#C6A15B] shrink-0 mt-0.5" />
                         <p>
                           <span className="text-[14px] uppercase tracking-wider text-muted-foreground block">Mobile / WhatsApp</span>
                           <span className="font-semibold font-mono text-[15px]">9663676464</span>
                         </p>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <Mail size={14} className="text-[#C6A15B] shrink-0" />
+                      <div className="flex items-start gap-3">
+                        <Mail size={14} className="text-[#C6A15B] shrink-0 mt-0.5" />
                         <p>
                           <span className="text-[14px] uppercase tracking-wider text-muted-foreground block">Email</span>
                           <span className="font-semibold text-[15px]">SARAKKIHOMES@GMAIL.COM</span>
                         </p>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <Globe size={14} className="text-[#C6A15B] shrink-0" />
+                      <div className="flex items-start gap-3">
+                        <Globe size={14} className="text-[#C6A15B] shrink-0 mt-0.5" />
                         <p>
                           <span className="text-[14px] uppercase tracking-wider text-muted-foreground block">Website</span>
-                          <span className="font-semibold text-[15px]">SARAKKIHOMES.COM</span>
+                          <a
+                            href="https://www.sarakkihomes.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-semibold text-[15px] hover:text-[#C6A15B] transition-colors"
+                          >
+                            SARAKKIHOMES.COM
+                          </a>
                         </p>
                       </div>
                     </div>
