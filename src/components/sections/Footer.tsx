@@ -89,11 +89,16 @@ export async function Footer() {
             </ul>
 
             <div className="mt-8 flex flex-col gap-3 text-sm text-background">
-              <a href={CONTACT.phoneHref} className="flex items-center gap-2 hover:text-accent-gold">
+              <a
+                href={CONTACT.whatsappHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:text-accent-gold"
+              >
                 <PhoneCall size={14} /> {CONTACT.phoneDisplay}
               </a>
               <span className="flex items-center gap-2">
-                <Mail size={14} /> hello@sarakkihomes.com
+                <Mail size={14} /> sarakkihomes@gmail.com
               </span>
               <span className="flex items-center gap-2">
                 <MapPin size={14} /> Bengaluru, Karnataka

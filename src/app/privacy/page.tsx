@@ -80,8 +80,8 @@ export default async function PrivacyPolicyPage() {
                 <h2 className="font-display text-xl">Questions about your data?</h2>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   Write to us at{" "}
-                  <a href="mailto:hello@sarakkihomes.com" className="font-medium text-accent-gold-dark">
-                    hello@sarakkihomes.com
+                  <a href="mailto:sarakkihomes@gmail.com" className="font-medium text-accent-gold-dark">
+                    sarakkihomes@gmail.com
                   </a>{" "}
                   or call{" "}
                   <a href={CONTACT.phoneHref} className="font-medium text-accent-gold-dark">

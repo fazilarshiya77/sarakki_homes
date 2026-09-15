@@ -11,9 +11,11 @@ function initialsFor(name: string): string {
 }
 
 /** The homepage book-flip section is fixed at 4 pages — this returns the 4
- *  most recent testimonials the admin has added, newest first isn't quite
- *  right for a "client stories" feel, so oldest-first (chronological,
- *  matching how the original hardcoded copy read) via createdAt asc. */
+ *  most recently added published testimonials (createdAt desc). Previously
+ *  ordered `asc` ("oldest first"), which silently broke the CMS: once more
+ *  than 4 testimonials existed, a newly admin-added one was always the
+ *  newest row and therefore always excluded from the fixed 4-slot query —
+ *  it could never appear on the site no matter how many were added. */
 // Wrapped in unstable_cache (Next's persistent Data Cache) rather than
 // relying on the page's `export const revalidate` alone — that route-level
 // setting only feeds the Full Route Cache, which next dev never populates,
@@ -27,7 +29,7 @@ const getCachedHomepageTestimonials = unstable_cache(
   async () => {
     const rows = await prisma.testimonial.findMany({
       where: { published: true },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: "desc" },
       take: 4,
     });
 

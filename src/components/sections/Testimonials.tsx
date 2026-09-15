@@ -421,7 +421,7 @@ export function Testimonials({ testimonials }: { testimonials: TestimonialData[]
                     </p>
                     <div className="pt-2">
                       <a
-                        href="https://wa.me/919845000000?text=Hi%20Sarakki%20Homes%2C%20I%27d%20like%20to%20book%20a%20consultation."
+                        href="https://wa.me/919663676464?text=Hi%20Sarakki%20Homes%2C%20I%27d%20like%20to%20book%20a%20consultation."
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}

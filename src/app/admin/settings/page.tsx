@@ -20,7 +20,7 @@ export default function SettingsPage() {
   // (see api/admin/settings GET) — this just tracks whether one exists,
   // so the field can hint "already set" without ever holding the value.
   const [smtpPasswordSet, setSmtpPasswordSet] = useState(false);
-  const [whatsappNo, setWhatsappNo] = useState("+91 98450 00000");
+  const [whatsappNo, setWhatsappNo] = useState("+91 9663676464");
   const [instagramUrl, setInstagramUrl] = useState("#");
   const [linkedinUrl, setLinkedinUrl] = useState("#");
   const [metaTitle, setMetaTitle] = useState("Sarakki Homes");

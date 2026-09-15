@@ -33,11 +33,11 @@ const DEFAULT_WHATSAPP_MESSAGE = "Hi Sarakki Homes, I'd like to book a consultat
 const FALLBACK: SiteSettings = {
   companyName: "Sarakki Homes",
   contact: {
-    phoneDisplay: "+91 98450 00000",
-    phoneHref: "tel:+919845000000",
+    phoneDisplay: "+91 9663676464",
+    phoneHref: "tel:+919663676464",
     whatsappHref:
-      "https://wa.me/919845000000?text=" + encodeURIComponent(DEFAULT_WHATSAPP_MESSAGE),
-    whatsappNumber: "919845000000",
+      "https://wa.me/919663676464?text=" + encodeURIComponent(DEFAULT_WHATSAPP_MESSAGE),
+    whatsappNumber: "919663676464",
     instagramHref: "https://www.instagram.com/himabasavaiah/",
   },
   metaTitle: "Sarakki Homes | Premium Real Estate Consultancy, Bengaluru",

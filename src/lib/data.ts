@@ -22,10 +22,10 @@ import {
 } from "lucide-react";
 
 export const CONTACT = {
-  phoneDisplay: "+91 98450 00000",
-  phoneHref: "tel:+919845000000",
+  phoneDisplay: "+91 9663676464",
+  phoneHref: "tel:+919663676464",
   whatsappHref:
-    "https://wa.me/919845000000?text=Hi%20Sarakki%20Homes%2C%20I%27d%20like%20to%20book%20a%20consultation.",
+    "https://wa.me/919663676464?text=Hi%20Sarakki%20Homes%2C%20I%27d%20like%20to%20book%20a%20consultation.",
   instagramHref: "https://www.instagram.com/himabasavaiah/",
 };
 

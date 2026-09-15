@@ -16,7 +16,7 @@ export async function GET() {
       setting = await prisma.setting.create({
         data: {
           companyName: "Sarakki Homes",
-          whatsappNo: "+91 98450 00000",
+          whatsappNo: "+91 9663676464",
         },
       });
     }
