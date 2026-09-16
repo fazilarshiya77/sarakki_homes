@@ -66,7 +66,7 @@ async function main() {
   console.log("✅ Seeded builders.");
 
   // 4. Seed Property Types
-  const propertyTypeNames = ["Independent Building", "Flat", "Villa", "Site"];
+  const propertyTypeNames = ["Flat", "Plot", "Building (Residential)", "Building (Commercial)", "Villa"];
   for (const name of propertyTypeNames) {
     await prisma.propertyType.upsert({ where: { name }, update: {}, create: { name } });
   }

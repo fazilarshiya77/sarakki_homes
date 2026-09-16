@@ -59,7 +59,7 @@ export const PROPERTY_STATUS_VALUES = [
 // someone corrects them in the CRM — pick the least-wrong default, not
 // just something plausible.
 export const DEFAULT_CATEGORY_TITLE = "Resale Properties";
-export const DEFAULT_TYPE = "Resale";
+export const DEFAULT_TYPE = "Flat";
 export const DEFAULT_PRICE_TEXT = "Price on request";
 
 // The identifier column — if a row has a value here that matches an
