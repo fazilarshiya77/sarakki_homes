@@ -330,7 +330,7 @@ export const LEGAL_SERVICES = [
   },
   {
     slug: "bank-loan-agreement",
-    title: "Bank Loan Agreement",
+    title: "Bank Loan Arrangement",
     description: "Guidance through loan documentation, so approval isn't delayed by paperwork.",
     heroTagline: "Financing, without the fine-print anxiety.",
     longDescription:
