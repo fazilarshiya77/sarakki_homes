@@ -211,6 +211,7 @@ const HEADER_STYLE: Partial<ExcelJS.Style> = {
 export async function buildTemplateWorkbook(reference: {
   categories: string[];
   builders: string[];
+  propertyTypes: string[];
 }): Promise<ExcelJS.Buffer> {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("Properties");
@@ -221,7 +222,7 @@ export async function buildTemplateWorkbook(reference: {
   const exampleRow: Record<string, string> = {
     [PROPERTY_ID_HEADER]: "",
     "Property Name": "Prestige Lakeside Habitat",
-    "Property Type": "Resale",
+    "Property Type": reference.propertyTypes[0] ?? "Flat",
     Category: reference.categories[0] ?? "Rental Income Properties",
     Builder: reference.builders[0] ?? "",
     Price: "₹1.25 Cr",
@@ -247,19 +248,18 @@ export async function buildTemplateWorkbook(reference: {
     { header: "Status values", key: "status", width: 20 },
   ];
   refSheet.getRow(1).eachCell((cell) => Object.assign(cell, { style: HEADER_STYLE }));
-  const typeDef = COLUMN_DEFS.find((c) => c.field === "type");
   const statusDef = COLUMN_DEFS.find((c) => c.field === "status");
   const maxLen = Math.max(
     reference.categories.length,
     reference.builders.length,
-    typeDef?.enumValues?.length ?? 0,
+    reference.propertyTypes.length,
     statusDef?.enumValues?.length ?? 0
   );
   for (let i = 0; i < maxLen; i++) {
     refSheet.addRow({
       cat: reference.categories[i] ?? "",
       builder: reference.builders[i] ?? "",
-      type: typeDef?.enumValues?.[i] ?? "",
+      type: reference.propertyTypes[i] ?? "",
       status: statusDef?.enumValues?.[i] ?? "",
     });
   }

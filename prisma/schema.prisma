@@ -70,6 +70,18 @@ model Builder {
   updatedAt  DateTime   @updatedAt
 }
 
+// Admin-managed list of property types (Independent Building, Flat, Villa,
+// Site, ...) — same pattern as Builder: a real table with its own CRUD
+// screen (/admin/property-types) rather than a hardcoded dropdown, so
+// staff can add/remove options without a code change.
+model PropertyType {
+  id         String     @id @default(uuid())
+  name       String     @unique
+  properties Property[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
 // Property statuses: PUBLISHED, UNPUBLISHED, ARCHIVED, SOLD, UNDER_PROCESS, AUCTION_CLOSED
 model Property {
   id             String   @id @default(uuid())
@@ -79,7 +91,6 @@ model Property {
   location       String
   price          String
   priceValueLakh Float
-  type           String
   status         String   @default("UNPUBLISHED")
   featured       String   @default("false") // "true" or "false"
   beds           Int
@@ -102,6 +113,15 @@ model Property {
   // real "None" option instead of forcing a pick.
   builderId String?
   builder   Builder? @relation(fields: [builderId], references: [id], onDelete: SetNull)
+
+  // Physical property type (Independent Building, Flat, Villa, Site, ...)
+  // — an admin-managed relation, not a hardcoded string list. Distinct
+  // from categoryId/category above: category is the investment/deal
+  // classification (bank auction, resale, rental income, ...) used for
+  // the public site's routing and filtering; this is what kind of
+  // structure the listing actually is.
+  propertyTypeId String
+  propertyType   PropertyType @relation(fields: [propertyTypeId], references: [id])
 
   // Auction details (optional)
   auctionInfo AuctionInfo?

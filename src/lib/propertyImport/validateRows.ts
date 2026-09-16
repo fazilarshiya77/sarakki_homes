@@ -13,7 +13,8 @@ import type { RawImportRow } from "./workbook";
 // safe default the manual "Add Property" form uses.
 export interface ValidatedRowData {
   title: string;
-  type: string | null;
+  propertyTypeId: string | null;
+  propertyTypeName: string | null;
   categoryId: string | null;
   categoryName: string | null;
   builderId: string | null;
@@ -56,6 +57,7 @@ export interface ErrorRow {
 export interface ReferenceData {
   categories: Map<string, { id: string; title: string }>;
   builders: Map<string, { id: string; name: string }>;
+  propertyTypes: Map<string, { id: string; name: string }>;
   existingPropertyIds: Map<string, string>;
 }
 
@@ -92,6 +94,7 @@ export function validateAndResolveRows(rawRows: RawImportRow[], ref: ReferenceDa
   const bump = (key: string) => assumptionCounts.set(key, (assumptionCounts.get(key) ?? 0) + 1);
 
   const defaultCategory = matchByName(ref.categories, DEFAULT_CATEGORY_TITLE);
+  const defaultPropertyType = matchByName(ref.propertyTypes, DEFAULT_TYPE);
 
   rawRows.forEach((row, idx) => {
     const rowNumber = idx + 1; // position among data rows, for the error report
@@ -199,8 +202,39 @@ export function validateAndResolveRows(rawRows: RawImportRow[], ref: ReferenceDa
     const explicitLakh = firstNumber((v.priceValueLakh ?? "").trim());
     if (explicitLakh !== null && explicitLakh >= 0) priceValueLakh = explicitLakh;
 
-    // --- everything else (all optional, all lenient) -------------------
-    const type = (v.type ?? "").trim() || (action === "create" ? DEFAULT_TYPE : null);
+    // --- property type — same resolution shape as Category above -------
+    let propertyTypeId: string | null = null;
+    let propertyTypeName: string | null = null;
+    const typeRaw = (v.type ?? "").trim();
+    if (typeRaw) {
+      const matched = matchByName(ref.propertyTypes, typeRaw);
+      if (matched) {
+        propertyTypeId = matched.id;
+        propertyTypeName = matched.name;
+      } else if (action === "create") {
+        if (!defaultPropertyType) {
+          errors.push(
+            `Property Type "${typeRaw}" doesn't exist, and the fallback type "${DEFAULT_TYPE}" isn't set up either.`
+          );
+        } else {
+          propertyTypeId = defaultPropertyType.id;
+          propertyTypeName = defaultPropertyType.name;
+          notes.push(`Property Type "${typeRaw}" not found — imported as "${defaultPropertyType.name}".`);
+          bump("type-guessed");
+        }
+      } else {
+        notes.push(`Property Type "${typeRaw}" not found — kept its current type.`);
+        bump("type-kept");
+      }
+    } else if (action === "create") {
+      if (!defaultPropertyType) {
+        errors.push(`No Property Type given and the fallback type "${DEFAULT_TYPE}" isn't set up.`);
+      } else {
+        propertyTypeId = defaultPropertyType.id;
+        propertyTypeName = defaultPropertyType.name;
+        bump("type-defaulted");
+      }
+    }
 
     const beds = v.beds != null ? parseBhk(v.beds) : null;
     const baths = v.baths != null ? parseBathrooms(v.baths) : null;
@@ -246,7 +280,8 @@ export function validateAndResolveRows(rawRows: RawImportRow[], ref: ReferenceDa
       notes,
       data: {
         title,
-        type,
+        propertyTypeId,
+        propertyTypeName,
         categoryId,
         categoryName,
         builderId,
@@ -274,6 +309,9 @@ export function validateAndResolveRows(rawRows: RawImportRow[], ref: ReferenceDa
     "category-kept": (n) => `${n} existing propert${n === 1 ? "y" : "ies"} had an unknown Category — their category was left unchanged.`,
     "builder-missing": (n) => `${n} row${n === 1 ? "" : "s"} named a Builder that doesn't exist — left unset.`,
     "price-missing": (n) => `${n} row${n === 1 ? "" : "s"} had no Price — set to "${DEFAULT_PRICE_TEXT}".`,
+    "type-defaulted": (n) => `${n} row${n === 1 ? "" : "s"} had no Property Type — imported as "${DEFAULT_TYPE}".`,
+    "type-guessed": (n) => `${n} row${n === 1 ? "" : "s"} had a Property Type that doesn't exist — imported as "${DEFAULT_TYPE}".`,
+    "type-kept": (n) => `${n} existing propert${n === 1 ? "y" : "ies"} had an unknown Property Type — their type was left unchanged.`,
   };
   const assumptions: string[] = [];
   for (const [key, n] of assumptionCounts) {

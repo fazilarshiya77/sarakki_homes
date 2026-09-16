@@ -60,7 +60,7 @@ const propertySchema = z.object({
   // the schema specifically so this field could have a real "None"
   // option instead of forcing a pick every time).
   builderId: z.string().optional(),
-  type: z.string().min(1, "Property type is required."),
+  propertyTypeId: z.string().min(1, "Property type is required."),
   // Was two separate fields (a free-text display string + this numeric
   // value) that both had to be filled in sync by hand -- collapsed into
   // this single required field per the client's request. The display
@@ -133,8 +133,11 @@ interface PropertyWizardInitialData extends PropertyFormData {
 }
 
 interface PropertyWizardProps {
-  categories: Array<{ id: string; title: string }>;
+  // slug is needed to detect the Bank Auction category (drives whether
+  // the Auction Details step appears) — see isBankAuction below.
+  categories: Array<{ id: string; title: string; slug: string }>;
   builders: Array<{ id: string; name: string }>;
+  propertyTypes: Array<{ id: string; name: string }>;
   initialData?: PropertyWizardInitialData;
 }
 
@@ -148,8 +151,9 @@ interface PropertyWizardProps {
 //      (one scroll instead of two clicks; nothing here was ever
 //      logically two separate steps, just two form pages).
 //   2. Auction Details — `conditional: true`, filtered out of the
-//      visible list entirely (not just grayed out) unless Property Type
-//      is "Bank Auction", so non-auction listings never see it at all.
+//      visible list entirely (not just grayed out) unless the selected
+//      Category is Bank Auction, so non-auction listings never see it
+//      at all.
 //   3. Photos.
 //   4. Review & Publish — SEO fields moved here as an optional,
 //      collapsed-by-default section rather than their own step, since
@@ -163,7 +167,12 @@ const ALL_STEPS = [
 
 type StepKey = (typeof ALL_STEPS)[number]["key"];
 
-export function PropertyWizard({ categories, builders: initialBuilders, initialData }: PropertyWizardProps) {
+export function PropertyWizard({
+  categories,
+  builders: initialBuilders,
+  propertyTypes: initialPropertyTypes,
+  initialData,
+}: PropertyWizardProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -176,6 +185,14 @@ export function PropertyWizard({ categories, builders: initialBuilders, initialD
   const [newBuilderName, setNewBuilderName] = useState("");
   const [builderSaving, setBuilderSaving] = useState(false);
   const [builderError, setBuilderError] = useState("");
+  // Same "+ Add" pattern as Builder above, for the Property Type field —
+  // reuses POST /api/admin/property-types (the standalone Property Types
+  // admin page's own endpoint), so a type added here shows up there too.
+  const [propertyTypes, setPropertyTypes] = useState(initialPropertyTypes);
+  const [addingPropertyType, setAddingPropertyType] = useState(false);
+  const [newPropertyTypeName, setNewPropertyTypeName] = useState("");
+  const [propertyTypeSaving, setPropertyTypeSaving] = useState(false);
+  const [propertyTypeError, setPropertyTypeError] = useState("");
   // SEO fields (title/description/slug overrides) folded into the
   // Review step as a collapsed-by-default section instead of their own
   // wizard step — every one of them already has a working default
@@ -218,12 +235,10 @@ export function PropertyWizard({ categories, builders: initialBuilders, initialD
       title: "",
       categoryId: "",
       builderId: "",
-      // Was defaulted to "Bank Auction" -- meant the select was always
-      // "filled" from the moment the wizard opened, so a user could never
-      // actually leave Property Type unselected and the "required" check
-      // was unenforceable. Starts blank now so the compulsory-fields
-      // validation has something real to check.
-      type: "",
+      // Starts blank so the compulsory-fields validation has something
+      // real to check, rather than a pre-filled default the admin never
+      // actually chose.
+      propertyTypeId: "",
       priceValueLakh: "",
       location: "",
       address: "",
@@ -262,16 +277,27 @@ export function PropertyWizard({ categories, builders: initialBuilders, initialD
   // produces.
   type FormValues = Parameters<Parameters<typeof handleSubmit>[0]>[0];
 
-  const propertyType = watch("type");
+  const selectedCategoryId = watch("categoryId");
   const formValues = watch();
 
+  // Whether the Auction Details step should appear is driven by the
+  // selected Category's slug ("bank-auctions"), not the free-standing
+  // Property Type field — those are two different classifications
+  // (physical type: Villa/Flat/... vs. investment category: bank
+  // auction/resale/...) that used to be conflated when Property Type
+  // still had a "Bank Auction" option.
+  const isBankAuctionCategory = useMemo(
+    () => categories.find((c) => c.id === selectedCategoryId)?.slug === "bank-auctions",
+    [categories, selectedCategoryId]
+  );
+
   // The visible step list — "auction" only appears when it's actually
-  // relevant. Recomputed whenever Property Type changes, which is also
-  // why currentStep gets clamped below (picking a different Property
-  // Type mid-flow can shrink this list out from under the current index).
+  // relevant. Recomputed whenever Category changes, which is also why
+  // currentStep gets clamped below (picking a different category
+  // mid-flow can shrink this list out from under the current index).
   const steps = useMemo(
-    () => ALL_STEPS.filter((s) => !("conditional" in s) || !s.conditional || propertyType === "Bank Auction"),
-    [propertyType]
+    () => ALL_STEPS.filter((s) => !("conditional" in s) || !s.conditional || isBankAuctionCategory),
+    [isBankAuctionCategory]
   );
 
   useEffect(() => {
@@ -285,7 +311,7 @@ export function PropertyWizard({ categories, builders: initialBuilders, initialD
   // Everything else on the merged "Property Details" step (Builder,
   // Location, Address, Google Maps Location, Description, Bedrooms/
   // Bathrooms/Area) is optional and must never hold up navigation.
-  const DETAILS_STEP_FIELDS = ["title", "type", "categoryId", "priceValueLakh"] as const;
+  const DETAILS_STEP_FIELDS = ["title", "propertyTypeId", "categoryId", "priceValueLakh"] as const;
 
   const handleNext = async () => {
     // Basic step validation before moving forward. This used to do its
@@ -322,7 +348,7 @@ export function PropertyWizard({ categories, builders: initialBuilders, initialD
       title: "Property Name",
       categoryId: "Category",
       builderId: "Builder",
-      type: "Property Type",
+      propertyTypeId: "Property Type",
       priceValueLakh: "Price",
       location: "Location",
       address: "Address",
@@ -373,6 +399,35 @@ export function PropertyWizard({ categories, builders: initialBuilders, initialD
       setBuilderError("Couldn't add that builder. Please try again.");
     } finally {
       setBuilderSaving(false);
+    }
+  };
+
+  // Inline "+ Add Property Type" — reuses the same POST
+  // /api/admin/property-types the standalone Property Types page uses.
+  const handleAddPropertyType = async () => {
+    const name = newPropertyTypeName.trim();
+    if (!name) return;
+    setPropertyTypeSaving(true);
+    setPropertyTypeError("");
+    try {
+      const res = await fetch("/api/admin/property-types", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      const data = await res.json();
+      if (res.ok && data.propertyType) {
+        setPropertyTypes((prev) => [...prev, data.propertyType].sort((a, b) => a.name.localeCompare(b.name)));
+        setValue("propertyTypeId", data.propertyType.id, { shouldDirty: true });
+        setNewPropertyTypeName("");
+        setAddingPropertyType(false);
+      } else {
+        setPropertyTypeError(data.error || "Couldn't add that property type. Please try again.");
+      }
+    } catch {
+      setPropertyTypeError("Couldn't add that property type. Please try again.");
+    } finally {
+      setPropertyTypeSaving(false);
     }
   };
 
@@ -549,15 +604,68 @@ export function PropertyWizard({ categories, builders: initialBuilders, initialD
                     />
                   </Field>
 
-                  <Field label="Property Type" required error={errors.type}>
-                    <select {...register("type")} className="crm-select" defaultValue="">
-                      <option value="" disabled>Select Property Type</option>
-                      <option value="Bank Auction">Bank Auction</option>
-                      <option value="Resale">Resale</option>
-                      <option value="Ready To Move">Ready To Move</option>
-                      <option value="Rental Income">Rental Income</option>
-                      <option value="Upcoming Project">Upcoming Project</option>
-                    </select>
+                  <Field label="Property Type" required error={errors.propertyTypeId}>
+                    <div className="flex items-center gap-2">
+                      <select {...register("propertyTypeId")} className="crm-select flex-1" defaultValue="">
+                        <option value="" disabled>Select Property Type</option>
+                        {propertyTypes.map((t) => (
+                          <option key={t.id} value={t.id}>{t.name}</option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setAddingPropertyType((v) => !v)}
+                        title="Add a new property type"
+                        aria-label="Add a new property type"
+                        className="crm-btn-secondary shrink-0 !px-3"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+
+                    {addingPropertyType && (
+                      <div className="mt-2 flex items-start gap-2">
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            value={newPropertyTypeName}
+                            onChange={(e) => setNewPropertyTypeName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleAddPropertyType();
+                              }
+                            }}
+                            placeholder="New property type name"
+                            className="crm-input"
+                            autoFocus
+                          />
+                          {propertyTypeError && <p className="mt-1 text-[13px] text-red-600">{propertyTypeError}</p>}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleAddPropertyType}
+                          disabled={propertyTypeSaving || !newPropertyTypeName.trim()}
+                          className="crm-btn-gold shrink-0"
+                        >
+                          {propertyTypeSaving ? <Loader2 size={14} className="animate-spin" /> : <span>Add</span>}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAddingPropertyType(false);
+                            setNewPropertyTypeName("");
+                            setPropertyTypeError("");
+                          }}
+                          disabled={propertyTypeSaving}
+                          title="Cancel"
+                          aria-label="Cancel adding a new property type"
+                          className="crm-btn-secondary shrink-0 !px-3"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    )}
                   </Field>
 
                   <Field label="Category" required error={errors.categoryId}>
@@ -730,13 +838,13 @@ export function PropertyWizard({ categories, builders: initialBuilders, initialD
                 </FieldGroup>
             </div>
 
-            {/* Step: Auction Details — only ever shown when Property
-                Type is "Bank Auction" (it's also filtered out of the
+            {/* Step: Auction Details — only ever shown when the selected
+                Category is Bank Auction (it's also filtered out of the
                 left-hand step list entirely in that case, via `steps`
                 above), so a non-auction listing never sees it. Still
                 always mounted per the note above — harmless, since
-                auctionInfo is optional and only persisted when
-                type === "Bank Auction" (see onSubmit / the API route). */}
+                auctionInfo is optional and only persisted when the
+                category is Bank Auction (see onSubmit / the API route). */}
             <div className={cn("space-y-8", currentStepKey !== "auction" && "hidden")}>
                 <StepHeading title="Auction Details" description="Bank auction specifics buyers will ask about." />
 
@@ -827,7 +935,10 @@ export function PropertyWizard({ categories, builders: initialBuilders, initialD
                   </div>
 
                   <div className="mt-6 grid grid-cols-2 gap-5 border-t border-crm-border pt-5 sm:grid-cols-4">
-                    <ReviewStat label="Type" value={formValues.type} />
+                    <ReviewStat
+                      label="Type"
+                      value={propertyTypes.find((t) => t.id === formValues.propertyTypeId)?.name ?? ""}
+                    />
                     <ReviewStat label="Bedrooms" value={formValues.beds || "0"} />
                     <ReviewStat label="Bathrooms" value={formValues.baths || "0"} />
                     <ReviewStat label="Area" value={formValues.area || "N/A"} />

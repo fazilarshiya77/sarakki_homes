@@ -18,6 +18,7 @@ import { safeDbCall } from "@/lib/db-safe";
 
 const AUCTION_INCLUDE = {
   category: true,
+  propertyType: true,
   images: { orderBy: { order: "asc" as const } },
   auctionInfo: true,
 } satisfies Prisma.PropertyInclude;
@@ -31,6 +32,7 @@ type DbAuctionProperty = Prisma.PropertyGetPayload<{ include: typeof AUCTION_INC
 // only the detail page (getBankAuctionByPropertyId) does.
 const AUCTION_LIST_INCLUDE = {
   category: true,
+  propertyType: true,
   images: { orderBy: { order: "asc" as const }, take: 1 },
   auctionInfo: true,
 } satisfies Prisma.PropertyInclude;
@@ -55,7 +57,7 @@ function toAuctionProperty(p: DbAuctionProperty): AuctionProperty {
     title: p.title,
     bank: p.auctionInfo?.bankName,
     location: p.location,
-    propertyType: p.type,
+    propertyType: p.propertyType.name,
     area: p.area || undefined,
     areaSqft: p.areaSqft || undefined,
     reservePrice: p.auctionInfo?.reservePrice,

@@ -12,14 +12,16 @@ export async function GET() {
   if (!auth.ok) return auth.response;
 
   try {
-    const [categories, builders] = await Promise.all([
+    const [categories, builders, propertyTypes] = await Promise.all([
       prisma.category.findMany({ select: { title: true }, orderBy: { title: "asc" } }),
       prisma.builder.findMany({ select: { name: true }, orderBy: { name: "asc" } }),
+      prisma.propertyType.findMany({ select: { name: true }, orderBy: { name: "asc" } }),
     ]);
 
     const buffer = await buildTemplateWorkbook({
       categories: categories.map((c) => c.title),
       builders: builders.map((b) => b.name),
+      propertyTypes: propertyTypes.map((t) => t.name),
     });
 
     return new NextResponse(buffer, {

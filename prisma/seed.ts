@@ -65,7 +65,14 @@ async function main() {
   }
   console.log("✅ Seeded builders.");
 
-  // 4. Seed Categories
+  // 4. Seed Property Types
+  const propertyTypeNames = ["Independent Building", "Flat", "Villa", "Site"];
+  for (const name of propertyTypeNames) {
+    await prisma.propertyType.upsert({ where: { name }, update: {}, create: { name } });
+  }
+  console.log("✅ Seeded property types.");
+
+  // 5. Seed Categories
   const categories = [
     {
       title: "Bank Auction Properties",

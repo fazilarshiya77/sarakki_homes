@@ -17,7 +17,7 @@ export async function GET(req: Request) {
   const status = searchParams.get("status") || "";
   const category = searchParams.get("category") || "";
   const builder = searchParams.get("builder") || "";
-  const type = searchParams.get("type") || "";
+  const propertyType = searchParams.get("propertyType") || "";
   const sort = searchParams.get("sort") || "newest";
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "10");
@@ -54,8 +54,8 @@ export async function GET(req: Request) {
     if (builder) {
       where.builderId = builder;
     }
-    if (type) {
-      where.type = type;
+    if (propertyType) {
+      where.propertyTypeId = propertyType;
     }
 
     const [properties, total] = await prisma.$transaction([
@@ -64,6 +64,7 @@ export async function GET(req: Request) {
         include: {
           category: true,
           builder: true,
+          propertyType: true,
           images: { orderBy: { order: "asc" }, take: 1 },
         },
         skip,
@@ -123,7 +124,7 @@ export async function POST(req: Request) {
         location: body.location,
         price: body.price,
         priceValueLakh: parseFloat(body.priceValueLakh || "0"),
-        type: body.type,
+        propertyTypeId: body.propertyTypeId,
         status: body.status || "UNPUBLISHED",
         featured: body.featured || "false",
         beds: parseInt(body.beds || "0"),
@@ -141,6 +142,17 @@ export async function POST(req: Request) {
       },
     });
 
+    // Whether this listing is a bank auction is driven by its Category
+    // (slug "bank-auctions"), not the free-standing Property Type field
+    // — those used to be conflated when Property Type still had a "Bank
+    // Auction" option. One extra lookup, but keeps this correct even if
+    // Property Type's available values change again later.
+    const category = await prisma.category.findUnique({
+      where: { id: body.categoryId },
+      select: { slug: true },
+    });
+    const isBankAuction = category?.slug === "bank-auctions";
+
     // These four writes are all independent of each other (each only
     // needs property.id, already in hand) but were previously awaited
     // one after another. This dev environment's round trip to Supabase
@@ -150,7 +162,7 @@ export async function POST(req: Request) {
     // instead of the sum of four.
     const followUpWrites: Promise<unknown>[] = [];
 
-    if (body.type === "Bank Auction" && body.auctionInfo) {
+    if (isBankAuction && body.auctionInfo) {
       followUpWrites.push(
         prisma.auctionInfo.create({
           data: {

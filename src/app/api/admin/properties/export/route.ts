@@ -13,7 +13,11 @@ export async function GET() {
 
   try {
     const properties = await prisma.property.findMany({
-      include: { category: { select: { title: true } }, builder: { select: { name: true } } },
+      include: {
+        category: { select: { title: true } },
+        builder: { select: { name: true } },
+        propertyType: { select: { name: true } },
+      },
       orderBy: { propertyId: "asc" },
     });
 
@@ -21,7 +25,7 @@ export async function GET() {
       properties.map((p) => ({
         propertyId: p.propertyId,
         title: p.title,
-        type: p.type,
+        type: p.propertyType.name,
         categoryTitle: p.category.title,
         builderName: p.builder?.name ?? null,
         price: p.price,

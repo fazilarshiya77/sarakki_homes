@@ -26,6 +26,7 @@ import { safeDbCall } from "@/lib/db-safe";
 const PROPERTY_INCLUDE = {
   category: true,
   builder: true,
+  propertyType: true,
   images: { orderBy: { order: "asc" as const } },
   auctionInfo: true,
   loanEligibility: true,
@@ -53,7 +54,7 @@ const PROPERTY_LIST_SELECT = {
   location: true,
   price: true,
   priceValueLakh: true,
-  type: true,
+  propertyType: { select: { name: true } },
   beds: true,
   baths: true,
   area: true,
@@ -87,7 +88,7 @@ function toPublicProperty(p: DbProperty): Property {
     location: p.location,
     price: p.price,
     priceValueLakh: p.priceValueLakh,
-    type: p.type,
+    type: p.propertyType.name,
     // Categories are seeded from the same six slugs PropertyCategorySlug
     // covers, but the DB stores it as a plain string — cast at the
     // boundary rather than threading a wider type through every consumer.
@@ -142,7 +143,7 @@ function toPublicPropertyListItem(p: DbPropertyListItem): Property {
     location: p.location,
     price: p.price,
     priceValueLakh: p.priceValueLakh,
-    type: p.type,
+    type: p.propertyType.name,
     categorySlug: p.category.slug as PropertyCategorySlug,
     beds: p.beds,
     baths: p.baths,

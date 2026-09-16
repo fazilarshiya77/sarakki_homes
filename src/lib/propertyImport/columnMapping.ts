@@ -35,16 +35,12 @@ export interface ColumnDef {
   description: string;
 }
 
-// Existing CRM enums (kept in sync with PropertyWizard.tsx and the
-// admin Properties page's own <option> lists — see those files if this
-// project's supported types/statuses ever change).
-export const PROPERTY_TYPE_VALUES = [
-  "Bank Auction",
-  "Resale",
-  "Ready To Move",
-  "Rental Income",
-  "Upcoming Project",
-] as const;
+// Property Type is no longer a fixed enum — it's an admin-managed table
+// (PropertyType, same pattern as Builder/Category), so its allowed values
+// are resolved dynamically against the database at import time (see
+// validateRows.ts's `propertyTypes` reference map), not listed here.
+// DEFAULT_TYPE below still names a fallback by value, matched by name
+// against whatever PropertyType rows currently exist.
 
 export const PROPERTY_STATUS_VALUES = [
   "PUBLISHED",
@@ -83,10 +79,10 @@ export const COLUMN_DEFS: ColumnDef[] = [
   {
     header: "Property Type",
     field: "type",
-    type: "enum",
+    type: "string",
     required: true,
-    enumValues: [...PROPERTY_TYPE_VALUES],
-    description: `One of: ${PROPERTY_TYPE_VALUES.join(", ")}.`,
+    description:
+      "Must match an existing property type name exactly (case-insensitive) — see Property Types in the CRM. Unknown/blank values fall back to a default, same as Category.",
   },
   {
     header: "Category",

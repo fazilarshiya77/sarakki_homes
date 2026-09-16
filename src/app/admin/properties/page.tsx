@@ -36,7 +36,6 @@ interface Property {
   title: string;
   location: string;
   price: string;
-  type: string;
   status: string;
   featured: string;
   views: number;

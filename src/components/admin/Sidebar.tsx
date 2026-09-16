@@ -10,6 +10,7 @@ import {
   Building,
   Tags,
   Hammer,
+  Home,
   MessageSquare,
   Users,
   Globe,
@@ -57,6 +58,7 @@ const NAV_GROUPS = [
       { label: "Properties", href: "/admin/properties", icon: Building },
       { label: "Categories", href: "/admin/categories", icon: Tags },
       { label: "Builders", href: "/admin/builders", icon: Hammer },
+      { label: "Property Types", href: "/admin/property-types", icon: Home },
     ],
   },
   {

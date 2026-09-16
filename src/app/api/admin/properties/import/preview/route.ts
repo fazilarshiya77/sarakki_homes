@@ -48,15 +48,17 @@ export async function POST(req: Request) {
       );
     }
 
-    const [categories, builders, existingProperties] = await Promise.all([
+    const [categories, builders, propertyTypes, existingProperties] = await Promise.all([
       prisma.category.findMany({ select: { id: true, title: true } }),
       prisma.builder.findMany({ select: { id: true, name: true } }),
+      prisma.propertyType.findMany({ select: { id: true, name: true } }),
       prisma.property.findMany({ select: { id: true, propertyId: true } }),
     ]);
 
     const ref: ReferenceData = {
       categories: new Map(categories.map((c) => [c.title.toLowerCase().trim(), c])),
       builders: new Map(builders.map((b) => [b.name.toLowerCase().trim(), b])),
+      propertyTypes: new Map(propertyTypes.map((t) => [t.name.toLowerCase().trim(), t])),
       existingPropertyIds: new Map(existingProperties.map((p) => [p.propertyId, p.id])),
     };
 

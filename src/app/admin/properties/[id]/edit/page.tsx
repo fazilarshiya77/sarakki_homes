@@ -27,11 +27,16 @@ export default async function EditPropertyPage({
 
   // Load lists
   const categories = await prisma.category.findMany({
-    select: { id: true, title: true },
+    select: { id: true, title: true, slug: true },
     orderBy: { title: "asc" },
   });
 
   const builders = await prisma.builder.findMany({
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+  });
+
+  const propertyTypes = await prisma.propertyType.findMany({
     select: { id: true, name: true },
     orderBy: { name: "asc" },
   });
@@ -42,7 +47,7 @@ export default async function EditPropertyPage({
     title: property.title,
     categoryId: property.categoryId,
     builderId: property.builderId ?? "",
-    type: property.type,
+    propertyTypeId: property.propertyTypeId,
     price: property.price,
     priceValueLakh: String(property.priceValueLakh),
     location: property.location,
@@ -92,7 +97,12 @@ export default async function EditPropertyPage({
         </p>
       </div>
 
-      <PropertyWizard categories={categories} builders={builders} initialData={initialData} />
+      <PropertyWizard
+        categories={categories}
+        builders={builders}
+        propertyTypes={propertyTypes}
+        initialData={initialData}
+      />
     </div>
   );
 }

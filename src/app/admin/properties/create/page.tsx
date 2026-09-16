@@ -4,13 +4,18 @@ import { PropertyWizard } from "@/components/admin/PropertyWizard";
 export const dynamic = "force-dynamic";
 
 export default async function CreatePropertyPage() {
-  // Query categories and builders for form selection options
+  // Query categories, builders, and property types for form selection options
   const categories = await prisma.category.findMany({
-    select: { id: true, title: true },
+    select: { id: true, title: true, slug: true },
     orderBy: { title: "asc" },
   });
 
   const builders = await prisma.builder.findMany({
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+  });
+
+  const propertyTypes = await prisma.propertyType.findMany({
     select: { id: true, name: true },
     orderBy: { name: "asc" },
   });
@@ -26,7 +31,7 @@ export default async function CreatePropertyPage() {
         </p>
       </div>
 
-      <PropertyWizard categories={categories} builders={builders} />
+      <PropertyWizard categories={categories} builders={builders} propertyTypes={propertyTypes} />
     </div>
   );
 }

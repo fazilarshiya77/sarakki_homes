@@ -66,8 +66,9 @@ export async function commitRowsChunk(rows: ValidRow[], userId: string): Promise
 
         // For a brand-new property anything the sheet didn't give (null)
         // falls back to the exact same default the manual "Add Property"
-        // form uses. `categoryId` is guaranteed non-null for a create by
-        // validateAndResolveRows (matched, or the fallback category).
+        // form uses. `categoryId`/`propertyTypeId` are guaranteed non-null
+        // for a create by validateAndResolveRows (matched, or the
+        // fallback category/type).
         const d = row.data;
         const created = await prisma.property.create({
           data: {
@@ -77,7 +78,7 @@ export async function commitRowsChunk(rows: ValidRow[], userId: string): Promise
             location: d.location ?? "",
             price: d.price ?? "Price on request",
             priceValueLakh: d.priceValueLakh ?? 0,
-            type: d.type ?? "Resale",
+            propertyTypeId: d.propertyTypeId!,
             // Client decision: imported properties should appear on the
             // website immediately rather than sit as an unreviewed draft
             // (previously defaulted to UNPUBLISHED here) — an explicit
@@ -119,7 +120,7 @@ export async function commitRowsChunk(rows: ValidRow[], userId: string): Promise
         // upload left out.
         const updateData: Prisma.PropertyUpdateInput = { title: d.title };
         if (d.price !== null) updateData.price = d.price;
-        if (d.type !== null) updateData.type = d.type;
+        if (d.propertyTypeId !== null) updateData.propertyType = { connect: { id: d.propertyTypeId } };
         if (d.categoryId !== null) updateData.category = { connect: { id: d.categoryId } };
         if (d.priceValueLakh !== null) updateData.priceValueLakh = d.priceValueLakh;
         if (d.location !== null) updateData.location = d.location;

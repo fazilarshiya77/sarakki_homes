@@ -22,6 +22,7 @@ export async function GET(
       include: {
         category: true,
         builder: true,
+        propertyType: true,
         auctionInfo: true,
         loanEligibility: true,
         images: { orderBy: { order: "asc" } },
@@ -77,7 +78,7 @@ export async function PUT(
         location: body.location,
         price: body.price,
         priceValueLakh: parseFloat(body.priceValueLakh || "0"),
-        type: body.type,
+        propertyTypeId: body.propertyTypeId,
         status: body.status,
         featured: body.featured,
         beds: parseInt(body.beds || "0"),
@@ -95,6 +96,16 @@ export async function PUT(
       },
     });
 
+    // Whether this listing is a bank auction is driven by its Category
+    // (slug "bank-auctions"), not the free-standing Property Type field
+    // — those used to be conflated when Property Type still had a "Bank
+    // Auction" option.
+    const category = await prisma.category.findUnique({
+      where: { id: body.categoryId },
+      select: { slug: true },
+    });
+    const isBankAuction = category?.slug === "bank-auctions";
+
     // AuctionInfo, LoanEligibility, Images, and the activity log entry
     // are all independent of each other (each only needs the property id
     // already in hand) but were previously awaited one after another --
@@ -108,7 +119,7 @@ export async function PUT(
     // promise in the batch rather than two separate entries.
     const followUpWrites: Promise<unknown>[] = [];
 
-    if (body.type === "Bank Auction" && body.auctionInfo) {
+    if (isBankAuction && body.auctionInfo) {
       followUpWrites.push(
         prisma.auctionInfo.upsert({
           where: { propertyId: id },
@@ -132,7 +143,7 @@ export async function PUT(
         })
       );
     } else {
-      // If type changed from Bank Auction, clean it up
+      // If the category changed away from Bank Auction, clean it up
       followUpWrites.push(prisma.auctionInfo.deleteMany({ where: { propertyId: id } }));
     }
 
