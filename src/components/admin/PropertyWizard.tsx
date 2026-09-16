@@ -19,6 +19,7 @@ import {
   ChevronDown,
   X,
   Plus,
+  Trash2,
 } from "lucide-react";
 import { PropertyImageManager, type ManagedImage } from "@/components/admin/PropertyImageManager";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
@@ -193,6 +194,13 @@ export function PropertyWizard({
   const [newPropertyTypeName, setNewPropertyTypeName] = useState("");
   const [propertyTypeSaving, setPropertyTypeSaving] = useState(false);
   const [propertyTypeError, setPropertyTypeError] = useState("");
+  // Deleting the currently-selected Property Type — reuses DELETE
+  // /api/admin/property-types/[id] (the standalone Property Types page's
+  // own endpoint), so it only works when the type isn't assigned to any
+  // property, same rule as deleting a Builder.
+  const [deletePropertyTypeOpen, setDeletePropertyTypeOpen] = useState(false);
+  const [deletePropertyTypeError, setDeletePropertyTypeError] = useState("");
+  const [deletingPropertyType, setDeletingPropertyType] = useState(false);
   // SEO fields (title/description/slug overrides) folded into the
   // Review step as a collapsed-by-default section instead of their own
   // wizard step — every one of them already has a working default
@@ -431,6 +439,31 @@ export function PropertyWizard({
     }
   };
 
+  const handleDeletePropertyType = async () => {
+    const id = watch("propertyTypeId");
+    if (!id) return;
+    setDeletingPropertyType(true);
+    setDeletePropertyTypeError("");
+    try {
+      const res = await fetch(`/api/admin/property-types/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (res.ok) {
+        setPropertyTypes((prev) => prev.filter((t) => t.id !== id));
+        setValue("propertyTypeId", "", { shouldDirty: true });
+        setDeletePropertyTypeOpen(false);
+      } else {
+        // Most likely reason: this type is still assigned to one or more
+        // properties (the API refuses the delete in that case) — shown
+        // inside the dialog rather than closing it, so the admin sees why.
+        setDeletePropertyTypeError(data.error || "Couldn't delete this property type. Please try again.");
+      }
+    } catch {
+      setDeletePropertyTypeError("Couldn't delete this property type. Please try again.");
+    } finally {
+      setDeletingPropertyType(false);
+    }
+  };
+
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
     setErrorMessage("");
@@ -620,6 +653,19 @@ export function PropertyWizard({
                         className="crm-btn-secondary shrink-0 !px-3"
                       >
                         <Plus size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDeletePropertyTypeError("");
+                          setDeletePropertyTypeOpen(true);
+                        }}
+                        disabled={!formValues.propertyTypeId}
+                        title="Remove the selected property type"
+                        aria-label="Remove the selected property type"
+                        className="crm-btn-secondary shrink-0 !px-3 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <Trash2 size={14} />
                       </button>
                     </div>
 
@@ -1079,6 +1125,23 @@ export function PropertyWizard({
         tone="danger"
         onConfirm={() => router.push("/admin/properties")}
         onCancel={() => setExitConfirmOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={deletePropertyTypeOpen}
+        title={`Delete "${propertyTypes.find((t) => t.id === watch("propertyTypeId"))?.name ?? ""}"?`}
+        message={
+          deletePropertyTypeError ||
+          "This removes the property type permanently, for every listing in the CRM, not just this one. It only works if no properties are currently assigned to it."
+        }
+        confirmLabel="Delete"
+        tone="danger"
+        loading={deletingPropertyType}
+        onConfirm={handleDeletePropertyType}
+        onCancel={() => {
+          setDeletePropertyTypeOpen(false);
+          setDeletePropertyTypeError("");
+        }}
       />
     </div>
   );
