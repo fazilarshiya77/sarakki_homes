@@ -1,12 +1,14 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowUpRight, ChevronDown, MapPin, MessageCircle, Search } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Counter } from "@/components/ui/Counter";
 import { HeroButton } from "@/components/ui/HeroButton";
-import { STATS } from "@/lib/data";
+import { CATEGORIES, STATS } from "@/lib/data";
 import { useSiteSettings } from "@/components/providers/SettingsProvider";
 import { heroDelayMs } from "@/lib/heroTiming";
 
@@ -17,6 +19,32 @@ const EASE = [0.22, 1, 0.36, 1] as const;
  *  crossfade; the only motion is a one-time staggered fade-in on load. */
 export function Hero() {
   const { contact: CONTACT, heroTitle } = useSiteSettings();
+  const router = useRouter();
+  const [searchLocation, setSearchLocation] = useState("");
+  const [searchCategory, setSearchCategory] = useState("");
+
+  // Previously a plain <form> with no onSubmit at all — every field was
+  // fully wired up (register()-free static inputs) but Search did
+  // nothing. Routes into the same /properties listing the header's
+  // Properties dropdown and category cards already use, pre-filtered —
+  // category via ?category=<slug> (PropertyExplorer already reads this
+  // on mount) and location via ?location=<text>, matched as a
+  // starts-with against each property's location (added below in
+  // PropertyExplorer). Bank Auction Properties get their own dedicated
+  // listing page/URL sitewide, same special-case as everywhere else
+  // this category is linked.
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchCategory === "bank-auctions") {
+      router.push("/properties/bank-auctions");
+      return;
+    }
+    const params = new URLSearchParams();
+    if (searchCategory) params.set("category", searchCategory);
+    if (searchLocation.trim()) params.set("location", searchLocation.trim());
+    const query = params.toString();
+    router.push(query ? `/properties?${query}` : "/properties");
+  };
 
   return (
     <section
@@ -89,30 +117,30 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: heroDelayMs(150), ease: EASE }}
           >
-            <form className="flex flex-col gap-1.5 md:flex-row md:items-stretch md:gap-0">
+            <form onSubmit={handleSearch} className="flex flex-col gap-1.5 md:flex-row md:items-stretch md:gap-0">
               <div className="flex flex-col divide-y divide-[#17231F]/8 md:flex-1 md:flex-row md:divide-x md:divide-y-0">
                 <div className="flex flex-1 items-center gap-3 px-4.5 py-3.5">
                   <MapPin size={17} className="shrink-0 text-accent-gold-dark" />
                   <input
                     type="text"
+                    value={searchLocation}
+                    onChange={(e) => setSearchLocation(e.target.value)}
                     placeholder="Location — e.g. Whitefield, Sarjapur Road"
                     className="w-full bg-transparent text-sm text-[#17231F] placeholder:text-[#6F756F] focus:outline-none"
                   />
                 </div>
                 <div className="relative flex items-center px-4.5 py-3.5 md:w-52">
                   <select
+                    value={searchCategory}
+                    onChange={(e) => setSearchCategory(e.target.value)}
                     className="w-full appearance-none bg-transparent pr-6 text-sm text-[#17231F] focus:outline-none cursor-pointer"
-                    defaultValue=""
                   >
-                    <option value="" disabled>
-                      Property Type
-                    </option>
-                    <option>Bank Auction</option>
-                    <option>Rental Income</option>
-                    <option>Chance Deal</option>
-                    <option>Resale</option>
-                    <option>Upcoming Project</option>
-                    <option>Ready To Move</option>
+                    <option value="">Property Type</option>
+                    {CATEGORIES.map((category) => (
+                      <option key={category.slug} value={category.slug}>
+                        {category.title}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown size={14} className="pointer-events-none absolute right-4.5 text-[#6F756F]" />
                 </div>

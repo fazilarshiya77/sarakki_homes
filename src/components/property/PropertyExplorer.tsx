@@ -12,14 +12,17 @@ import { PropertyList } from "@/components/property/PropertyList";
 import { BUDGET_RANGES, type Property } from "@/lib/data";
 
 export function PropertyExplorer({ properties }: { properties: Property[] }) {
-  // Pre-fill the category filter from ?category=<slug> so the header's
-  // Properties dropdown lands on an already-filtered grid, not just the
-  // generic listing page. An unrecognized slug just yields an empty grid —
-  // PropertyGrid's EmptyState already handles that.
+  // Pre-fill filters from the URL so an external link lands on an
+  // already-filtered grid, not just the generic listing page:
+  // ?category=<slug> from the header's Properties dropdown/category
+  // cards (an unrecognized slug just yields an empty grid — PropertyGrid's
+  // EmptyState already handles that), ?location=<text> from the
+  // homepage hero's search bar.
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<FilterState>({
     ...DEFAULT_FILTERS,
     category: searchParams.get("category") ?? "",
+    location: searchParams.get("location") ?? "",
   });
 
   const filtered = useMemo(() => {
