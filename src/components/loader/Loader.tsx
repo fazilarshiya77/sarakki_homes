@@ -33,6 +33,7 @@ export function Loader({ visible }: { visible: boolean }) {
               viewBox="0 0 128 102"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              className="h-[82px] w-[103px] sm:h-[102px] sm:w-32"
             >
               <defs>
                 <linearGradient
@@ -61,10 +62,10 @@ export function Loader({ visible }: { visible: boolean }) {
               />
             </svg>
 
-            <div className="mt-10 flex flex-col items-center">
+            <div className="mt-8 flex flex-col items-center sm:mt-10">
               <div className="relative">
                 <motion.p
-                  className="font-display text-[2.35rem] font-medium tracking-[0.3em] text-transparent"
+                  className="font-display text-[1.65rem] font-medium tracking-[0.22em] text-transparent sm:text-[2.35rem] sm:tracking-[0.3em]"
                   style={{
                     backgroundImage:
                       "linear-gradient(90deg, #A8874F 0%, #C8A96A 38%, #EDDFBA 55%, #C8A96A 72%, #A8874F 100%)",
@@ -80,7 +81,7 @@ export function Loader({ visible }: { visible: boolean }) {
                 </motion.p>
                 <motion.span
                   aria-hidden
-                  className="pointer-events-none absolute inset-0 font-display text-[2.35rem] font-medium tracking-[0.3em] text-transparent"
+                  className="pointer-events-none absolute inset-0 font-display text-[1.65rem] font-medium tracking-[0.22em] text-transparent sm:text-[2.35rem] sm:tracking-[0.3em]"
                   style={{
                     backgroundImage:
                       "linear-gradient(105deg, transparent 42%, rgba(255,250,238,0.95) 50%, transparent 58%)",
@@ -96,13 +97,13 @@ export function Loader({ visible }: { visible: boolean }) {
               </div>
 
               <motion.div
-                className="mt-5 h-px w-40 origin-center bg-gradient-to-r from-transparent via-accent-gold/60 to-transparent"
+                className="mt-4 h-px w-28 origin-center bg-gradient-to-r from-transparent via-accent-gold/60 to-transparent sm:mt-5 sm:w-40"
                 initial={{ scaleX: 0, opacity: 0 }}
                 animate={{ scaleX: 1, opacity: 1 }}
                 transition={{ delay: 0.95, duration: 0.8, ease: EASE }}
               />
               <motion.p
-                className="mt-4 text-[14px] font-medium uppercase tracking-[0.4em] text-background/45"
+                className="mt-3 text-xs font-medium uppercase tracking-[0.32em] text-background/45 sm:mt-4 sm:text-[14px] sm:tracking-[0.4em]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.05, duration: 0.6 }}
