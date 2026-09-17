@@ -119,7 +119,7 @@ export function PropertyGallery({
       </div>
 
       {slideCount > 1 && (
-        <div className="mt-3 grid grid-cols-4 gap-3">
+        <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
           {Array.from({ length: slideCount }, (_, i) => (
             <button
               key={i}

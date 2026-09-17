@@ -83,7 +83,7 @@ export function Hero() {
             transition={{ duration: 0.9, delay: heroDelayMs(0), ease: EASE }}
           >
             <h1
-              className="font-display text-7xl font-medium leading-[0.98] tracking-[-0.02em] text-background sm:text-8xl md:text-[7.5rem]"
+              className="font-display text-4xl font-medium leading-[0.98] tracking-[-0.02em] text-background sm:text-6xl md:text-7xl lg:text-8xl xl:text-[7.5rem]"
               style={{ textShadow: "0 2px 16px rgba(0,0,0,0.3)" }}
             >
               {heroTitle}
