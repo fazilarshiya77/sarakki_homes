@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   PropertyFilters,
@@ -24,6 +24,21 @@ export function PropertyExplorer({ properties }: { properties: Property[] }) {
     category: searchParams.get("category") ?? "",
     location: searchParams.get("location") ?? "",
   });
+
+  // The useState initializer above only ever runs on mount — clicking a
+  // different category from the header's Properties dropdown while
+  // already on this page navigates client-side without remounting this
+  // component (same route, only the query string changes), so the
+  // initial-state-only version silently kept showing the old category.
+  // Re-sync whenever the URL's own filter params actually change.
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      category: searchParams.get("category") ?? "",
+      location: searchParams.get("location") ?? "",
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.get("category"), searchParams.get("location")]);
 
   const filtered = useMemo(() => {
     const budget = BUDGET_RANGES[filters.budgetIndex];

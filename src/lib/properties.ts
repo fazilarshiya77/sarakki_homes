@@ -229,6 +229,34 @@ export async function getFeaturedProperties(limit = 6): Promise<Property[]> {
   );
 }
 
+// The FeaturedProperties intro collage picks its photos separately from
+// the grid above — most listings still have no photography uploaded yet,
+// so filtering the same "most recent"/"featured" set down to ones with an
+// image (as the collage needs) often left only 1 of 3 tiles filled. This
+// queries specifically for photographed properties instead, so the
+// collage reliably shows real property photos rather than depending on
+// whichever properties happen to be newest.
+const getCachedCollagePhotoProperties = unstable_cache(
+  async (limit: number) => {
+    return prisma.property.findMany({
+      where: { status: "PUBLISHED", images: { some: {} }, ...EXCLUDE_BANK_AUCTIONS },
+      select: PROPERTY_LIST_SELECT,
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+  },
+  ["collage-photo-properties"],
+  { revalidate: 60, tags: ["properties"] }
+);
+
+export async function getCollagePhotoProperties(limit = 3): Promise<Property[]> {
+  return safeDbCall(
+    async () => (await getCachedCollagePhotoProperties(limit)).map(toPublicPropertyListItem),
+    [],
+    "getCollagePhotoProperties"
+  );
+}
+
 const getCachedPropertiesByCategory = unstable_cache(
   async (categorySlug: string, limit: number) => {
     const rows = await prisma.property.findMany({

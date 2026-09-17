@@ -6,18 +6,20 @@ import { ButtonFX } from "@/components/ui/ButtonFX";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { CollagePhoto } from "@/components/property/CollagePhoto";
-import { getFeaturedProperties } from "@/lib/properties";
+import { getFeaturedProperties, getCollagePhotoProperties } from "@/lib/properties";
 
 export async function FeaturedProperties() {
-  const featured = await getFeaturedProperties(6);
-
-  // Real photos from among the featured properties themselves — not
-  // stock — used to break up the section intro, which was plain
-  // eyebrow/headline/button text on a flat surface. Only properties
-  // that actually have a real photo (`image` set) qualify; on a slow
-  // week where few featured listings have photography yet, the collage
-  // simply renders fewer tiles rather than padding out with placeholders.
-  const collagePhotos = featured.filter((p) => p.image).slice(0, 3);
+  const [featured, collagePhotos] = await Promise.all([
+    getFeaturedProperties(6),
+    // Sourced independently from the grid below — the 6 newest/featured
+    // listings often don't overlap much with the (currently smaller) set
+    // of properties that actually have photography uploaded yet, so this
+    // queries specifically for photographed properties instead. On a slow
+    // week where fewer than 3 published properties have photos yet, the
+    // collage simply renders fewer tiles rather than padding out with
+    // placeholders.
+    getCollagePhotoProperties(3),
+  ]);
 
   return (
     <Section id="properties" className="bg-surface">
