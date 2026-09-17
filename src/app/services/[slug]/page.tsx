@@ -125,6 +125,41 @@ export default async function ServiceDetailPage({
                     </li>
                   ))}
                 </ul>
+
+                {service.eligibilityDocuments && (
+                  <>
+                    <h2 className="mt-14 font-display text-2xl">Check My Eligibility</h2>
+                    <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                      {service.eligibilityDocuments.map((group) => (
+                        <div
+                          key={group.profile}
+                          className="rounded-md border border-border bg-surface p-6"
+                        >
+                          <p className="font-display text-lg">{group.profile}</p>
+                          <ul className="mt-4 flex flex-col gap-2.5">
+                            {group.documents.map((doc) => (
+                              <li
+                                key={doc}
+                                className="text-sm leading-relaxed text-foreground"
+                              >
+                                {doc}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                    <a
+                      href={CONTACT.whatsappHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={buttonClasses("primary", "mt-6 w-fit")}
+                    >
+                      <ButtonFX />
+                      Check My Eligibility
+                    </a>
+                  </>
+                )}
               </RevealOnScroll>
             </div>
 

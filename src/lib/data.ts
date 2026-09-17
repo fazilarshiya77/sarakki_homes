@@ -344,6 +344,28 @@ export const LEGAL_SERVICES = [
     idealFor: ["Buyers financing a purchase with a home loan", "Anyone refinancing or restructuring an existing loan"],
     icon: Landmark,
     tone: "gold" as MediaTone,
+    eligibilityDocuments: [
+      {
+        profile: "Salaried",
+        documents: [
+          "3 Months Salary Slips",
+          "6 Months Bank Statement",
+          "Form 16 (Two Years)",
+          "PAN Card",
+          "Aadhar Card",
+        ],
+      },
+      {
+        profile: "Self Employed",
+        documents: [
+          "Business Proof",
+          "One Year Bank Statement",
+          "PAN Card",
+          "Aadhar Card",
+          "GST Number (if applicable)",
+        ],
+      },
+    ],
   },
   {
     slug: "no-brokerage-cashback",
